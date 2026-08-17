@@ -1,0 +1,8 @@
+<RCC>
+    <qresource prefix="/">
+        <file>Diagram/flowset.qss</file>
+        <file>programConfig/programConfig.qss</file>
+        <file>stateBar/stateBar.qss</file>
+        <file>stove/stove.qss</file>
+    </qresource>
+</RCC>

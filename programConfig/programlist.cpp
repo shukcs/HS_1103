@@ -1,0 +1,423 @@
+﻿#include "programlist.h"
+#include <QGroupBox>
+#include <QVBoxLayout>
+#include <QHBoxLayout>
+#include <QGridLayout>
+#include <QGridLayout>
+#include <QScrollBar>
+#include <QComboBox>
+#include <QPushButton>
+#include <QListWidget>
+#include <QDebug>
+#include <QMessageBox>
+#include <QFile>
+#include <QDir>
+#include <QList>
+#include <QCoreApplication>
+#include <QScrollArea>
+#include "common/mymessageBox.h"
+#include "programConfig/customTool/ToolBox.h"
+#include "programConfig/customTool/objlist.h"
+#pragma execution_character_set("utf-8")
+
+ProgramList::ProgramList(QWidget *parent)
+    : QWidget(parent)
+{
+    state = false;
+    runTime = 0;
+    programCnt = 0;
+    totalCnt = 0;
+    circulationCnt = 0;
+    totalcirculationCnt = 0;
+    delayTime = 0;
+    CirculateStartLine = 0;
+    CirculateStopLine = 0;
+
+    ListMain.clear(); // 清除所有数据
+
+    QFile Stylefile;
+    Stylefile.setFileName(":/programConfig/programConfig.qss");
+    if (Stylefile.exists() ) {
+        Stylefile.open(QFile::ReadOnly);
+        QString styleSheet = QLatin1String(Stylefile.readAll());
+        this->setStyleSheet(styleSheet);
+        Stylefile.close();
+    }
+
+    QHBoxLayout *main_layout = new QHBoxLayout(this);
+    main_layout->setContentsMargins(2,2,2,2);
+    main_layout->setSpacing(2);
+
+    QWidget *w1 = new QWidget;
+    w1->setObjectName("w1");
+    w1->setFixedWidth(200);
+    QWidget *w2 = new QWidget;
+    w2->setObjectName("w2");
+    w1->setStyleSheet("QWidget#w1{background-color: rgb(220, 220, 220);border-radius: 15px;border: 1px solid rgb(239, 239, 239);}");
+    w2->setStyleSheet("QWidget#w2{background-color: rgb(220, 220, 220);border-radius: 15px;border: 1px solid rgb(239, 239, 239);}");
+
+    main_layout->addWidget(w1, 0);
+    main_layout->addWidget(w2, 1);
+
+    QVBoxLayout* vlayoutW1 = new QVBoxLayout(w1);//  左边垂直布局
+    vlayoutW1->setContentsMargins(0, 0, 0, 0);
+
+    V2layout = new QVBoxLayout(w2);
+    V2layout->setContentsMargins(0, 0, 0, 0);
+
+//    QPushButton *btntest = new QPushButton;
+//    btntest->setFixedSize(200,30);
+//    btntest->setText("hello");
+//    V2layout->addWidget(btntest);
+
+    QHBoxLayout *hlayout1 = new QHBoxLayout;
+    hlayout1->setContentsMargins(0,0,0,0);
+    hlayout1->addStretch();
+
+    _btnrun = new QPushButton;
+    _btnrun->setText("开始运行");
+    _btnrun->setToolTip("启动自动程序");
+    _btnrun->setFixedHeight(30);
+ //   _btnrun->setFixedSize(200,40);
+    _btnrun->setIcon(QIcon(":/programConfig/image/_btnrun.png"));
+    connect(_btnrun,SIGNAL(clicked()),this,SLOT(runBtn_clicked()));
+    hlayout1->addWidget(_btnrun);
+
+    pause = new QPushButton;
+    pause->setText("暂停");
+    pause->setToolTip("暂停自动程序");
+//    _btnrun->setFixedHeight(25);
+    pause->setFixedSize(60,30);
+ //   pause->setIcon(QIcon(":/programConfig/image/_btnrun.png"));
+    connect(pause,SIGNAL(clicked()),this,SLOT(pauseBtn_clicked()));
+    hlayout1->addWidget(pause);
+    hlayout1->addStretch();
+    vlayoutW1->addLayout(hlayout1);
+
+//    circulate = new QPushButton;
+//    circulate->setText("0");
+//    circulate->setToolTip("已完成的循环次数");
+//    circulate->setFixedSize(60,40);
+//    Toplayout->addWidget(circulate);
+//    Toplayout->addStretch();
+
+    QHBoxLayout* hlayout2 = new QHBoxLayout();
+    hlayout2->setContentsMargins(0, 0, 0, 0);
+    vlayoutW1->addLayout(hlayout2);
+
+    refresh = new QPushButton;
+    refresh->setFixedSize(30,30);
+    refresh->setToolTip("刷新配置列表");
+    refresh->setIcon(QIcon(":/programConfig/image/refresh.png"));
+    refresh->setIconSize(QSize(20,20));
+    connect(refresh,SIGNAL(clicked()),this,SLOT(refreshBtn_clicked()));
+    hlayout2->addWidget(refresh);
+
+    nameList = new QComboBox;
+    nameList->setView(new QListView);  //  必须加入，否则部分样式不生效
+    connect(nameList, &QComboBox::currentTextChanged,this, &ProgramList::nameFile_changed);
+    nameList->setFixedSize(120,26);
+    nameList->setStyleSheet("QComboBox {border: 1px solid rgb(226,226,226);"
+                                 "border-radius: 5px;"
+                                 "padding: 1px 18px 1px 3px;"
+                                 "background-color: rgb(255,255,255);"
+                                 "font-family:SimHei;"
+                                 "font-size:20px;}"
+                                 "QComboBox::drop-down {subcontrol-origin: padding;"
+                                 "subcontrol-position: top right;"
+                                 "width:20px;"
+                                 "padding-right:5px;"
+                                 "border-left: none;}"
+                                 "QComboBox::down-arrow {image: url(:/stateBar/image/arrow.png);"
+                                 "width: 20px;"
+                                 "height: 20px;}"
+                                 "QComboBox QAbstractItemView::item{"
+                                 "height:30px;"
+                                 "font-family:SimHei;"
+                                 "font-size:20px;}"
+                                 "QComboBox QAbstractItemView::item {min-height: 30px;}"
+                                 "QListView{font-family:SimHei;font-size:20px;}");
+
+    hlayout2->addWidget(nameList);
+
+    _proList = new QListWidget;   // 子项目列表
+    _proList->setStyleSheet("QListWidget{border:none;padding:10px 10px 10px 10px;font-family:SimHei;font-size:16px;}");
+    _proList->setFocusPolicy(Qt::NoFocus);  //这禁用tab键和上下方向键并且除去复选框
+    V2layout->addWidget(_proList);
+
+    _obj = new objList;
+    connect(_obj, &objList::obj_clicked,this,&ProgramList::obj_clicked);
+    vlayoutW1->addWidget(_obj);
+
+    connect(&timer,SIGNAL(timeout()),this,SLOT(timer_slot()));
+    connect(&runTimer,SIGNAL(timeout()),this,SLOT(runTimer_slot()));
+}
+
+ProgramList::~ProgramList()
+{
+}
+
+void ProgramList::state_change()
+{
+    if(state == true)   // 如果已经启动了
+    {
+       state = false;
+       programCnt = 0;
+       circulationCnt = 0;
+       obj_index = 0;
+       //circulate->setText(QString::number(circulationCnt));
+       _btnrun->setIcon(QIcon(":/programConfig/image/_btnrun.png"));
+       _btnrun->setText("开始运行");
+       _btnrun->setToolTip("启动自动程序");
+       timer.stop();
+       refresh->setDisabled(false); // 刷新按钮恢复点击
+       nameList->setDisabled(false); // 名称列表恢复点击
+       runTime = 0;
+       runTimer.stop();
+       _obj->setAllBtn_Enable();
+    }
+    else
+    {
+       if(_proList->count() == 0)
+       {
+           MyMessageBox msg(MyMessageBox::Critical, "提示", "请先添加配置！", MyMessageBox::Ok,this);
+           msg.exec();
+           return ;
+       }
+       refresh->setDisabled(true); // 刷新按钮不可点击
+       nameList->setDisabled(true); // 名称列表不可点击
+       state = true;
+       programCnt = 0;
+       obj_index = 0;
+       _btnrun->setIcon(QIcon(":/programConfig/image/stop.png"));
+       _btnrun->setText("停止运行");
+       _btnrun->setToolTip("停止自动程序");
+       timer.start(1000);
+       runTimer.start(1000);
+       pause->setText("暂停");
+    }
+
+    emit autoRun(state);
+}
+
+bool ProgramList::getState()
+{
+    return state;
+}
+
+void ProgramList::refreshBtn_clicked()
+{
+    QString path = QCoreApplication::applicationDirPath()+"/config";
+    QDir dir(path);
+
+    if(!dir.exists())   //  检查目录是否存在
+    {
+       return ;
+    }
+    nameList->clear();
+
+    QStringList filter = { "*.txt" };
+    dir.setNameFilters(filter);
+    auto fileInfo= dir.entryInfoList(filter);
+    if(fileInfo.size() <= 0)
+    {
+        _proList->clear();  // 清除子列表
+        _obj->list_clear(); // 清除主列表
+    }
+    for (auto &itr : fileInfo)
+    {
+        nameList->addItem(itr.baseName());
+    }
+}
+
+void ProgramList::runBtn_clicked()
+{
+    state_change();
+}
+
+void ProgramList::pauseBtn_clicked()
+{
+    if(pause->text() == "暂停")
+    {
+       if(timer.isActive())
+       {
+          pause->setText("继续");
+          pause->setToolTip("继续自动程序");
+          timer.stop();
+          runTimer.stop();
+       }
+    }
+    else
+    {
+       pause->setText("暂停");
+       pause->setToolTip("暂停自动程序");
+       timer.start();
+       runTimer.start();
+    }
+}
+
+void ProgramList::timer_slot()
+{
+     timer.stop();
+     if(obj_index < total_obj)
+     {
+       sub_num = ListMain.at(obj_index).list.count();  // 获取子类数量
+       _obj->setBtn_Enable(obj_index);
+     }
+     if(programCnt < sub_num)
+     {
+       _proList->setCurrentRow(programCnt);
+       if(_proList->item(programCnt)->text().contains("---"))  //  不处理功能标签
+       {
+           timer.start(1000);
+       }
+       else if(_proList->item(programCnt)->text().contains("延时"))
+       {
+           QStringList list = _proList->item(programCnt)->text().split(" ");
+           int delay = QString(list.at(1)).toFloat() * 60;  //  将分钟转换成秒钟
+           if(delay <= 1)
+           {
+              delay = 1;
+           }
+           timer.start(delay*1000);
+       }
+       else if(_proList->item(programCnt)->text().contains("开始循环"))
+       {
+           QStringList list = _proList->item(programCnt)->text().split(" ");
+           totalcirculationCnt= QString(list.at(1)).toInt();  // 获取循环次数
+           CirculateStartLine = programCnt;  // 保存循环起始位置
+           timer.start(1000);
+       }
+       else if(_proList->item(programCnt)->text().contains("结束循环"))
+       {
+           if(totalcirculationCnt > 0 && circulationCnt < totalcirculationCnt) // 判断循环次数大于0，且处于循环周期内
+           {
+              circulationCnt ++;
+              if(circulationCnt == totalcirculationCnt)
+              {
+                circulationCnt = 0;
+                totalcirculationCnt = 0;
+  //              circulate->setText(QString::number(circulationCnt));
+              }
+              else
+              {
+                  programCnt = CirculateStartLine;
+  //                circulate->setText(QString::number(circulationCnt));
+              }
+           }
+           timer.start(1000);
+       }
+       else if(_proList->item(programCnt)->text().contains("收集器"))
+       {
+           emit readyTorun_toColl(_proList->item(programCnt)->text());
+           timer.start(1000);
+       }
+       else
+       {
+            emit readyTorun(_proList->item(programCnt)->text());
+            timer.start(1000);
+       }
+       programCnt++;
+       if(programCnt >= sub_num)
+       {
+           if(obj_index < (total_obj - 1)) // 判断最还在范围内
+           {
+              programCnt = 0;
+              obj_index++;
+           }
+       }
+     }
+     else
+     {
+       state_change();
+     }
+}
+
+void ProgramList::nameFile_changed(const QString& str)
+{
+    QString path = QCoreApplication::applicationDirPath()+"/config/"+str+".txt";
+
+    QFile readFile(path);
+    if (!readFile.open(QIODevice::ReadOnly | QIODevice::Text))
+        return ;
+    _proList->clear();  // 清除子列表
+    _obj->list_clear(); // 清除主列表
+    ListMain.clear(); // 清除之前的
+    total_obj = 0; // 大类总数量
+    totalCnt = 0;  // 子类总数量
+    QTextStream stream(&readFile);    //  读取文件
+    QString line;
+    int flag = 0;
+    while (!stream.atEnd())
+    {
+        ListTextContent list;
+        list.list.clear();
+        if(flag == 0)
+        {
+           line = stream.readLine();   //  逐行读取
+        }
+        else
+        {
+           flag = 0;
+        }
+
+        if(line.contains("---")) // 包含主类别项目
+        {
+            list.name = line;
+            while(!stream.atEnd()) // 继续查询子类
+            {
+                line = stream.readLine();
+                if(line.contains("---")) // 包含类别项目
+                {
+                   flag = 1;
+                   break;
+                }
+                else
+                {
+                  list.list.append(line); // 记录子类别
+                  totalCnt++;
+                }
+            }
+            ListMain.append(list);
+            _obj->add_Btn(ListMain.at(total_obj).name,total_obj);
+            total_obj++;
+        }
+        if(line.isEmpty())
+        {
+           readFile.close();
+           return ;
+        }
+    }
+    readFile.close();
+}
+
+void ProgramList::runTimer_slot()
+{
+    runTime++;
+    emit sendRunTime(runTime);
+}
+
+void ProgramList::clear_sub_list()
+{
+    while (QLayoutItem* item = V2layout->takeAt(0))
+    {
+        if (QWidget* widget = item->widget())
+            widget->deleteLater();
+
+        if (QSpacerItem* spaerItem = item->spacerItem())
+            V2layout->removeItem(spaerItem);
+
+        delete item;
+    }
+}
+
+void ProgramList::obj_clicked(int index)
+{
+    int i;
+    int count = ListMain.at(index).list.count();
+    _proList->clear();
+    for(i=0;i<count;i++)
+    {
+       _proList->addItem(ListMain.at(index).list.at(i));
+    }
+}

@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>DlgFeedMaterial</class>
+ <widget class="QDialog" name="DlgFeedMaterial">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>629</width>
+    <height>433</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string notr="true">添加物料</string>
+  </property>
+  <property name="styleSheet">
+   <string notr="true">QLabel {
+   font-family:SimHei;
+   font-size: 16px;
+}
+
+QPushButton
+{
+	min-width: 75px;
+    min-height: 30px;
+    background:qlineargradient(spread:pad,x1:1,y1:0,x2:1,y2:1,stop:0 rgb(204,204,204) stop:1 rgb(206,206,206));  
+	border-radius: 5px;  
+}
+QPushButton:hover
+{
+    background:qlineargradient(spread:pad,x1:1,y1:0,x2:1,y2:1,stop:0 rgb(255,255,255) stop:1 rgb(192,192,192));  
+}
+QPushButton:pressed
+{
+    background:qlineargradient(spread:pad,x1:1,y1:0,x2:1,y2:1,stop:0 rgb(255,255,255) stop:1 rgb(200,200,200));  
+}
+
+QComboBox {
+  border: 1px solid rgb(226,226,226);
+  border-radius: 5px;
+  padding: 1px 18px 1px 3px;
+  background-color: rgb(255,255,255);
+  font-family:SimHei;
+  font-size:16px;
+}
+QComboBox::drop-down {
+  subcontrol-origin: padding;
+  subcontrol-position: top right;
+  width: 20px;
+  padding-right:5px;
+  border-left: none;
+}
+QComboBox::down-arrow {
+  image: url(:/stateBar/image/arrow.png);
+  width: 20px;
+  height: 20px;
+}
+QComboBox QAbstractItemView::item {
+  min-height: 30px;
+}
+QListView{
+  font-family:SimHei;
+  font-size:16px;
+}</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout" stretch="0,1,0">
+   <property name="sizeConstraint">
+    <enum>QLayout::SetFixedSize</enum>
+   </property>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <item>
+      <widget class="QLabel" name="label">
+       <property name="text">
+        <string>料瓶状态</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="cmb">
+       <property name="minimumSize">
+        <size>
+         <width>0</width>
+         <height>30</height>
+        </size>
+       </property>
+       <item>
+        <property name="text">
+         <string>缺失</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>料瓶可用</string>
+        </property>
+       </item>
+      </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer_2">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>0</width>
+         <height>0</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <widget class="MaterialsSelect" name="widget" native="true"/>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_4">
+     <property name="topMargin">
+      <number>10</number>
+     </property>
+     <item>
+      <spacer name="horizontalSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>0</width>
+         <height>0</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QPushButton" name="btn_ok">
+       <property name="text">
+        <string>确定</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="btn_cancle">
+       <property name="text">
+        <string>取消</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+  </layout>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>MaterialsSelect</class>
+   <extends>QWidget</extends>
+   <header>MaterialsSelect.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>btn_ok</sender>
+   <signal>clicked()</signal>
+   <receiver>DlgFeedMaterial</receiver>
+   <slot>accept()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>488</x>
+     <y>356</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>445</x>
+     <y>399</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>btn_cancle</sender>
+   <signal>clicked()</signal>
+   <receiver>DlgFeedMaterial</receiver>
+   <slot>reject()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>581</x>
+     <y>364</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>562</x>
+     <y>396</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>

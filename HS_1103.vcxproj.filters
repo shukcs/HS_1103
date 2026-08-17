@@ -1,0 +1,1222 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="..\HS_1103\desktop.cpp" />
+    <ClCompile Include="..\HS_1103\main.cpp" />
+    <ClCompile Include="release\moc_collectorop.cpp">
+      <Filter>Genarated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="debug\moc_collectorop.cpp">
+      <Filter>Genarated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="release\moc_customgraph.cpp">
+      <Filter>Genarated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="debug\moc_customgraph.cpp">
+      <Filter>Genarated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="release\moc_debuggraph.cpp">
+      <Filter>Genarated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="debug\moc_debuggraph.cpp">
+      <Filter>Genarated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="debug\moc_desktop.cpp">
+      <Filter>Genarated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="release\moc_desktop.cpp">
+      <Filter>Genarated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="release\moc_deviceop.cpp">
+      <Filter>Genarated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="debug\moc_deviceop.cpp">
+      <Filter>Genarated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="release\moc_diagram.cpp">
+      <Filter>Genarated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="debug\moc_diagram.cpp">
+      <Filter>Genarated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="debug\moc_DlgFeedMaterial.cpp">
+      <Filter>Genarated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="release\moc_DlgFeedMaterial.cpp">
+      <Filter>Genarated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="debug\moc_DlgMaterialModify.cpp">
+      <Filter>Genarated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="release\moc_DlgMaterialModify.cpp">
+      <Filter>Genarated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="debug\moc_FeederDecoder.cpp">
+      <Filter>Genarated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="release\moc_FeederDecoder.cpp">
+      <Filter>Genarated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="release\moc_FeederGroupBox.cpp">
+      <Filter>Genarated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="debug\moc_FeederGroupBox.cpp">
+      <Filter>Genarated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="release\moc_fileexport.cpp">
+      <Filter>Genarated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="debug\moc_fileexport.cpp">
+      <Filter>Genarated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="release\moc_fileopen.cpp">
+      <Filter>Genarated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="debug\moc_fileopen.cpp">
+      <Filter>Genarated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="debug\moc_filesave.cpp">
+      <Filter>Genarated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="release\moc_filesave.cpp">
+      <Filter>Genarated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="debug\moc_flowset.cpp">
+      <Filter>Genarated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="release\moc_flowset.cpp">
+      <Filter>Genarated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="debug\moc_graphexport.cpp">
+      <Filter>Genarated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="release\moc_graphexport.cpp">
+      <Filter>Genarated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="debug\moc_graphopen.cpp">
+      <Filter>Genarated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="release\moc_graphopen.cpp">
+      <Filter>Genarated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="debug\moc_graphsave.cpp">
+      <Filter>Genarated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="release\moc_graphsave.cpp">
+      <Filter>Genarated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="release\moc_HeatGroupBox.cpp">
+      <Filter>Genarated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="debug\moc_HeatGroupBox.cpp">
+      <Filter>Genarated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="release\moc_hslist.cpp">
+      <Filter>Genarated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="debug\moc_hslist.cpp">
+      <Filter>Genarated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="release\moc_hslogo.cpp">
+      <Filter>Genarated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="debug\moc_hslogo.cpp">
+      <Filter>Genarated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="debug\moc_manualop.cpp">
+      <Filter>Genarated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="release\moc_manualop.cpp">
+      <Filter>Genarated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="debug\moc_MaterialsSelect.cpp">
+      <Filter>Genarated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="release\moc_MaterialsSelect.cpp">
+      <Filter>Genarated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="debug\moc_MaterialStore.cpp">
+      <Filter>Genarated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="release\moc_MaterialStore.cpp">
+      <Filter>Genarated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="debug\moc_MotorGroupBox.cpp">
+      <Filter>Genarated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="release\moc_MotorGroupBox.cpp">
+      <Filter>Genarated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="release\moc_mymessagebox.cpp">
+      <Filter>Genarated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="debug\moc_mymessagebox.cpp">
+      <Filter>Genarated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="debug\moc_objlist.cpp">
+      <Filter>Genarated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="release\moc_objlist.cpp">
+      <Filter>Genarated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="release\moc_portthread.cpp">
+      <Filter>Genarated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="debug\moc_portthread.cpp">
+      <Filter>Genarated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="release\moc_progconfig.cpp">
+      <Filter>Genarated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="debug\moc_progconfig.cpp">
+      <Filter>Genarated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="debug\moc_programlist.cpp">
+      <Filter>Genarated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="release\moc_programlist.cpp">
+      <Filter>Genarated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="debug\moc_projectmode.cpp">
+      <Filter>Genarated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="release\moc_projectmode.cpp">
+      <Filter>Genarated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="release\moc_qcirculation.cpp">
+      <Filter>Genarated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="debug\moc_qcirculation.cpp">
+      <Filter>Genarated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="release\moc_qcollectorctrl.cpp">
+      <Filter>Genarated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="debug\moc_qcollectorctrl.cpp">
+      <Filter>Genarated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="release\moc_qcustomplot.cpp">
+      <Filter>Genarated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="debug\moc_qcustomplot.cpp">
+      <Filter>Genarated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="debug\moc_qflowpanel.cpp">
+      <Filter>Genarated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="release\moc_qflowpanel.cpp">
+      <Filter>Genarated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="release\moc_qfunlabel.cpp">
+      <Filter>Genarated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="debug\moc_qfunlabel.cpp">
+      <Filter>Genarated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="release\moc_qponittemp.cpp">
+      <Filter>Genarated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="debug\moc_qponittemp.cpp">
+      <Filter>Genarated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="release\moc_qpumpctrl.cpp">
+      <Filter>Genarated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="debug\moc_qpumpctrl.cpp">
+      <Filter>Genarated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="debug\moc_qsfunction.cpp">
+      <Filter>Genarated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="release\moc_qsfunction.cpp">
+      <Filter>Genarated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="debug\moc_qslopetemp.cpp">
+      <Filter>Genarated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="release\moc_qslopetemp.cpp">
+      <Filter>Genarated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="release\moc_qtcdpanel.cpp">
+      <Filter>Genarated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="debug\moc_qtcdpanel.cpp">
+      <Filter>Genarated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="debug\moc_qtimedelay.cpp">
+      <Filter>Genarated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="release\moc_qtimedelay.cpp">
+      <Filter>Genarated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="release\moc_qvalvectrl.cpp">
+      <Filter>Genarated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="debug\moc_qvalvectrl.cpp">
+      <Filter>Genarated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="release\moc_RobotMgr.cpp">
+      <Filter>Genarated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="debug\moc_RobotMgr.cpp">
+      <Filter>Genarated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="debug\moc_SpinCust.cpp">
+      <Filter>Genarated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="release\moc_SpinCust.cpp">
+      <Filter>Genarated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="debug\moc_statebar.cpp">
+      <Filter>Genarated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="release\moc_statebar.cpp">
+      <Filter>Genarated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="debug\moc_stove.cpp">
+      <Filter>Genarated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="release\moc_stove.cpp">
+      <Filter>Genarated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="debug\moc_stovetable.cpp">
+      <Filter>Genarated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="release\moc_stovetable.cpp">
+      <Filter>Genarated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="release\moc_strdecoder.cpp">
+      <Filter>Genarated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="debug\moc_strdecoder.cpp">
+      <Filter>Genarated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="debug\moc_swpanel.cpp">
+      <Filter>Genarated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="release\moc_swpanel.cpp">
+      <Filter>Genarated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="release\moc_tabeledit.cpp">
+      <Filter>Genarated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="debug\moc_tabeledit.cpp">
+      <Filter>Genarated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="release\moc_ToolBox.cpp">
+      <Filter>Genarated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="debug\moc_ToolBox.cpp">
+      <Filter>Genarated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="release\moc_ToolPage.cpp">
+      <Filter>Genarated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="debug\moc_ToolPage.cpp">
+      <Filter>Genarated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="debug\moc_tooltitle.cpp">
+      <Filter>Genarated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="release\moc_tooltitle.cpp">
+      <Filter>Genarated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="debug\moc_Valve3ChGroupBox.cpp">
+      <Filter>Genarated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="release\moc_Valve3ChGroupBox.cpp">
+      <Filter>Genarated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="release\qrc_image.cpp">
+      <Filter>Genarated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="debug\qrc_image.cpp">
+      <Filter>Genarated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="release\qrc_img.cpp">
+      <Filter>Genarated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="debug\qrc_img.cpp">
+      <Filter>Genarated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="release\qrc_qss.cpp">
+      <Filter>Genarated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="debug\qrc_qss.cpp">
+      <Filter>Genarated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="release\qrc_style.cpp">
+      <Filter>Genarated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\HS_1103\common\DlgSerialSettings.cpp">
+      <Filter>common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\HS_1103\common\mymessagebox.cpp">
+      <Filter>common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\HS_1103\materialFeeder\subMateUi\DlgFeedMaterial.cpp">
+      <Filter>materialFeeder\subMateUi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\HS_1103\materialFeeder\subMateUi\DlgMaterialModify.cpp">
+      <Filter>materialFeeder\subMateUi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\HS_1103\materialFeeder\FeederDecoder.cpp">
+      <Filter>materialFeeder</Filter>
+    </ClCompile>
+    <ClCompile Include="..\HS_1103\strDecoder\portthread.cpp">
+      <Filter>strdecoder</Filter>
+    </ClCompile>
+    <ClCompile Include="..\HS_1103\strDecoder\strdecoder.cpp">
+      <Filter>strdecoder</Filter>
+    </ClCompile>
+    <ClCompile Include="..\HS_1103\materialFeeder\subMateUi\MaterialsSelect.cpp">
+      <Filter>materialFeeder\subMateUi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\HS_1103\materialFeeder\subMateUi\MaterialTableWidget.cpp">
+      <Filter>materialFeeder\subMateUi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\HS_1103\programConfig\customTool\fileexport.cpp">
+      <Filter>programConfig\customTool</Filter>
+    </ClCompile>
+    <ClCompile Include="..\HS_1103\programConfig\customTool\fileopen.cpp">
+      <Filter>programConfig\customTool</Filter>
+    </ClCompile>
+    <ClCompile Include="..\HS_1103\programConfig\customTool\filesave.cpp">
+      <Filter>programConfig\customTool</Filter>
+    </ClCompile>
+    <ClCompile Include="..\HS_1103\programConfig\customTool\ToolBox.cpp">
+      <Filter>programConfig\customTool</Filter>
+    </ClCompile>
+    <ClCompile Include="..\HS_1103\programConfig\customTool\ToolPage.cpp">
+      <Filter>programConfig\customTool</Filter>
+    </ClCompile>
+    <ClCompile Include="..\HS_1103\programConfig\customTool\objlist.cpp">
+      <Filter>programConfig\customTool</Filter>
+    </ClCompile>
+    <ClCompile Include="..\HS_1103\programConfig\FeederGroupBox.cpp">
+      <Filter>programConfig</Filter>
+    </ClCompile>
+    <ClCompile Include="..\HS_1103\materialFeeder\subMateUi\SpinCust.cpp">
+      <Filter>materialFeeder\subMateUi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\HS_1103\materialFeeder\MaterialStore.cpp">
+      <Filter>materialFeeder</Filter>
+    </ClCompile>
+    <ClCompile Include="..\HS_1103\materialFeeder\RobotMgr.cpp">
+      <Filter>materialFeeder</Filter>
+    </ClCompile>
+    <ClCompile Include="..\HS_1103\programConfig\HeatGroupBox.cpp">
+      <Filter>programConfig</Filter>
+    </ClCompile>
+    <ClCompile Include="..\HS_1103\programConfig\hslist.cpp">
+      <Filter>programConfig</Filter>
+    </ClCompile>
+    <ClCompile Include="..\HS_1103\programConfig\MotorGroupBox.cpp">
+      <Filter>programConfig</Filter>
+    </ClCompile>
+    <ClCompile Include="..\HS_1103\programConfig\progconfig.cpp">
+      <Filter>programConfig</Filter>
+    </ClCompile>
+    <ClCompile Include="..\HS_1103\programConfig\programlist.cpp">
+      <Filter>programConfig</Filter>
+    </ClCompile>
+    <ClCompile Include="..\HS_1103\programConfig\qcirculation.cpp">
+      <Filter>programConfig</Filter>
+    </ClCompile>
+    <ClCompile Include="..\HS_1103\programConfig\qcollectorctrl.cpp">
+      <Filter>programConfig</Filter>
+    </ClCompile>
+    <ClCompile Include="..\HS_1103\programConfig\qflowpanel.cpp">
+      <Filter>programConfig</Filter>
+    </ClCompile>
+    <ClCompile Include="..\HS_1103\programConfig\qfunlabel.cpp">
+      <Filter>programConfig</Filter>
+    </ClCompile>
+    <ClCompile Include="..\HS_1103\programConfig\qponittemp.cpp">
+      <Filter>programConfig</Filter>
+    </ClCompile>
+    <ClCompile Include="..\HS_1103\programConfig\qpumpctrl.cpp">
+      <Filter>programConfig</Filter>
+    </ClCompile>
+    <ClCompile Include="..\HS_1103\programConfig\qsfunction.cpp">
+      <Filter>programConfig</Filter>
+    </ClCompile>
+    <ClCompile Include="..\HS_1103\programConfig\qtimedelay.cpp">
+      <Filter>programConfig</Filter>
+    </ClCompile>
+    <ClCompile Include="..\HS_1103\programConfig\qtcdpanel.cpp">
+      <Filter>programConfig</Filter>
+    </ClCompile>
+    <ClCompile Include="..\HS_1103\programConfig\qvalvectrl.cpp">
+      <Filter>programConfig</Filter>
+    </ClCompile>
+    <ClCompile Include="..\HS_1103\programConfig\Valve3ChGroupBox.cpp">
+      <Filter>programConfig</Filter>
+    </ClCompile>
+    <ClCompile Include="..\HS_1103\customGraph\customgraph.cpp">
+      <Filter>customGraph</Filter>
+    </ClCompile>
+    <ClCompile Include="..\HS_1103\customGraph\debuggraph.cpp">
+      <Filter>customGraph</Filter>
+    </ClCompile>
+    <ClCompile Include="..\HS_1103\customGraph\qcustomplot.cpp">
+      <Filter>customGraph</Filter>
+    </ClCompile>
+    <ClCompile Include="..\HS_1103\customGraph\customTool\graphexport.cpp">
+      <Filter>customGraph\customTool</Filter>
+    </ClCompile>
+    <ClCompile Include="..\HS_1103\customGraph\customTool\graphopen.cpp">
+      <Filter>customGraph\customTool</Filter>
+    </ClCompile>
+    <ClCompile Include="..\HS_1103\customGraph\customTool\graphsave.cpp">
+      <Filter>customGraph\customTool</Filter>
+    </ClCompile>
+    <ClCompile Include="..\HS_1103\programConfig\swpanel.cpp">
+      <Filter>programConfig</Filter>
+    </ClCompile>
+    <ClCompile Include="..\HS_1103\common\MaskWidget.cpp">
+      <Filter>common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\HS_1103\materialFeeder\subMateUi\DemoWidget.cpp">
+      <Filter>materialFeeder\subMateUi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\HS_1103\materialFeeder\subMateUi\DlgTubeBack.cpp">
+      <Filter>materialFeeder\subMateUi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\HS_1103\collectorOp\collectorop.cpp">
+      <Filter>collectorop</Filter>
+    </ClCompile>
+    <ClCompile Include="..\HS_1103\stove\stove.cpp">
+      <Filter>stove</Filter>
+    </ClCompile>
+    <ClCompile Include="..\HS_1103\stove\stovetable.cpp">
+      <Filter>stove</Filter>
+    </ClCompile>
+    <ClCompile Include="..\HS_1103\stove\tabeledit.cpp">
+      <Filter>stove</Filter>
+    </ClCompile>
+    <ClCompile Include="..\HS_1103\toolTitle\tooltitle.cpp">
+      <Filter>toolTitle</Filter>
+    </ClCompile>
+    <ClCompile Include="..\HS_1103\toolTitle\hslogo.cpp">
+      <Filter>toolTitle</Filter>
+    </ClCompile>
+    <ClCompile Include="..\HS_1103\stateBar\statebar.cpp">
+      <Filter>stateBar</Filter>
+    </ClCompile>
+    <ClCompile Include="..\HS_1103\Diagram\diagram.cpp">
+      <Filter>Diagram</Filter>
+    </ClCompile>
+    <ClCompile Include="..\HS_1103\Diagram\flowset.cpp">
+      <Filter>Diagram</Filter>
+    </ClCompile>
+    <ClCompile Include="..\HS_1103\programConfig\qslopetemp.cpp">
+      <Filter>programConfig</Filter>
+    </ClCompile>
+    <ClCompile Include="..\HS_1103\projectMode\projectmode.cpp">
+      <Filter>projectmode</Filter>
+    </ClCompile>
+    <ClCompile Include="debug\qrc_style.cpp">
+      <Filter>Genarated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\HS_1103\deviceOp\deviceop.cpp">
+      <Filter>deviceop</Filter>
+    </ClCompile>
+    <ClCompile Include="..\HS_1103\manualOp\manualop.cpp">
+      <Filter>manualop</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="ui_Valve3ChGroupBox.h">
+      <Filter>Genarated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ui_collectorop.h">
+      <Filter>Genarated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ui_customgraph.h">
+      <Filter>Genarated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ui_debuggraph.h">
+      <Filter>Genarated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ui_desktop.h">
+      <Filter>Genarated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ui_deviceop.h">
+      <Filter>Genarated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ui_diagram.h">
+      <Filter>Genarated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ui_DlgFeedMaterial.h">
+      <Filter>Genarated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ui_DlgMaterialModify.h">
+      <Filter>Genarated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ui_DlgSerialSettings.h">
+      <Filter>Genarated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ui_FeederGroupBox.h">
+      <Filter>Genarated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ui_fileexport.h">
+      <Filter>Genarated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ui_fileopen.h">
+      <Filter>Genarated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ui_filesave.h">
+      <Filter>Genarated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ui_flowset.h">
+      <Filter>Genarated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ui_Form.h">
+      <Filter>Genarated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ui_graphexport.h">
+      <Filter>Genarated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ui_graphopen.h">
+      <Filter>Genarated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ui_graphsave.h">
+      <Filter>Genarated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ui_HeatGroupBox.h">
+      <Filter>Genarated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ui_manualop.h">
+      <Filter>Genarated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ui_MaterialsSelect.h">
+      <Filter>Genarated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ui_MaterialStore.h">
+      <Filter>Genarated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ui_MotorGroupBox.h">
+      <Filter>Genarated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ui_progconfig.h">
+      <Filter>Genarated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ui_projectmode.h">
+      <Filter>Genarated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ui_SpinCust.h">
+      <Filter>Genarated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ui_statebar.h">
+      <Filter>Genarated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ui_stove.h">
+      <Filter>Genarated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ui_ToolBox.h">
+      <Filter>Genarated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ui_ToolPage.h">
+      <Filter>Genarated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ui_tooltitle.h">
+      <Filter>Genarated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\HS_1103\common\DlgSerialSettings.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\HS_1103\materialFeeder\subMateUi\MaterialTableWidget.h">
+      <Filter>materialFeeder\subMateUi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\HS_1103\common\MaskWidget.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\HS_1103\materialFeeder\subMateUi\DemoWidget.h">
+      <Filter>materialFeeder\subMateUi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\HS_1103\materialFeeder\subMateUi\DlgTubeBack.h">
+      <Filter>materialFeeder\subMateUi</Filter>
+    </ClInclude>
+    <ClInclude Include="ui_DlgTubeBack.h">
+      <Filter>Genarated Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="..\HS_1103\desktop.h" />
+    <CustomBuild Include="..\HS_1103\desktop.ui" />
+    <CustomBuild Include="..\HS_1103\image.qrc" />
+    <CustomBuild Include="..\HS_1103\programConfig\customTool\img.qrc" />
+    <CustomBuild Include="release\moc_predefs.h.cbt">
+      <Filter>Genarated Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="debug\moc_predefs.h.cbt">
+      <Filter>Genarated Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\HS_1103\common\DlgSerialSettings.ui">
+      <Filter>common</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\HS_1103\common\mymessagebox.h">
+      <Filter>common</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\HS_1103\materialFeeder\subMateUi\DlgFeedMaterial.h">
+      <Filter>materialFeeder\subMateUi</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\HS_1103\materialFeeder\subMateUi\DlgFeedMaterial.ui">
+      <Filter>materialFeeder\subMateUi</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\HS_1103\materialFeeder\subMateUi\DlgMaterialModify.h">
+      <Filter>materialFeeder\subMateUi</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\HS_1103\materialFeeder\FeederDecoder.h">
+      <Filter>materialFeeder</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\HS_1103\strDecoder\portthread.h">
+      <Filter>strdecoder</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\HS_1103\strDecoder\strdecoder.h">
+      <Filter>strdecoder</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\HS_1103\materialFeeder\subMateUi\MaterialsSelect.ui">
+      <Filter>materialFeeder\subMateUi</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\HS_1103\programConfig\customTool\fileexport.h">
+      <Filter>programConfig\customTool</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\HS_1103\programConfig\customTool\fileexport.ui">
+      <Filter>programConfig\customTool</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\HS_1103\programConfig\customTool\fileopen.h">
+      <Filter>programConfig\customTool</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\HS_1103\programConfig\customTool\fileopen.ui">
+      <Filter>programConfig\customTool</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\HS_1103\programConfig\customTool\filesave.h">
+      <Filter>programConfig\customTool</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\HS_1103\programConfig\customTool\filesave.ui">
+      <Filter>programConfig\customTool</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\HS_1103\programConfig\customTool\ToolBox.h">
+      <Filter>programConfig\customTool</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\HS_1103\programConfig\customTool\ToolBox.ui">
+      <Filter>programConfig\customTool</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\HS_1103\programConfig\customTool\ToolPage.h">
+      <Filter>programConfig\customTool</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\HS_1103\programConfig\customTool\ToolPage.ui">
+      <Filter>programConfig\customTool</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\HS_1103\programConfig\customTool\Form.ui">
+      <Filter>programConfig\customTool</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\HS_1103\programConfig\customTool\objlist.h">
+      <Filter>programConfig\customTool</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\HS_1103\programConfig\FeederGroupBox.h">
+      <Filter>programConfig</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\HS_1103\programConfig\FeederGroupBox.ui">
+      <Filter>programConfig</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\HS_1103\materialFeeder\subMateUi\SpinCust.h">
+      <Filter>materialFeeder\subMateUi</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\HS_1103\materialFeeder\subMateUi\SpinCust.ui">
+      <Filter>materialFeeder\subMateUi</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\HS_1103\materialFeeder\subMateUi\DlgMaterialModify.ui">
+      <Filter>materialFeeder\subMateUi</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\HS_1103\materialFeeder\MaterialStore.ui">
+      <Filter>materialFeeder</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\HS_1103\materialFeeder\MaterialStore.h">
+      <Filter>materialFeeder</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\HS_1103\programConfig\HeatGroupBox.h">
+      <Filter>programConfig</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\HS_1103\programConfig\HeatGroupBox.ui">
+      <Filter>programConfig</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\HS_1103\programConfig\hslist.h">
+      <Filter>programConfig</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\HS_1103\programConfig\MotorGroupBox.h">
+      <Filter>programConfig</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\HS_1103\programConfig\MotorGroupBox.ui">
+      <Filter>programConfig</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\HS_1103\programConfig\progconfig.h">
+      <Filter>programConfig</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\HS_1103\programConfig\progconfig.ui">
+      <Filter>programConfig</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\HS_1103\programConfig\programlist.h">
+      <Filter>programConfig</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\HS_1103\programConfig\qcirculation.h">
+      <Filter>programConfig</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\HS_1103\programConfig\qcollectorctrl.h">
+      <Filter>programConfig</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\HS_1103\programConfig\qflowpanel.h">
+      <Filter>programConfig</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\HS_1103\programConfig\qfunlabel.h">
+      <Filter>programConfig</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\HS_1103\programConfig\qponittemp.h">
+      <Filter>programConfig</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\HS_1103\programConfig\qpumpctrl.h">
+      <Filter>programConfig</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\HS_1103\programConfig\qsfunction.h">
+      <Filter>programConfig</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\HS_1103\programConfig\qtimedelay.h">
+      <Filter>programConfig</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\HS_1103\programConfig\qtcdpanel.h">
+      <Filter>programConfig</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\HS_1103\programConfig\qvalvectrl.h">
+      <Filter>programConfig</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\HS_1103\programConfig\Valve3ChGroupBox.h">
+      <Filter>programConfig</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\HS_1103\programConfig\Valve3ChGroupBox.ui">
+      <Filter>programConfig</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\HS_1103\customGraph\customgraph.h">
+      <Filter>customGraph</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\HS_1103\customGraph\customgraph.ui">
+      <Filter>customGraph</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\HS_1103\customGraph\debuggraph.h">
+      <Filter>customGraph</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\HS_1103\customGraph\debuggraph.ui">
+      <Filter>customGraph</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\HS_1103\customGraph\qcustomplot.h">
+      <Filter>customGraph</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\HS_1103\customGraph\customTool\graphexport.h">
+      <Filter>customGraph\customTool</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\HS_1103\customGraph\customTool\graphexport.ui">
+      <Filter>customGraph\customTool</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\HS_1103\customGraph\customTool\graphopen.h">
+      <Filter>customGraph\customTool</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\HS_1103\customGraph\customTool\graphopen.ui">
+      <Filter>customGraph\customTool</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\HS_1103\customGraph\customTool\graphsave.h">
+      <Filter>customGraph\customTool</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\HS_1103\customGraph\customTool\graphsave.ui">
+      <Filter>customGraph\customTool</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\HS_1103\programConfig\swpanel.h">
+      <Filter>programConfig</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\HS_1103\materialFeeder\RobotMgr.h">
+      <Filter>materialFeeder</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\HS_1103\collectorOp\collectorop.h">
+      <Filter>collectorop</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\HS_1103\collectorOp\collectorop.ui">
+      <Filter>collectorop</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\HS_1103\stove\stove.h">
+      <Filter>stove</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\HS_1103\stove\stove.ui">
+      <Filter>stove</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\HS_1103\stove\stovetable.h">
+      <Filter>stove</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\HS_1103\stove\tabeledit.h">
+      <Filter>stove</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\HS_1103\toolTitle\tooltitle.h">
+      <Filter>toolTitle</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\HS_1103\toolTitle\tooltitle.ui">
+      <Filter>toolTitle</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\HS_1103\toolTitle\hslogo.h">
+      <Filter>toolTitle</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\HS_1103\stateBar\statebar.ui">
+      <Filter>stateBar</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\HS_1103\stateBar\statebar.h">
+      <Filter>stateBar</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\HS_1103\Diagram\diagram.h">
+      <Filter>Diagram</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\HS_1103\Diagram\diagram.ui">
+      <Filter>Diagram</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\HS_1103\Diagram\flowset.h">
+      <Filter>Diagram</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\HS_1103\programConfig\customTool\qss.qrc">
+      <Filter>res</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\HS_1103\style.qrc">
+      <Filter>res</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\HS_1103\Diagram\flowset.ui">
+      <Filter>Diagram</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\HS_1103\programConfig\qslopetemp.h">
+      <Filter>programConfig</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\HS_1103\projectMode\projectmode.h">
+      <Filter>projectmode</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\HS_1103\projectMode\projectmode.ui">
+      <Filter>projectmode</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\HS_1103\deviceOp\deviceop.h">
+      <Filter>deviceop</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\HS_1103\deviceOp\deviceop.ui">
+      <Filter>deviceop</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\HS_1103\manualOp\manualop.h">
+      <Filter>manualop</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\HS_1103\manualOp\manualop.ui">
+      <Filter>manualop</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\HS_1103\materialFeeder\subMateUi\DlgTubeBack.ui">
+      <Filter>materialFeeder\subMateUi</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\HS_1103\materialFeeder\subMateUi\MaterialsSelect.h">
+      <Filter>materialFeeder\subMateUi</Filter>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\HS_1103\customGraph\image\clear.png">
+      <Filter>res</Filter>
+    </None>
+    <None Include="..\HS_1103\programConfig\image\addSb.png">
+      <Filter>res</Filter>
+    </None>
+    <None Include="..\HS_1103\programConfig\image\append.png">
+      <Filter>res</Filter>
+    </None>
+    <None Include="..\HS_1103\stateBar\image\arrow.png">
+      <Filter>res</Filter>
+    </None>
+    <None Include="..\HS_1103\stateBar\image\auto.png">
+      <Filter>res</Filter>
+    </None>
+    <None Include="..\HS_1103\toolTitle\image\auto.png">
+      <Filter>res</Filter>
+    </None>
+    <None Include="..\HS_1103\customGraph\image\baseline.png">
+      <Filter>res</Filter>
+    </None>
+    <None Include="..\HS_1103\programConfig\image\clear.png">
+      <Filter>res</Filter>
+    </None>
+    <None Include="..\HS_1103\programConfig\image\add.png">
+      <Filter>res</Filter>
+    </None>
+    <None Include="..\HS_1103\common\image\Critical.png">
+      <Filter>res</Filter>
+    </None>
+    <None Include="..\HS_1103\deviceOp\image\dec.png">
+      <Filter>res</Filter>
+    </None>
+    <None Include="..\HS_1103\programConfig\image\del.png">
+      <Filter>res</Filter>
+    </None>
+    <None Include="..\HS_1103\Diagram\image\diagram.png">
+      <Filter>res</Filter>
+    </None>
+    <None Include="..\HS_1103\stateBar\image\disconnected.png">
+      <Filter>res</Filter>
+    </None>
+    <None Include="..\HS_1103\programConfig\image\down.png">
+      <Filter>res</Filter>
+    </None>
+    <None Include="..\HS_1103\stove\image\down.png">
+      <Filter>res</Filter>
+    </None>
+    <None Include="..\HS_1103\programConfig\customTool\img\down-arrow.png">
+      <Filter>res</Filter>
+    </None>
+    <None Include="..\HS_1103\customGraph\image\export.png">
+      <Filter>res</Filter>
+    </None>
+    <None Include="..\HS_1103\Diagram\image\esc.png">
+      <Filter>res</Filter>
+    </None>
+    <None Include="..\HS_1103\image\feeder.png">
+      <Filter>res</Filter>
+    </None>
+    <None Include="..\HS_1103\deviceOp\image\inc.png">
+      <Filter>res</Filter>
+    </None>
+    <None Include="..\HS_1103\programConfig\customTool\img\left-arrow.png">
+      <Filter>res</Filter>
+    </None>
+    <None Include="..\HS_1103\common\image\Information.png">
+      <Filter>res</Filter>
+    </None>
+    <None Include="..\HS_1103\toolTitle\image\logo.png">
+      <Filter>res</Filter>
+    </None>
+    <None Include="..\HS_1103\toolTitle\image\manual.png">
+      <Filter>res</Filter>
+    </None>
+    <None Include="..\HS_1103\stateBar\image\manual.png">
+      <Filter>res</Filter>
+    </None>
+    <None Include="..\HS_1103\deviceOp\image\max.png">
+      <Filter>res</Filter>
+    </None>
+    <None Include="..\HS_1103\deviceOp\image\min.png">
+      <Filter>res</Filter>
+    </None>
+    <None Include="..\HS_1103\common\image\Question.png">
+      <Filter>res</Filter>
+    </None>
+    <None Include="..\HS_1103\projectMode\image\refresh.png">
+      <Filter>res</Filter>
+    </None>
+    <None Include="..\HS_1103\programConfig\image\refresh.png">
+      <Filter>res</Filter>
+    </None>
+    <None Include="..\HS_1103\customGraph\image\reset.png">
+      <Filter>res</Filter>
+    </None>
+    <None Include="..\HS_1103\deviceOp\image\save.png">
+      <Filter>res</Filter>
+    </None>
+    <None Include="..\HS_1103\stove\image\save.png">
+      <Filter>res</Filter>
+    </None>
+    <None Include="..\HS_1103\programConfig\image\run.png">
+      <Filter>res</Filter>
+    </None>
+    <None Include="..\HS_1103\programConfig\image\save.png">
+      <Filter>res</Filter>
+    </None>
+    <None Include="..\HS_1103\customGraph\image\save.png">
+      <Filter>res</Filter>
+    </None>
+    <None Include="..\HS_1103\deviceOp\image\set.png">
+      <Filter>res</Filter>
+    </None>
+    <None Include="..\HS_1103\image\set.png">
+      <Filter>res</Filter>
+    </None>
+    <None Include="..\HS_1103\manualOp\image\set.png">
+      <Filter>res</Filter>
+    </None>
+    <None Include="..\HS_1103\Diagram\image\set.png">
+      <Filter>res</Filter>
+    </None>
+    <None Include="..\HS_1103\deviceOp\image\start.png">
+      <Filter>res</Filter>
+    </None>
+    <None Include="..\HS_1103\customGraph\image\start.png">
+      <Filter>res</Filter>
+    </None>
+    <None Include="..\HS_1103\customGraph\image\stop.png">
+      <Filter>res</Filter>
+    </None>
+    <None Include="..\HS_1103\deviceOp\image\stop.png">
+      <Filter>res</Filter>
+    </None>
+    <None Include="..\HS_1103\programConfig\image\stop.png">
+      <Filter>res</Filter>
+    </None>
+    <None Include="..\HS_1103\common\image\Success.png">
+      <Filter>res</Filter>
+    </None>
+    <None Include="..\HS_1103\Diagram\image\sw1_off.png">
+      <Filter>res</Filter>
+    </None>
+    <None Include="..\HS_1103\Diagram\image\sw1_on.png">
+      <Filter>res</Filter>
+    </None>
+    <None Include="..\HS_1103\Diagram\image\sw2_off.png">
+      <Filter>res</Filter>
+    </None>
+    <None Include="..\HS_1103\Diagram\image\sw2_on.png">
+      <Filter>res</Filter>
+    </None>
+    <None Include="..\HS_1103\Diagram\image\sw3_off.png">
+      <Filter>res</Filter>
+    </None>
+    <None Include="..\HS_1103\Diagram\image\sw3_on.png">
+      <Filter>res</Filter>
+    </None>
+    <None Include="..\HS_1103\Diagram\image\sw4_off.png">
+      <Filter>res</Filter>
+    </None>
+    <None Include="..\HS_1103\Diagram\image\sw4_on.png">
+      <Filter>res</Filter>
+    </None>
+    <None Include="..\HS_1103\stove\image\up.png">
+      <Filter>res</Filter>
+    </None>
+    <None Include="..\HS_1103\programConfig\image\up.png">
+      <Filter>res</Filter>
+    </None>
+    <None Include="..\HS_1103\common\image\Warning.png">
+      <Filter>res</Filter>
+    </None>
+    <None Include="..\HS_1103\stateBar\image\water.png">
+      <Filter>res</Filter>
+    </None>
+    <None Include="..\HS_1103\programConfig\image\help.png">
+      <Filter>res</Filter>
+    </None>
+    <None Include="..\HS_1103\customGraph\image\open.png">
+      <Filter>res</Filter>
+    </None>
+    <None Include="..\HS_1103\programConfig\image\open.png">
+      <Filter>res</Filter>
+    </None>
+    <None Include="..\HS_1103\stateBar\image\graph.png">
+      <Filter>res</Filter>
+    </None>
+    <None Include="..\HS_1103\toolTitle\image\graph.png">
+      <Filter>res</Filter>
+    </None>
+    <None Include="..\HS_1103\stateBar\image\connected.png">
+      <Filter>res</Filter>
+    </None>
+    <None Include="..\HS_1103\stove\stove.qss">
+      <Filter>res</Filter>
+    </None>
+    <None Include="..\HS_1103\stateBar\stateBar.qss">
+      <Filter>res</Filter>
+    </None>
+    <None Include="..\HS_1103\Diagram\flowset.qss">
+      <Filter>res</Filter>
+    </None>
+    <None Include="..\HS_1103\programConfig\programConfig.qss">
+      <Filter>res</Filter>
+    </None>
+    <None Include="..\HS_1103\programConfig\customTool\qss\toolpage.qss">
+      <Filter>res</Filter>
+    </None>
+    <None Include="..\HS_1103\image\balance.png">
+      <Filter>res</Filter>
+    </None>
+    <None Include="..\HS_1103\image\bottle_gray.png">
+      <Filter>res</Filter>
+    </None>
+    <None Include="..\HS_1103\image\bottle_orange.png">
+      <Filter>res</Filter>
+    </None>
+    <None Include="..\HS_1103\image\bottle_green.png">
+      <Filter>res</Filter>
+    </None>
+    <None Include="..\HS_1103\image\bottle_red.png">
+      <Filter>res</Filter>
+    </None>
+    <None Include="..\HS_1103\image\bottle_sky.png">
+      <Filter>res</Filter>
+    </None>
+    <None Include="..\HS_1103\image\bottle_white.png">
+      <Filter>res</Filter>
+    </None>
+    <None Include="..\HS_1103\stateBar\image\closed.png">
+      <Filter>res</Filter>
+    </None>
+    <None Include="..\HS_1103\image\store.png">
+      <Filter>res</Filter>
+    </None>
+    <None Include="..\HS_1103\image\store_b.png">
+      <Filter>res</Filter>
+    </None>
+    <None Include="..\HS_1103\image\feeding.png">
+      <Filter>res</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="res">
+      <UniqueIdentifier>{942bd1a7-a3c1-464e-afce-8ab20fe566c6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Genarated Files">
+      <UniqueIdentifier>{80b8ea15-7ebb-4571-8609-fe4d523088e5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="common">
+      <UniqueIdentifier>{a49c50f5-4d3a-4470-9eda-147dd9258804}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="materialFeeder">
+      <UniqueIdentifier>{17c57c7c-a418-4330-a5d2-565583c9a2af}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="materialFeeder\subMateUi">
+      <UniqueIdentifier>{0fe02642-eab2-4ade-970f-c80eec9b8050}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="strdecoder">
+      <UniqueIdentifier>{203cdcea-07a1-464b-a82d-d7f3bfa98e32}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="programConfig">
+      <UniqueIdentifier>{b2a2c6e8-e9b4-458c-8e98-7f2eeca5cfbe}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="programConfig\customTool">
+      <UniqueIdentifier>{8ba44340-4de7-439b-8431-1f0755ccbee2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="customGraph">
+      <UniqueIdentifier>{ddace6e3-3392-4551-80d1-0d08cd16f730}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="customGraph\customTool">
+      <UniqueIdentifier>{84d566cd-15cf-4bc4-acd5-336d17d88f9e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="collectorop">
+      <UniqueIdentifier>{2517d7a0-21df-4e52-ae53-c750c0a23ba2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="stove">
+      <UniqueIdentifier>{cc95dadb-859c-4532-8b77-486d08fe1bb9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="toolTitle">
+      <UniqueIdentifier>{9e6f0e0a-c28d-446d-b524-5361e0909c38}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="stateBar">
+      <UniqueIdentifier>{18b73c4c-1ab5-4325-8c62-787a8c13b04e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Diagram">
+      <UniqueIdentifier>{3d078334-6cad-4087-b518-4385849bff4a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="projectmode">
+      <UniqueIdentifier>{bcc11483-9573-44da-b3a5-8d0ea8baa1a3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="deviceop">
+      <UniqueIdentifier>{825e4a4b-1431-4369-ba46-ebb88534e71e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="manualop">
+      <UniqueIdentifier>{bbcad364-2ef4-4888-83a9-667209f7d5ea}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="E:\project\work\buildHS_1103\HS_1103_resource.rc" />
+  </ItemGroup>
+</Project>

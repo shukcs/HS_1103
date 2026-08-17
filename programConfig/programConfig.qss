@@ -1,0 +1,80 @@
+QWidget
+{
+	background-color:transparent;
+}
+
+QLineEdit
+{
+    border: 1px solid rgb(0, 120, 200);
+	border-radius: 4px;     
+	background-color: rgb(255, 255, 255);
+	color: rgb(25, 189, 181);
+	height:20px;	
+}
+
+QPushButton
+{
+    background-color: rgb(121, 80, 148);    
+	color: rgb(255, 255, 255);
+	border-radius: 8;   
+    border: 1px solid rgb(154, 127, 167);   
+   	font-family:SimHei;	
+	font-size:16px;	   
+}
+
+QPushButton::disabled
+{
+    background-color: lightgray;     
+}
+
+QPushButton::pressed
+{
+    background-color: rgb(120, 127, 167);     
+}
+
+
+QScrollBar:vertical
+{
+    width:14px;
+    background:rgba(240,240,240,0);
+    margin:0px,0px,0px,0px;
+    padding-top:10px;  
+    padding-bottom:10px;
+}
+QScrollBar::handle:vertical
+{
+    width:14px;
+    background:rgba(0,0,0,25%);
+    border-radius:4px;  
+    min-height:20;
+}
+QScrollBar::handle:vertical:hover
+{
+    width:14px;
+    background:rgba(0,0,0,50%);  
+    border-radius:4px;
+    min-height:20;
+}
+
+QScrollBar:horizontal
+{
+    height:14px;
+    background:rgba(240,240,240,0);
+    margin:0px,0px,0px,0px;
+    padding-left:9px;  
+    padding-right:9px;
+}
+QScrollBar::handle:horizontal
+{
+    height:14px;
+    background:rgba(0,0,0,25%);
+    border-radius:4px;  
+    min-width:20;
+}
+QScrollBar::handle:horizontal:hover
+{
+    height:14px;
+    background:rgba(0,0,0,50%);  
+    border-radius:4px;
+    min-width:20;
+}

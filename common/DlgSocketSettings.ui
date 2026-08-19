@@ -1,125 +1,133 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>DlgFeedMaterial</class>
- <widget class="QDialog" name="DlgFeedMaterial">
+ <class>DlgSocketSettings</class>
+ <widget class="QDialog" name="DlgSocketSettings">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>629</width>
-    <height>433</height>
+    <width>310</width>
+    <height>132</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string notr="true">添加物料</string>
+   <string notr="true">串口设置</string>
   </property>
   <property name="styleSheet">
    <string notr="true">QLabel {
    font-family:SimHei;
-   font-size: 20px;
+   font-size: 16px;
 }
 
-QPushButton
-{
+QPushButton {
 	min-width: 75px;
     min-height: 30px;
     background:qlineargradient(spread:pad,x1:1,y1:0,x2:1,y2:1,stop:0 rgb(204,204,204) stop:1 rgb(206,206,206));  
-	border-radius: 5px;
-   font-family:SimHei;
-   font-size: 20px;
+	border-radius: 5px;  
 }
-QPushButton:hover
-{
+QPushButton:hover {
     background:qlineargradient(spread:pad,x1:1,y1:0,x2:1,y2:1,stop:0 rgb(255,255,255) stop:1 rgb(192,192,192));  
 }
-QPushButton:pressed
-{
+QPushButton:pressed {
     background:qlineargradient(spread:pad,x1:1,y1:0,x2:1,y2:1,stop:0 rgb(255,255,255) stop:1 rgb(200,200,200));  
 }
 
-QComboBox {
-  border: 1px solid rgb(226,226,226);
-  border-radius: 5px;
-  padding: 1px 18px 1px 3px;
-  background-color: rgb(255,255,255);
-  font-family:SimHei;
-  font-size:20px;
+QAbstractSpinBox {
+	background-color: white;
+    border: 1px solid #E2E2E2;
+    min-height: 30px;
+    border-radius: 5px;
+    padding: 1px;
+    font-size: 14px;
 }
-QComboBox::drop-down {
-  subcontrol-origin: padding;
-  subcontrol-position: top right;
-  width: 20px;
-  padding-right:5px;
-  border-left: none;
-}
-QComboBox::down-arrow {
-  image: url(:/stateBar/image/arrow.png);
-  width: 20px;
-  height: 20px;
-}
-QComboBox QAbstractItemView::item {
-  min-height: 30px;
-}
-QListView{
-  font-family:SimHei;
-  font-size:20px;
+
+QLineEdit {
+    border: 1px solid #E2E2E2;
+    min-height: 30px;
+    border-radius: 5px;
+    padding: 1px;
+    font-size: 14px;
 }</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout" stretch="0,1,0">
+  <layout class="QVBoxLayout" name="verticalLayout">
    <property name="sizeConstraint">
-    <enum>QLayout::SetFixedSize</enum>
+    <enum>QLayout::SetDefaultConstraint</enum>
    </property>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout">
-     <item>
+    <layout class="QGridLayout" name="gridLayout" columnstretch="0,1">
+     <item row="0" column="0">
       <widget class="QLabel" name="label">
-       <property name="text">
-        <string>料瓶状态</string>
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
        </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QComboBox" name="cmb">
        <property name="minimumSize">
         <size>
-         <width>0</width>
-         <height>30</height>
+         <width>90</width>
+         <height>0</height>
         </size>
        </property>
-       <item>
-        <property name="text">
-         <string>缺失</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>料瓶可用</string>
-        </property>
-       </item>
+       <property name="text">
+        <string>Host名或IP:</string>
+       </property>
       </widget>
      </item>
-     <item>
-      <spacer name="horizontalSpacer_2">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
+     <item row="1" column="0">
+      <widget class="QLabel" name="label_2">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
        </property>
-       <property name="sizeHint" stdset="0">
+       <property name="minimumSize">
         <size>
          <width>0</width>
          <height>0</height>
         </size>
        </property>
-      </spacer>
+       <property name="text">
+        <string>端口号:</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="1">
+      <widget class="QSpinBox" name="spin_port">
+       <property name="minimumSize">
+        <size>
+         <width>0</width>
+         <height>34</height>
+        </size>
+       </property>
+       <property name="buttonSymbols">
+        <enum>QAbstractSpinBox::NoButtons</enum>
+       </property>
+       <property name="maximum">
+        <number>65535</number>
+       </property>
+       <property name="value">
+        <number>502</number>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="1">
+      <widget class="QLineEdit" name="edit_host">
+       <property name="minimumSize">
+        <size>
+         <width>150</width>
+         <height>34</height>
+        </size>
+       </property>
+      </widget>
      </item>
     </layout>
    </item>
    <item>
-    <widget class="MaterialsSelect" name="widget" native="true"/>
-   </item>
-   <item>
     <layout class="QHBoxLayout" name="horizontalLayout_4">
      <property name="topMargin">
-      <number>10</number>
+      <number>0</number>
      </property>
      <item>
       <spacer name="horizontalSpacer">
@@ -128,7 +136,7 @@ QListView{
        </property>
        <property name="sizeHint" stdset="0">
         <size>
-         <width>0</width>
+         <width>40</width>
          <height>0</height>
         </size>
        </property>
@@ -152,20 +160,14 @@ QListView{
    </item>
   </layout>
  </widget>
- <customwidgets>
-  <customwidget>
-   <class>MaterialsSelect</class>
-   <extends>QWidget</extends>
-   <header>MaterialsSelect.h</header>
-   <container>1</container>
-  </customwidget>
- </customwidgets>
- <resources/>
+ <resources>
+  <include location="../image.qrc"/>
+ </resources>
  <connections>
   <connection>
    <sender>btn_ok</sender>
    <signal>clicked()</signal>
-   <receiver>DlgFeedMaterial</receiver>
+   <receiver>DlgSocketSettings</receiver>
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -181,7 +183,7 @@ QListView{
   <connection>
    <sender>btn_cancle</sender>
    <signal>clicked()</signal>
-   <receiver>DlgFeedMaterial</receiver>
+   <receiver>DlgSocketSettings</receiver>
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">

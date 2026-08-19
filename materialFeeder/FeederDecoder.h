@@ -3,14 +3,33 @@
 #include <QObject>
 #include <QMap>
 
-enum {
-    C_None,
-    C_CanUse,
-    C_WaitStart,
-    C_Using,
-    C_Used,
-    C_Back,
-    C_Error,
+enum StoreStat {
+	S_None,			///无料仓
+	S_NoMate,		///无配料
+	S_CanFeed,		///已配料
+	S_WaitFeed,
+	S_Feeding,
+	S_Feeded,
+};
+enum TubeStat {
+	T_None,
+	T_WaitPrepare,
+	T_Preparing,
+	T_Prepared,
+	T_WaitFix,
+	T_Fixing,
+	T_Fixed,
+	T_WaitRecycle,
+	T_Recycling,
+	T_Recyced,
+};
+enum BottleStat {
+	B_None,
+	B_CanUse,
+	B_WaitStart,
+	B_Using,
+	B_Used,
+	B_Error,
 };
 
 enum {
@@ -39,7 +58,7 @@ typedef struct {
 class MaterialStruct {
 public:
     float weight; //g
-	float usedRate=1.0;///比例系数
+    float usedRate = 1.0;///比例系数
     union {
         date_packed_t data;
         uint16_t ch;
@@ -52,11 +71,15 @@ public:
 
 class StoreStruct {
 public:
+	StoreStruct(int num, const MaterialStruct *m, const QString &id);
+	StoreStat getStat()const;
+	void setStat(StoreStat);
+private:
+	StoreStat  stat = S_None;
+public:
 	int numb;
 	const MaterialStruct *pMate;
 	QString     nfcid;
-	uint16_t    stat = 0; ///0:归为，1:机械臂移动，2: 投料中
-	StoreStruct(int num, const MaterialStruct *m, const QString &id);
 };
 
 enum DeviceType {
@@ -67,80 +90,86 @@ enum DeviceType {
     Dev_NextWait,
 };
 
+class BottleStruct
+{
+public:
+	uint16_t m_numb;
+	uint16_t m_stWork;
+    BottleStruct(uint16_t numb, uint16_t flag = B_CanUse, uint16_t stWork = 0);
+	BottleStat getFlag()const;
+    void setFlag(BottleStat);
+private:
+    uint16_t m_flag;
+};
+
+class TubeStruct {
+public:
+    TubeStruct(uint16_t n, uint16_t flag=T_WaitPrepare);
+	TubeStat getFlag()const;
+    void setFlag(TubeStat);
+    uint16_t getNumber()const;
+    int getStoveCh()const;
+    void setStoveCh(int8_t ch);
+private:
+    uint16_t m_numb;
+    uint16_t m_flag;
+    int16_t  m_chStove=-1;
+};
+
+class FeederParam
+{
+public:
+    FeederParam(const QList<QPair<int, float> > &feeds = QList<QPair<int, float> >(), uint16_t numb = 0, int16_t nTube = -1);
+    int16_t getBottleNumb()const;
+    BottleStruct *getBottle()const;
+    int16_t getTubeNumb()const;
+    TubeStruct *getTube()const;
+    const QList<QPair<int, float> > &feedMaterial()const;
+    void getFeedNameAndWeight(QList<QPair<QString, float> > *ret)const;
+    void feederFinish(int type)const;
+private:
+    QList<QPair<int, float> >m_feedMaterials;
+    uint16_t    m_numbBottle;
+    int16_t     m_numbTube;
+};
+
 class DeviceAct {
 public:
     DeviceType	type : 8;     ///DeviceType
-    bool bStart : 1;   ///false: 可以同步进行下一个
+    bool bStart : 1;        ///false: true, 已经开始
     bool bWaitFinish : 1;   ///false: 可以同步进行下一个
-	union {
-		uint32_t data = 0;
-		struct {
-			uint16_t robotStep;	///RobotMgr::RobotStep
-			uint8_t robotIndex;		///料瓶0~~N, 内衬0~~M, 反应管......
-		};
-		struct {
-			uint16_t cmdFeeder;
-            uint16_t cmdAck;
-		};
-		struct {
-			uint8_t servoPos;
-		};
-		struct {
-			uint8_t stepType;   ///
-			uint8_t stepCh:4;   ///0 or 1
-			bool stepDirCont:1; ///true: 打开炉膛 /反应管上升
-		};
-        float fWaitTime;        ///
-	};
+    union {
+        struct {
+            uint16_t robotStep;	///RobotMgr::RobotStep
+            uint8_t robotIndex;		///料瓶0~~N, 内衬0~~M, 反应管......
+        };
+        struct { ///
+            uint16_t cmdFeeder;
+            uint8_t cmdAck;
+            uint8_t idStore;
+            float wFeed;
+        };
+        struct {
+            uint8_t servoPos;
+        };
+        struct {
+            uint8_t stepType;   ///
+            uint8_t stepCh : 4;   ///0 or 1
+            bool stepDirCont : 1; ///true: 打开炉膛 /反应管上升
+        };
+        struct {
+            float fWaitTime;    ///
+        };
+    };
     DeviceAct(DeviceType type = Dev_Robot, bool bWait = true);
     DeviceAct(float tmWait);
     void SetFeedCmd(uint16_t cmd, int ack = -1);
 };
 
-class BottleStruct
-{
-public:
-	uint16_t m_numb;
-	uint16_t m_flag;
-	uint16_t m_stWork;
-    BottleStruct(uint16_t numb, uint16_t flag = C_CanUse, uint16_t stWork = 0);
-};
-
-class TubeStruct {
-public:
-	uint16_t numb;
-	uint16_t flag;
-    uint16_t chStove;
-    bool     bFeeded = false;
-public:
-    TubeStruct(uint16_t n, uint16_t flag=C_CanUse, uint16_t ch=0);
-};
-
-class FeederBottle
-{
-public:
-    FeederBottle(const QList<QPair<int, float> > &feeds=QList<QPair<int, float> >(), uint16_t numb=0, int16_t nTube = -1);
-    int16_t getBottleNumb()const;
-    int16_t getTubeNumb()const;
-    TubeStruct *getTube()const;
-    const QList<QPair<int, float> > &feedMaterial()const;
-    void getFeedNameAndWeight(QList<QPair<QString, float> > *ret)const;
-    bool isRepeat()const;
-    void setRepeat(bool b);
-    int16_t getChannel()const;
-    void setChannel(int16_t ch);
-    void feedFinish()const;
-private:
-    uint16_t  m_numbBottle;
-    QList<QPair<int, float> >m_feedMaterials;
-    int16_t m_ch;
-    int16_t m_numbTube;
-    bool m_bRepeat = false;
-};
-
 class QSerialPort;
 class StepMotorStat;
-class FeederDecoder :  public QObject
+struct WorkItem;
+class FeederMgr :  public QObject
 {
     Q_OBJECT
 public:
@@ -157,11 +186,17 @@ public:
         Pos_BlanceDoor,
         Pos_Stove1,
         Pos_Stove2 = Pos_None,
-        Pos_Home = 1,
+        Pos_Home = 0,
+    };
+    enum JobType {
+        J_PrepareMate,    ///反应管备料
+        J_StoveFixTube,   ///反应管入炉膛
+        J_StoveTubeBack,  ///回收炉膛反应管
+        J_Unknow = -1,
     };
 public:
-    FeederDecoder(QObject* p);
-    ~FeederDecoder();
+    FeederMgr(QObject* p);
+    ~FeederMgr();
 
     const QStringList &AllAvalidMaterials()const;
     float MaterialsWeight(const QString& name)const;
@@ -169,17 +204,18 @@ public:
     void ChangeMaterial(const QString& nfcid, float weight, const QString& name, const QString& idNew=QString());
     const MaterialStruct* GetMaterial(const QString& id)const;
     uint32_t GetStoreNum()const;
-    const StoreStruct* GetContainer(const QString& id)const;
-    const StoreStruct* GetContainer(uint32_t idx)const;
-    QString GetContainerName(uint32_t idx)const;
+    const StoreStruct* GetStore(const QString& id)const;
+    const StoreStruct* GetStore(uint32_t idx)const;
     QStringList GetStoreNfcId(bool bContainUse = true, const QString &cur=QString());
     const QList<BottleStruct*> &AllBottles()const;
     const QList<TubeStruct*> &AllTubes()const;
-    QList<TubeStruct*> ValidTubes()const;
+    QList<TubeStruct*> ValidTubes(JobType t=J_PrepareMate)const;
+    QList<BottleStruct*> ValidBottls()const;
     TubeStruct *ValidTube(int index)const;
 
-    bool FeedSolidMaterial(const QMap<QString, float> &feeds, int numb=-1, int nTub=-1, int ch=0);
-    bool StoveTubeBack(int num);
+    bool FeedSolidMaterial(const QMap<QString, float> &feeds, int numb, int nTub=-1, bool bFix=true, int ch=0);
+    bool FixTube(uint16_t nTb, uint16_t ch);
+    bool StoveTubeBack(int ch, int nBack=-1);
     void CancleFeed(BottleStruct* bt);
     QString GetCurPortName()const;
     int GetCurPortBaut()const;
@@ -190,15 +226,18 @@ public:
 
     TubeStruct *GetInSotveTube(uint8_t ch)const;
     TubeStruct *getTube(int idx)const;
-    const FeederBottle *getfeedParams(int numb) const;
+	const FeederParam *GetfeedParamsByBottleNum(int numb) const;
+	bool CanAddWork(JobType t, int numTub, bool bProg = false)const;
 public:
-    static FeederDecoder& Instance();
+    static FeederMgr& Instance();
     static uint16_t Modbus_crc16(const uint8_t* buff, uint16_t Len);
     static bool Equal(double f1, double f2);
     static void AddModbusFloat(uint8_t* buff, float f);
     static void AddModbusData(uint8_t* buff, uint16_t f);
+    static void AddModbusU32(uint8_t* buff, uint32_t f);
     static float PichModbusFloat(const void* buff);
     static uint16_t PichModbusU16(const void* buff);
+    static uint32_t PichModbusU32(const void* buff);
     static RobotPostion getStovePos(int ch);
     static QString DefaultConfigFile();
 public slots:
@@ -216,9 +255,10 @@ protected:
     void addMaterial(const MaterialStruct& m, bool bAdd=true);
     void updateStore(const QString& nfcid, int idx);
 
-    void prcsRead(uint16_t addr, const QByteArray& msg);
-    void prcsStat(uint16_t addr, const QByteArray& msg);
-	const FeederBottle* curFeedBootle()const;
+    bool prcsRead(uint16_t addr, const QByteArray& msg);
+	bool prcsStat(uint16_t addr, const QByteArray& msg);
+	bool prcsWriteCmd(uint16_t addr, uint16_t cmd);
+    bool prcsFeederStat(uint16_t stat);
     void checkMatesCanFeed();
     void sumFeederWeight(QMap<int, float> *feeds) const;
 private:
@@ -227,52 +267,62 @@ private:
     void readMaterials(int idx = 0);
     void readStore(int idx = 0);
     void writeMaterial(const MaterialStruct *m, uint16_t idx);
-    void writeCmd(uint16_t cmd, const QString &id=QString(), float w=0.0f);
+    void writeCmd(const DeviceAct &act);
     void writeFunc(uint16_t cmd, uint16_t val=1);
     void readFeedStat();
-    void prcsFeederStat(uint16_t stat);
-    void doAction();
-    void genActions(FeederBottle &bt);
-    void genBackActions(const FeederBottle *fb);///回收反应管
+    void readFeedWeight();
+    bool doAction();
+    void genPrepareActions(const WorkItem &item);
+    void genTubToStvoe(const WorkItem &item);
+    void genBackActions(const WorkItem &itemb);///回收反应管
     void checkActions();
+	bool addWorkItem(const struct WorkItem &item);
+	QList<JobType> tubeJobs(int numTub)const;
 
-    StoreStruct* getContainer(const QString& id)const;
-    StoreStruct* getContainer(uint16_t num)const;
+    StoreStruct* getStore(const QString& id)const;
+	StoreStruct* getStore(uint16_t num)const;
     MaterialStruct* getMaterial(const QString& id)const;
-    const FeederBottle *getfeedParamsByTube(int numb) const;
-    StoreStruct* getPropContainer(float weight, const QString& name, const QMap<int, float> &preDistrs)const;
+    const FeederParam *getfeedParamsByTube(int numb) const;
+    StoreStruct* getPropStore(float weight, const QString& name, const QMap<int, float> &preDistrs)const;
     BottleStruct *getBottle(int numb) const;
-    void onWait();
 
-    void addFeederAct(uint16_t cmd, bool bWait = true, int32_t act = -1);
+    void addFeederAct(uint16_t cmd, bool bWait = true, int32_t act = -1, uint8_t numStore=0xff, float wFeed=0.0);
     void addServoMotorAct(RobotPostion pos, bool bWait = true);
     void addStepMotorAct(uint8_t type, uint8_t ch, bool bCont, bool bWait = true);
     void adddRobotAct(uint16_t type, uint8_t index = 0, bool bWait = true);
+	void onWait();
 signals:
     void serialPortError(bool);
     void connectStatChanged(PortStat);
     void materialChanged(const QString &, const MaterialStruct&);
     void materialAdded(const MaterialStruct &);
     void materialRemoved(int);
-    void containerChanged(const StoreStruct *);
-    void matesCanFeedChanged();
+    void storeChanged(const StoreStruct *);
     void bottleChanged(const BottleStruct*);
     void tubeChanged(const TubeStruct*);
     void actionRun(const DeviceAct*);
-	void feedTubeChanged(uint8_t ch, bool bFix); ///ch: 通道；bFix: true=反应管安装， false=反应管取回
+	void feedTubeChanged(uint16_t type, uint16_t ch); ///type: JobType类型
+    void canUsedBottleChanged();
+    void canUsedTubeChanged();
+    void matesCanFeedChanged();
+    void feedingChanged(float, bool);  ///bool true:投料重量； false，已投
 private:
-    friend class FeederBottle;
+	friend class FeederParam;
+	friend class BottleStruct;
+	friend class StoreStruct;
+    friend class TubeStruct;
+private:
     bool                    m_bOk;
     QSerialPort             *m_port;
+    StoreStruct             *m_feedStore = nullptr;
     bool                    m_bPortChaned = false;
-    int                     m_nWrite = -1;
     int                     m_idTimer=-1;
     int                     m_idRead=-1;
     int64_t                 m_lastTmRcv;
     int64_t                 m_lastTmSnd=-1;
     PortStat                m_comStat = PortClose;
-    uint32_t                m_flag = 0;
-    uint16_t                m_nStoreNum = 12;
+    uint16_t                m_flag = 0;
+	uint16_t                m_nStoreNum = 12;
     uint16_t                m_nBottle;
     uint16_t                m_nTube;
     QByteArray              m_buff;
@@ -281,16 +331,17 @@ private:
     QList<StoreStruct *>    m_allStore;
     QList<BottleStruct*>    m_allBottle;
     QList<TubeStruct*>      m_allTube;
-	QStringList             m_canFeedMatesNames;
-	QList<DeviceAct>		m_actions;
-	QList<QVariant>		    m_feedParams;
-    QString                 m_portName;
+    QStringList             m_canFeedMatesNames;
+    QList<FeederParam>		        m_feedParams;
+    QList<int>                      m_jobs;
+    QList<DeviceAct>                m_actions;     ///工作列表
+    QString                         m_portName;
 };
 
 Q_DECLARE_METATYPE(const StoreStruct*);
 Q_DECLARE_METATYPE(BottleStruct*);
 Q_DECLARE_METATYPE(TubeStruct*);
 Q_DECLARE_METATYPE(const DeviceAct*);
-Q_DECLARE_METATYPE(FeederBottle);
+Q_DECLARE_METATYPE(FeederParam);
 
 #endif // __FeederDecoder

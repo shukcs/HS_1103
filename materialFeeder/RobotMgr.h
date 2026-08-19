@@ -5,14 +5,19 @@
 
 class QSerialPort;
 class DeviceAct;
+class QTcpSocket;
 class RobotMgr : public QObject
 {
     Q_OBJECT
 public:
-    enum PortStat {
+    enum RobotStat {
         PortClose,
         NoData,
         Communicate,
+        PowerOff,
+        PowerOn,
+        RobotStart,
+        ProgmaStart,
     };
     enum RobotAction {
         None = -1,
@@ -38,38 +43,50 @@ public:
     ~RobotMgr();
 
     bool IsConnenct()const;
-    void ConnectPort();
-    QSerialPort *serialPort()const;
-    PortStat serialPortStat()const;
+    void ConnectSocket(const QString &ip=QString(), uint16_t port=0);
+    RobotStat tcpSocketStat()const;
+    const QString &GetHost()const;
+    uint16_t GetPort()const;
 public slots:
     void DoAction(const DeviceAct *act);//step RobotAction, idx
 protected:
     void timerEvent(QTimerEvent* e)override;
 
+    RobotStat fromRead(uint16_t s);
+protected:
     void ctrl();
-    QByteArray pickModbus();
+    QByteArray pickTcpModbus();
     uint32_t getAckLen(const uint8_t *buf, uint32_t len);
     void onRead();
 
     bool parse();
+
     void readStat();
+    void initRobot();
 signals:
     void actionDone(int); //RobotStep
-    void connectStatChanged(PortStat);
+    void connectStatChanged(RobotStat);
 private:
     RobotAction     m_curAct = None;
     int             m_curIdx = -1;
-    uint16_t        m_stat = 0;  //0: 没发送，1:发送等待响应，2:响应
+    uint16_t        m_seq = 0;
+    bool            m_bWait = false;
     bool            m_bRobotToPos = false;
-    bool            m_bPortChaned = false;
     RobotAction     m_actWrite = None;
     int             m_idTimer = -1;
     int64_t         m_lastTmRcv;
     int64_t         m_lastTmCtrl = 0;
-    PortStat        m_comStat = PortClose;
-    QSerialPort     *m_port=nullptr;
+    RobotStat       m_comStat = PortClose;
+    QTcpSocket      *m_socket = nullptr;
+    bool            m_bReadRobotStat=false;
+    QString         m_ip;
+    uint16_t        m_port;
+    bool            m_bStart = true;
+    uint16_t        m_speed = 25; ///默认运行速度25%
+    bool            m_bSetSpeed = false;
+    //QSerialPort     *m_port=nullptr;
     QByteArray      m_rcvs;
-    QString         m_portName;
+    //QString         m_portName;
 };
 
 #endif //__RobotMgr_H__

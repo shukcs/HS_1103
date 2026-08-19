@@ -12,27 +12,13 @@ MaterialsSelect::MaterialsSelect(QWidget *parent) : QWidget(parent)
 {
     m_ui->setupUi(this);
     m_ui->widget->setVisible(false);
-    for (auto itr : FeederDecoder::Instance().ValidTubes())
-    {
-        m_ui->cmb_tube->addItem(tr("反应管%1").arg(itr->numb + 1));
-    }
+    SetBottleSelected(false);
     initUi(m_ui->cmb_id, m_ui->w_id);
-
-    connect(&FeederDecoder::Instance(), &FeederDecoder::matesCanFeedChanged, this, [=]() {
-        auto strLs = FeederDecoder::Instance().AllAvalidMaterials();
-        for (auto itr : m_unitMates)
-        {
-            auto str = itr.cmb->currentText();
-            itr.cmb->clear();
-            itr.cmb->addItems(strLs);
-			if (!str.isEmpty())
-				itr.cmb->setCurrentText(str);
-			else
-				strLs.removeAll(itr.cmb->currentText());
-        }
-        if (!m_unitMates.isEmpty())
-            m_unitMates.last().spin->SetBtnVisible(strLs.size() > 0, 0);
-    });
+    changeAvalidTube();
+    changeAvalidBottle();
+    connect(&FeederMgr::Instance(), &FeederMgr::matesCanFeedChanged, this, &MaterialsSelect::changeAvalidMate);
+    connect(&FeederMgr::Instance(), &FeederMgr::canUsedTubeChanged, this, &MaterialsSelect::changeAvalidTube);
+    connect(&FeederMgr::Instance(), &FeederMgr::canUsedBottleChanged, this, &MaterialsSelect::changeAvalidBottle);
 }
 
 MaterialsSelect::~MaterialsSelect()
@@ -55,11 +41,11 @@ void MaterialsSelect::GetFeedMaterials(QMap<QString, float>* mates)const
     }
 }
 
-void MaterialsSelect::SetFeedMaterials(const FeederBottle *bt)
+void MaterialsSelect::SetFeedMaterials(const FeederParam *bt)
 {
-    if (bt)
+    if (auto tb = bt ? bt->getTube() : nullptr)
     {
-        m_ui->cmb_ch->setCurrentIndex(bt->getChannel());
+        m_ui->cmb_ch->setCurrentIndex(tb->getStoveCh());
         SpinCust* sp = NULL;
         QList<QPair<QString, float> > feederMats;
         bt->getFeedNameAndWeight(&feederMats);
@@ -78,17 +64,27 @@ void MaterialsSelect::SetFeedMaterials(const FeederBottle *bt)
 
 int8_t MaterialsSelect::GetTubeNumber()const
 {
-    return m_ui->cmb_tube->currentIndex()-1;
+    return m_ui->cmb_tube->currentText().remove(tr("反应管")).toInt()-1;
 }
 
 int MaterialsSelect::GetChannel() const
 {
-    return m_ui->cmb_ch->currentIndex();
+	auto idx = m_ui->cmb_ch->currentIndex();
+	return idx == m_ui->cmb_ch->count() - 1 ? -1 : idx;;
+}
+
+void MaterialsSelect::SetBottleSelected(bool b)
+{
+    m_ui->stackedWidget->setCurrentWidget(b ? m_ui->p_bottle : m_ui->p_stove);
+}
+
+int MaterialsSelect::GetSelectedBottleNum() const
+{
+    return m_ui->cmb_bottle->currentText().remove(tr("料瓶")).toInt()-1;
 }
 
 void MaterialsSelect::initUi(QComboBox* cmb, SpinCust* sp)
 {
-    auto strLs = FeederDecoder::Instance().AllAvalidMaterials();
     if (m_unitMates.size() == 0)
     { 
         sp->SetBtnVisible(false, 1);
@@ -100,13 +96,7 @@ void MaterialsSelect::initUi(QComboBox* cmb, SpinCust* sp)
         m_unitMates.last().mask->show();
     }
 
-    for (auto& itr : m_unitMates)
-    {
-        strLs.removeAll(itr.cmb->currentText());
-    }
     cmb->setFocusPolicy(Qt::NoFocus);
-    cmb->addItems(strLs);
-    cmb->setCurrentIndex(0);
     connect(sp, &SpinCust::btnClick, this, [=](int idx) {
         0 == idx ? addUnit(sp) : delUnit(sp);
         });
@@ -115,6 +105,13 @@ void MaterialsSelect::initUi(QComboBox* cmb, SpinCust* sp)
     auto mask = new MaskWidget(cmb);
     mask->hide();
 
+    auto strLs = FeederMgr::Instance().AllAvalidMaterials();
+    for (auto& itr : m_unitMates)
+    {
+        strLs.removeAll(itr.cmb->currentText());
+    }
+    cmb->addItems(strLs);
+    cmb->setCurrentIndex(0);
     m_unitMates << UnitMate{ cmb, sp, mask };
     m_unitMates.last().spin->SetBtnVisible(strLs.size() > 1, 0);
 }
@@ -144,7 +141,7 @@ void MaterialsSelect::delUnit(SpinCust* sp)
     if (idx >= m_unitMates.size() || idx < 0)
         return;
 
-    auto strLs = FeederDecoder::Instance().AllAvalidMaterials();
+    auto strLs = FeederMgr::Instance().AllAvalidMaterials();
     auto u = m_unitMates.at(idx);
     QString str = u.cmb->currentText();
     if (!str.isEmpty())
@@ -185,4 +182,79 @@ int MaterialsSelect::indexUnit(SpinCust* sp)
         ret++;
     }
     return ret;
+}
+
+void MaterialsSelect::changeAvalidMate()
+{
+    auto strLs = FeederMgr::Instance().AllAvalidMaterials();
+    if (m_bVallid && strLs.isEmpty())
+    {
+        m_bVallid = false;
+        emit avalidChanged(m_bVallid);
+    }
+    else if (!m_bVallid && !strLs.isEmpty() && !FeederMgr::Instance().ValidBottls().isEmpty() && !FeederMgr::Instance().ValidTubes().isEmpty())
+    {
+        m_bVallid = true;
+        emit avalidChanged(m_bVallid);
+    }
+    for (auto itr : m_unitMates)
+    {
+        auto str = itr.cmb->currentText();
+        itr.cmb->clear();
+        itr.cmb->addItems(strLs);
+        if (!str.isEmpty())
+            itr.cmb->setCurrentText(str);
+        else
+            strLs.removeAll(itr.cmb->currentText());
+    }
+    if (!m_unitMates.isEmpty())
+        m_unitMates.last().spin->SetBtnVisible(strLs.size() > 0, 0);
+}
+
+void MaterialsSelect::changeAvalidTube()
+{
+    auto vts = FeederMgr::Instance().ValidTubes();
+    if (m_bVallid && vts.isEmpty())
+    {
+        m_bVallid = false;
+        emit avalidChanged(m_bVallid);
+    }
+    else if (!m_bVallid && !vts.isEmpty() && !FeederMgr::Instance().ValidBottls().isEmpty() && !FeederMgr::Instance().AllAvalidMaterials().isEmpty())
+    {
+        m_bVallid = true;
+        emit avalidChanged(m_bVallid);
+    }
+    auto str = m_ui->cmb_tube->currentText();
+    m_ui->cmb_tube->clear();
+    m_ui->cmb_tube->addItem(tr("自动"));
+    for (auto itr : vts)
+    {
+        m_ui->cmb_tube->addItem(tr("反应管%1").arg(itr->getNumber() + 1));
+    }
+    if (!str.isEmpty())
+        m_ui->cmb_tube->setCurrentText(str);
+}
+
+void MaterialsSelect::changeAvalidBottle()
+{
+    auto vbs = FeederMgr::Instance().ValidBottls();
+    if (m_bVallid && vbs.isEmpty())
+    {
+        m_bVallid = false;
+        emit avalidChanged(m_bVallid);
+    }
+    else if (!m_bVallid && !vbs.isEmpty() && !FeederMgr::Instance().ValidTubes().isEmpty() && !FeederMgr::Instance().AllAvalidMaterials().isEmpty())
+    {
+        m_bVallid = true;
+        emit avalidChanged(m_bVallid);
+    }
+    auto str = m_ui->cmb_bottle->currentText();
+    m_ui->cmb_bottle->clear();
+    m_ui->cmb_bottle->addItem(tr("自动"));
+    for (auto itr : vbs)
+    {
+        m_ui->cmb_bottle->addItem(tr("料瓶%1").arg(itr->m_numb + 1));
+    }
+    if (!str.isEmpty())
+        m_ui->cmb_bottle->setCurrentText(str);
 }

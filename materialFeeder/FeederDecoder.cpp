@@ -23,139 +23,41 @@ union DataU
     uint32_t u32D;
 };
 
-/*
-* MaterialStruct
-*/
-MaterialStruct::MaterialStruct(const QString &nfc, const QString &name/*=QString()*/, float w/*=0.0f*/)
-: name(name), nfcid(nfc), weight(w)
+struct WorkItem {
+    uint8_t type;
+    uint8_t nNumTube;
+    uint8_t chStove; ///
+    uint8_t index;   ///归还位 type=FeederMgr::J_StoveTubeBack有效
+	static WorkItem initFrom(FeederMgr::JobType t, uint8_t n, uint8_t ch = 0, uint8_t idx = 0);
+	static WorkItem initFrom(int n);
+	int toInt()const;
+};
+
+WorkItem WorkItem::initFrom(int n)
 {
+	WorkItem ret = *(WorkItem*)&n;
+	return ret;
+}
+
+WorkItem WorkItem::initFrom(FeederMgr::JobType t, uint8_t n, uint8_t ch /*= 0*/, uint8_t idx /*= 0*/)
+{
+	WorkItem ret = { (uint8_t)t, n, ch, idx };
+	return ret;
+}
+
+int WorkItem::toInt() const
+{
+	int ret = *(int*)this;
+	return ret;
 }
 
 /*
-* StoreStruct
+* FeederMgr
 */
-StoreStruct::StoreStruct(int num, const MaterialStruct *m, const QString &id) : numb(num),
-pMate(m), nfcid(id)
-{
-}
-
-/*
-* DeviceAct
-*/
-DeviceAct::DeviceAct(DeviceType t, bool bWait) : type(t), bStart(false), bWaitFinish(bWait)
-{
-}
-
-DeviceAct::DeviceAct(float tmWait) : type(Dev_NextWait), fWaitTime(tmWait), bStart(false), bWaitFinish(false)
-{
-}
-
-void DeviceAct::SetFeedCmd(uint16_t cmd, int ack /*= -1*/)
-{
-    if (type == Dev_Feeder)
-    {
-        cmdFeeder = cmd;
-        cmdAck = ack < 0 ? cmd + 1 : ack;
-    }
-}
-
-/*
-* FeederBottle
-*/
-FeederBottle::FeederBottle(const QList<QPair<int, float> > &feeds, uint16_t numb, int16_t nTube) : m_numbBottle(numb)
-, m_feedMaterials (feeds), m_ch(0), m_numbTube(nTube)
-{
-}
-
-int16_t FeederBottle::getBottleNumb() const
-{
-	return m_numbBottle;
-}
-
-int16_t FeederBottle::getTubeNumb() const
-{
-    return m_numbTube;
-}
-
-TubeStruct *FeederBottle::getTube() const
-{
-    return FeederDecoder::Instance().getTube(m_numbTube);
-}
-
-const QList<QPair<int, float> > & FeederBottle::feedMaterial() const
-{
-    return m_feedMaterials;
-}
-
-void FeederBottle::getFeedNameAndWeight(QList<QPair<QString, float> > *ret) const
-{
-    if (!ret)
-        return;
-
-    auto &feeder = FeederDecoder::Instance();
-    ret->clear();
-    for (auto &itr : m_feedMaterials)
-    {
-        auto c = feeder.GetContainer(itr.first);
-        if (auto m = c ? c->pMate : nullptr)
-            *ret << QPair<QString, float>(m->name, itr.second);
-    }
-}
-
-bool FeederBottle::isRepeat() const
-{
-    return m_bRepeat;
-}
-
-void FeederBottle::setRepeat(bool b)
-{
-    m_bRepeat = b;
-}
-
-int16_t FeederBottle::getChannel() const
-{
-    return m_ch;
-}
-
-void FeederBottle::setChannel(int16_t ch)
-{
-    m_ch = ch;
-}
-
-void FeederBottle::feedFinish()const
-{
-    auto &feeder = FeederDecoder::Instance();
-    if (auto tb = feeder.getTube(m_numbTube))
-    {
-        tb->flag = C_Using;
-        tb->bFeeded = true;
-        feeder.tubeChanged(tb);
-    }
-}
-
-/*
-* FeederBottle
-*/
-BottleStruct::BottleStruct(uint16_t num, uint16_t flag, uint16_t stWork) : m_numb(num)
-, m_flag(flag), m_stWork(stWork)
-{
-}
-
-/*
-* FeederBottle
-*/
-TubeStruct::TubeStruct(uint16_t n, uint16_t f, uint16_t c)
-: numb(n), flag(f), chStove(c)
-{
-}
-
-/*
-* FeederDecoder
-*/
-FeederDecoder::FeederDecoder(QObject* p) : QObject(p)
+FeederMgr::FeederMgr(QObject* p) : QObject(p)
 , m_port(new QSerialPort(qApp))
 {
-    connect(m_port, &QSerialPort::readyRead, this, &FeederDecoder::readByets);
+    connect(m_port, &QSerialPort::readyRead, this, &FeederMgr::readByets);
     connect(m_port, &QSerialPort::errorOccurred, this, [=](QSerialPort::SerialPortError err) {
         emit serialPortError(err != QSerialPort::NoError);
     });
@@ -176,7 +78,7 @@ FeederDecoder::FeederDecoder(QObject* p) : QObject(p)
     m_port->setStopBits(QSerialPort::OneStop);
     connect(m_port, &QSerialPort::baudRateChanged, this, [=] {m_bPortChaned = true; });
     m_port->open(QSerialPort::ReadWrite);
-    QTimer::singleShot(50, this, &FeederDecoder::ConnectPort);
+    QTimer::singleShot(50, this, &FeederMgr::ConnectPort);
     writeFunc(406);
 	m_nBottle = settings.value("nBottle", 6).toInt();
     for (int i = 0; i < m_nBottle; ++i)
@@ -192,16 +94,9 @@ FeederDecoder::FeederDecoder(QObject* p) : QObject(p)
     settings.endGroup();
     ConnectPort();
     readMaterials();
-
-	QTimer::singleShot(50, this, [=] {
-		AddMaterial("123", "固体1", 52.5);
-		AddMaterial("124", "固体2", 62.5);
-		updateStore("123", 0);
-		updateStore(QString(), 1);
-	});
 }
 
-FeederDecoder::~FeederDecoder()
+FeederMgr::~FeederMgr()
 {
     qDeleteAll(m_allMaterials);
     qDeleteAll(m_allStore);
@@ -209,13 +104,13 @@ FeederDecoder::~FeederDecoder()
     qDeleteAll(m_allTube);
 }
 
-FeederDecoder& FeederDecoder::Instance()
+FeederMgr& FeederMgr::Instance()
 {
-    static FeederDecoder s_ins(nullptr);
+    static FeederMgr s_ins(nullptr);
     return s_ins;
 }
 
-uint16_t FeederDecoder::Modbus_crc16(const uint8_t* buff, uint16_t len)
+uint16_t FeederMgr::Modbus_crc16(const uint8_t* buff, uint16_t len)
 {
     unsigned short crc = 0xffff;
     while (len--)
@@ -232,12 +127,13 @@ uint16_t FeederDecoder::Modbus_crc16(const uint8_t* buff, uint16_t len)
 
     return (crc >> 8) | (crc << 8);
 }
-bool FeederDecoder::Equal(double f1, double f2)
+
+bool FeederMgr::Equal(double f1, double f2)
 {
     return fabs(f1 - f2) < 0.000001;
 }
 
-void FeederDecoder::AddModbusFloat(uint8_t* buff, float f)
+void FeederMgr::AddModbusFloat(uint8_t* buff, float f)
 {
     DataU tmp;
     tmp.fD = f;
@@ -247,7 +143,7 @@ void FeederDecoder::AddModbusFloat(uint8_t* buff, float f)
     buff[3] = tmp.cD[1];
 }
 
-void FeederDecoder::AddModbusData(uint8_t* buff, uint16_t u)
+void FeederMgr::AddModbusData(uint8_t* buff, uint16_t u)
 {
     DataU tmp;
     tmp.u16D = u;
@@ -255,7 +151,17 @@ void FeederDecoder::AddModbusData(uint8_t* buff, uint16_t u)
     buff[1] = tmp.cD[0];
 }
 
-float FeederDecoder::PichModbusFloat(const void* src)
+void FeederMgr::AddModbusU32(uint8_t* buff, uint32_t u)
+{
+    DataU tmp;
+    tmp.u32D = u;
+    buff[0] = tmp.cD[3];
+    buff[1] = tmp.cD[2];
+    buff[2] = tmp.cD[1];
+    buff[3] = tmp.cD[0];
+}
+
+float FeederMgr::PichModbusFloat(const void* src)
 {
     auto buff = (const uint8_t*)src;
     DataU tmp;
@@ -267,7 +173,7 @@ float FeederDecoder::PichModbusFloat(const void* src)
     return tmp.fD;
 }
 
-uint16_t FeederDecoder::PichModbusU16(const void* src)
+uint16_t FeederMgr::PichModbusU16(const void* src)
 {
     auto buff = (const uint8_t*)src;
     DataU tmp;
@@ -277,7 +183,19 @@ uint16_t FeederDecoder::PichModbusU16(const void* src)
     return tmp.u16D;
 }
 
-FeederDecoder::RobotPostion FeederDecoder::getStovePos(int ch)
+uint32_t FeederMgr::PichModbusU32(const void* src)
+{
+    auto buff = (const uint8_t*)src;
+    DataU tmp;
+    tmp.cD[0] = buff[3];
+    tmp.cD[1] = buff[2];
+    tmp.cD[2] = buff[1];
+    tmp.cD[3] = buff[0];
+
+    return tmp.u32D;
+}
+
+FeederMgr::RobotPostion FeederMgr::getStovePos(int ch)
 {
     switch (ch)
     {
@@ -290,7 +208,7 @@ FeederDecoder::RobotPostion FeederDecoder::getStovePos(int ch)
     return Pos_None;
 }
 
-QString FeederDecoder::DefaultConfigFile()
+QString FeederMgr::DefaultConfigFile()
 {
     auto iniFile = QFileInfo(QCoreApplication::applicationDirPath() + "/user/config.ini");
     auto dir = QFileInfo(iniFile).dir();
@@ -305,7 +223,7 @@ QString FeederDecoder::DefaultConfigFile()
     return iniFile.absoluteFilePath();
 }
 
-void FeederDecoder::ConnectPort()
+void FeederMgr::ConnectPort()
 {
     if (!m_port->isOpen())
     {
@@ -328,103 +246,97 @@ void FeederDecoder::ConnectPort()
         if (PortClose == m_comStat)
         {
             m_comStat = NoData;
-            emit connectStatChanged(PortClose);
+            emit connectStatChanged(m_comStat);
         }
     }
 }
 
-TubeStruct * FeederDecoder::GetInSotveTube(uint8_t ch) const
+TubeStruct * FeederMgr::GetInSotveTube(uint8_t ch) const
 {
     for (auto &itr : m_feedParams)
     {
-        if(!itr.canConvert<FeederBottle>())
-            continue;
-
-        auto fb = itr.value<FeederBottle>();
-        if (auto tb = fb.getTube())
+        if (auto tb = itr.getTube())
         {
-            if (tb->bFeeded && C_Using==tb->flag && fb.getChannel()==ch)
+            if (T_Fixed==tb->getFlag() && tb->getStoveCh()==ch)
                 return tb;
         }
     }
     return nullptr;
 }
 
-void FeederDecoder::OnRobotDone(int typeRobot)
+void FeederMgr::OnRobotDone(int typeRobot)
 {
+    bool bDoNext = false;
     auto itr = m_actions.begin();
     for (; itr != m_actions.end(); ++itr)
     {
         if (Dev_Robot == itr->type && itr->robotStep==typeRobot)
         {
             bool bChange = RobotMgr::MoveStore == typeRobot || RobotMgr::StoreBack == typeRobot;
-            if (auto c = bChange ? getContainer(itr->robotIndex) : nullptr)
-            {
-                c->stat = RobotMgr::MoveStore == typeRobot ? 2 : 0;
-                emit containerChanged(c);
-            }
-            if (auto tb = (RobotMgr::Bottle2Tube == typeRobot) ? getTube(itr->robotIndex) : nullptr)
-                tb->flag = C_Using;
+            if (auto c = bChange ? getStore(itr->robotIndex) : nullptr)
+                c->setStat(RobotMgr::MoveStore == typeRobot ? S_WaitFeed : S_CanFeed);
 
-            if (auto c = RobotMgr::StoreBack==typeRobot ? getContainer(itr->robotIndex) : nullptr)
-                c->stat = 0;
-
-            itr = m_actions.erase(itr);
+            m_actions.erase(itr);
+            bDoNext = true;
             break;
         }
         if (itr->bWaitFinish)
             return;
     }
-    doAction();
+
+    if (bDoNext)
+        doAction();
 }
 
-void FeederDecoder::OnServoMotor(int pos, bool bReached)
+void FeederMgr::OnServoMotor(int pos, bool bReached)
 {
-    if (!bReached || m_actions.isEmpty())
+    if (!bReached)
         return;
 
+    bool bDoNext = false;
     auto itr = m_actions.begin();
     for (; itr != m_actions.end(); ++itr)
     {
         if (Dev_Servo==itr->type && itr->servoPos==pos)
         {
             itr = m_actions.erase(itr);
+            bDoNext = true;
             break;
         }
         if (itr->bWaitFinish)
             return;
     }
-    if (itr == m_actions.end())
-        return;
-    doAction();
+    if (bDoNext)
+        doAction();
 }
 
-void FeederDecoder::OnStepMotor(StepMotorStat* st)
+void FeederMgr::OnStepMotor(StepMotorStat* st)
 {
-    if (st->IsRun() || m_actions.isEmpty())
+    if (st->IsRun())
         return;
 
+    bool bDoNext = false;
     auto itr = m_actions.begin();
     for (; itr != m_actions.end(); ++itr)
     {
         if (Dev_StepMotor != itr->type || itr->stepType != st->GetType() || itr->stepCh != st->GetChannel())
             continue;
+
         bool bReached = itr->stepDirCont ? st->IsLimitH() : st->IsLimitL();
         if (bReached)
         {
             itr = m_actions.erase(itr);
+            bDoNext = true;
             break;
         }
         if (itr->bWaitFinish)
             return;
     }
-    if (itr == m_actions.end())
-        return;
-
-    doAction();
+    if (bDoNext)
+        doAction();
 }
 
-void FeederDecoder::readByets()
+void FeederMgr::readByets()
 {
     if (m_port->bytesAvailable() < 1)
         return;
@@ -449,7 +361,7 @@ void FeederDecoder::readByets()
     }
 }
 
-void FeederDecoder::prcsRead(uint16_t addr, const QByteArray& msg)
+bool FeederMgr::prcsRead(uint16_t addr, const QByteArray& msg)
 {
     if (addr >= 600 && addr < 600 * 32 * 16)
     {
@@ -458,7 +370,7 @@ void FeederDecoder::prcsRead(uint16_t addr, const QByteArray& msg)
         if (m.nfcid=="0000000000000000")
         {
             m_flag &= ~Flag_DoReadMaterial;
-            return;
+            return false;
         }
 
         m.name = QString::fromStdString(std::string(msg.data() + 11, 10).c_str());
@@ -468,27 +380,36 @@ void FeederDecoder::prcsRead(uint16_t addr, const QByteArray& msg)
         memcpy(&m.ch, msg.data() + 31, 2);
 
         addMaterial(m, false);
-        readMaterials(idx + 1);
-    }
+		if (idx + 1 < MaterialMaxNum)
+		{
+			readMaterials(idx + 1);
+			return true;
+		}
+	}
+	return false;
 }
-void FeederDecoder::prcsStat(uint16_t addr, const QByteArray& msg)
+
+bool FeederMgr::prcsStat(uint16_t addr, const QByteArray& msg)
 {
+	bool ret = false;
     switch (addr)
     {
     case 103:
         if (m_nStoreNum >0 && m_nStoreNum < 12 && PichModbusU16(msg.data() + 3) != m_nStoreNum)
-            writeFunc(402, m_nStoreNum);
+			writeFunc(402, m_nStoreNum);
         m_flag |= Flag_StoreNumRead;
-        readStore();
-        break;
+		readStore();
+		ret = true;
+		break;
     case 105:
-        prcsFeederStat(PichModbusU16(msg.data() + 3));
-        break;
+        ret = prcsFeederStat(PichModbusU16(msg.data() + 3));
+		break;
     case 106:
         if (0==PichModbusU16(msg.data()+3))
         {
             m_flag |= Flag_CanReadStore;
             readStore();
+			ret = true;
         }
         break;
     case 107:
@@ -496,7 +417,10 @@ void FeederDecoder::prcsStat(uint16_t addr, const QByteArray& msg)
         {
             m_flag |= Flag_CanReadMaterial;
             readMaterials();
+			ret = true;
         }
+    case 108:
+        emit feedingChanged(PichModbusFloat(msg.data() + 3), false);
         break;
     default:
         if (138 <= addr && addr < 138 + 4 * m_nStoreNum)
@@ -505,18 +429,32 @@ void FeederDecoder::prcsStat(uint16_t addr, const QByteArray& msg)
             QString nfcif(QByteArray(msg.data() + 3, 8).toHex());
             bool b = nfcif != "0100000000000000" && nfcif != "0000000000000000";
             updateStore(b ? nfcif.toUpper() : QString(), idx);
-            readStore(idx + 1);
+			if (idx+1 < m_nStoreNum)
+			{
+				readStore(idx + 1);
+				ret = true;
+			}
         }
         break;
     }
+	return ret;
 }
 
-void FeederDecoder::checkMatesCanFeed()
+bool FeederMgr::prcsWriteCmd(uint16_t addr, uint16_t cmd)
+{
+	if (2000 != addr)
+		return false;
+
+	readFeedStat();
+	return true;
+}
+
+void FeederMgr::checkMatesCanFeed()
 {
     QStringList ret;
     for (auto& itr : m_allMaterials)
     {
-        if (GetContainer(itr->nfcid))
+        if (GetStore(itr->nfcid))
             ret << itr->name;
     }
     ret.removeDuplicates();
@@ -528,18 +466,14 @@ void FeederDecoder::checkMatesCanFeed()
     }
 }
 
-void FeederDecoder::sumFeederWeight(QMap<int, float> *feeds) const
+void FeederMgr::sumFeederWeight(QMap<int, float> *feeds) const
 {
     if (!feeds)
         return;
 
     QMap<int, float> &ref = *feeds;
-    for (auto &itr : m_feedParams)
+    for (auto &fb : m_feedParams)
     {
-        if(!itr.canConvert<FeederBottle>())
-            continue;
-
-        auto fb = itr.value<FeederBottle>();
         for (auto &it : fb.feedMaterial())
         {
             auto itT = ref.find(it.first);
@@ -551,28 +485,39 @@ void FeederDecoder::sumFeederWeight(QMap<int, float> *feeds) const
     }
 }
 
-void FeederDecoder::prcsFeederStat(uint16_t stat)
+bool FeederMgr::prcsFeederStat(uint16_t stat)
 {
+    bool bDoNext = false;
     for (auto itr = m_actions.begin(); itr != m_actions.end(); ++itr)
     {
         if (Dev_Feeder == itr->type && itr->cmdAck == stat)
         {
-            itr = m_actions.erase(itr);
+			if (auto c = itr->cmdFeeder == 104 ? getStore(itr->idStore) : nullptr)
+            {
+                c->setStat(S_Feeded);
+                m_feedStore = nullptr;
+            }
+            m_actions.erase(itr);
+            bDoNext = true;
             break;
         }
         if (itr->bWaitFinish)
-            return;
+            return false;
     }
-    doAction();
+    if (bDoNext)
+        return doAction();
+
+	return false;
 }
 
-void FeederDecoder::doAction()
+bool FeederMgr::doAction()
 {
     checkActions();
     if (m_actions.isEmpty())
-        return;
+        return false;
 
-    bool bWaiNext = false;
+	bool bWaiNext = false;
+	bool ret = false;
     for (auto &act : m_actions)
     {
         if (act.bStart || bWaiNext)
@@ -591,20 +536,22 @@ void FeederDecoder::doAction()
             emit actionRun(&act);
             break;
         case Dev_Feeder:
-            writeCmd(act.cmdFeeder);
-            break;
+			writeCmd(act);
+			ret = true;
+			break;
         case Dev_NextWait:
             bWaiNext = true;
-            QTimer::singleShot(act.fWaitTime*1000, this, &FeederDecoder::onWait);
+            QTimer::singleShot(act.fWaitTime*1000, this, &FeederMgr::onWait);
             break;
         }
         act.bStart = true;
         if (act.bWaitFinish)
             break;
     }
+	return ret;
 }
 
-StoreStruct* FeederDecoder::getContainer(const QString& id)const
+StoreStruct* FeederMgr::getStore(const QString& id)const
 {
     if (id.isEmpty())
         return nullptr;
@@ -617,7 +564,7 @@ StoreStruct* FeederDecoder::getContainer(const QString& id)const
     return nullptr;
 }
 
-StoreStruct* FeederDecoder::getContainer(uint16_t num) const
+StoreStruct* FeederMgr::getStore(uint16_t num) const
 {
     for (auto itr : m_allStore)
     {
@@ -627,10 +574,10 @@ StoreStruct* FeederDecoder::getContainer(uint16_t num) const
     return nullptr;
 }
 
-MaterialStruct* FeederDecoder::getMaterial(const QString& id)const
+MaterialStruct* FeederMgr::getMaterial(const QString& id)const
 {
     if (id.isEmpty())
-        return NULL;
+        return nullptr;
 
     for (auto itr : m_allMaterials)
     {
@@ -640,35 +587,27 @@ MaterialStruct* FeederDecoder::getMaterial(const QString& id)const
     return NULL;
 }
 
-const FeederBottle * FeederDecoder::getfeedParams(int numb) const
+const FeederParam * FeederMgr::GetfeedParamsByBottleNum(int numb) const
 {
     for (auto &itr : m_feedParams)
     {
-        if (!itr.canConvert<FeederBottle>())
-            continue;
-
-        auto ret = (FeederBottle*)itr.data();
-        if (ret->getBottleNumb() == numb)
-            return ret;
+        if (itr.getBottleNumb() == numb)
+            return &itr;
     }
     return nullptr;
 }
 
-const FeederBottle * FeederDecoder::getfeedParamsByTube(int numb) const
+const FeederParam *FeederMgr::getfeedParamsByTube(int numb) const
 {
     for (auto &itr : m_feedParams)
     {
-        if (!itr.canConvert<FeederBottle>())
-            continue;
-
-        auto ret = (FeederBottle*)itr.data();
-        if (ret->getTubeNumb() == numb)
-            return ret;
+        if (itr.getTubeNumb() == numb)
+            return &itr;
     }
     return nullptr;
 }
 
-StoreStruct* FeederDecoder::getPropContainer(float weight, const QString& name, const QMap<int, float> &preDistrs)const
+StoreStruct* FeederMgr::getPropStore(float weight, const QString& name, const QMap<int, float> &preDistrs)const
 {
     for (auto& itr : m_allStore)
     {
@@ -682,7 +621,7 @@ StoreStruct* FeederDecoder::getPropContainer(float weight, const QString& name, 
     return nullptr;
 }
 
-BottleStruct * FeederDecoder::getBottle(int numb) const
+BottleStruct * FeederMgr::getBottle(int numb) const
 {
     for (auto itr : m_allBottle)
     {
@@ -692,30 +631,38 @@ BottleStruct * FeederDecoder::getBottle(int numb) const
     return nullptr;
 }
 
-void FeederDecoder::onWait()
+void FeederMgr::onWait()
 {
+    bool bDoNext = false;
     auto itr = m_actions.begin();
     for (; itr != m_actions.end(); ++itr)
     {
         if (Dev_NextWait == itr->type)
         {
             m_actions.erase(itr);
+            bDoNext = true;
             break;
         }
         if (itr->bWaitFinish)
             return;
     }
-    doAction();
+    if (bDoNext)
+        doAction();
 }
 
-void FeederDecoder::addFeederAct(uint16_t cmd, bool bWait/*=false*/, int32_t ack)
+void FeederMgr::addFeederAct(uint16_t cmd, bool bWait, int32_t ack, uint8_t numStore, float wFeed)
 {
     DeviceAct act(Dev_Feeder, bWait);
     act.SetFeedCmd(cmd, ack);
+    if (104 == cmd)
+    {
+        act.idStore = numStore;
+        act.wFeed = wFeed;
+    }
     m_actions << act;
 }
 
-void FeederDecoder::addServoMotorAct(RobotPostion pos, bool bWait /*= true*/)
+void FeederMgr::addServoMotorAct(RobotPostion pos, bool bWait /*= true*/)
 {
     if (pos < 0)
         return;
@@ -725,7 +672,7 @@ void FeederDecoder::addServoMotorAct(RobotPostion pos, bool bWait /*= true*/)
     m_actions << actServo;
 }
 
-void FeederDecoder::addStepMotorAct(uint8_t type, uint8_t ch, bool bCont, bool bWait /*= true*/)
+void FeederMgr::addStepMotorAct(uint8_t type, uint8_t ch, bool bCont, bool bWait /*= true*/)
 {
     DeviceAct actStep(Dev_StepMotor, bWait);
     actStep.stepCh = ch;
@@ -735,7 +682,7 @@ void FeederDecoder::addStepMotorAct(uint8_t type, uint8_t ch, bool bCont, bool b
 }
 
 
-void FeederDecoder::adddRobotAct(uint16_t type, uint8_t index /*= 0*/, bool bWait /*= true*/)
+void FeederMgr::adddRobotAct(uint16_t type, uint8_t index /*= 0*/, bool bWait /*= true*/)
 {
     DeviceAct actRobot(Dev_Robot, bWait);
     actRobot.robotStep = type;
@@ -743,17 +690,59 @@ void FeederDecoder::adddRobotAct(uint16_t type, uint8_t index /*= 0*/, bool bWai
     m_actions << actRobot;
 }
 
-TubeStruct *FeederDecoder::getTube(int idx)const
+bool FeederMgr::CanAddWork(JobType t, int numTub, bool bProg)const
+{
+	auto tb = getTube(numTub);
+	auto flg = tb ? tb->getFlag() : T_None;
+	if (T_None==flg && flg>=T_WaitRecycle)
+		return false;
+	auto ls = tubeJobs(numTub);
+	if (ls.contains(t))
+		return false;
+	else if (J_PrepareMate==t)
+		return T_WaitPrepare == flg;
+
+	switch (flg)
+	{
+	case T_WaitPrepare:
+		return ls.contains(JobType(t-1)) || bProg;
+	case T_Preparing:
+	case T_Prepared:
+		if (J_StoveFixTube == t)
+			return true;
+		return ls.contains(JobType(t-1)) || bProg;
+	case T_WaitFix:
+	case T_Fixing:
+	case T_Fixed:
+		return J_StoveTubeBack == t;
+	}
+
+	return false;
+}
+
+QList<FeederMgr::JobType> FeederMgr::tubeJobs(int numTub)const
+{
+	QList<JobType> ret;
+	for (auto itr : m_jobs)
+	{
+		WorkItem it = WorkItem::initFrom(itr);
+		if (it.nNumTube == numTub)
+			ret << (JobType)it.type;
+	}
+	return ret;
+}
+
+TubeStruct *FeederMgr::getTube(int idx)const
 {
     for (auto itr : m_allTube)
     {
-        if (itr->numb == idx)
+        if (itr->getNumber() == idx)
             return itr;
     }
     return nullptr;
 }
 
-void FeederDecoder::decode(const QByteArray& msg)
+void FeederMgr::decode(const QByteArray& msg)
 {
     if (m_sends.isEmpty())
         return;
@@ -763,24 +752,26 @@ void FeederDecoder::decode(const QByteArray& msg)
     if (arr.at(1) != msg.at(1))
         return;
     m_sends.removeFirst();
+	bool bSnd = false;
     switch (arr.at(1))
     {
     case 3:
-        prcsRead(addr, msg);
+        bSnd = prcsRead(addr, msg);
         break;
     case 4:
-        prcsStat(addr, msg);
+        bSnd = prcsStat(addr, msg);
         break;
     case 0x10:
-        if (200 == addr)
-            readFeedStat();
+		bSnd = prcsWriteCmd(addr, PichModbusU16(arr.data() + 7));
         break;
     default:
         break;
     }
+	if (!bSnd && !m_sends.isEmpty())
+		send(m_sends.first());
 }
 
-int FeederDecoder::send(const QByteArray& arr, bool bWaitWAck)
+int FeederMgr::send(const QByteArray& arr, bool bWaitWAck)
 {
     auto ret = m_port->write(arr.data(), arr.size());
     if (!bWaitWAck && !m_sends.isEmpty() && 404== PichModbusU16(arr.data() + 2) && arr==m_sends.first())
@@ -790,128 +781,122 @@ int FeederDecoder::send(const QByteArray& arr, bool bWaitWAck)
     return ret;
 }
 
-void FeederDecoder::genActions(FeederBottle &bt)
+void FeederMgr::genPrepareActions(const WorkItem &item)
 {
-	if (!m_actions.isEmpty() || m_feedParams.isEmpty())
+    if(!m_actions.isEmpty())
 		return;
-
-    DeviceAct act(Dev_Feeder, true);
+    auto fb = getfeedParamsByTube(item.nNumTube);
+    if (!fb)
+        return;
 
     addFeederAct(100);
-
     int iGen = 0;
-	for (auto &itr : bt.feedMaterial())
+	for (auto &itr : fb->feedMaterial())
     {
         iGen++;
-
         addServoMotorAct(Pos_BlanceDoor);
         adddRobotAct(RobotMgr::OpenDoor);
         //addServoMotorAct(Pos_InOutBlance);
-        adddRobotAct(RobotMgr::BottleInBlance/*, bt.getBottleNumb()*/);
+        adddRobotAct(RobotMgr::BottleInBlance, fb->getBottleNumb());
         //addServoMotorAct(Pos_BlanceDoor);
         adddRobotAct(RobotMgr::CloseDoor);
 
         addFeederAct(102);
 
-        adddRobotAct(RobotMgr::MoveStore/*, itr.first*/);
+        adddRobotAct(RobotMgr::MoveStore, itr.first);
 
-        addFeederAct(104);
+        addFeederAct(104, true, 105, itr.first, itr.second);///投料
 
-        adddRobotAct(RobotMgr::StoreBack/*, itr.first*/);
+        adddRobotAct(RobotMgr::StoreBack, itr.first);
 
-        if (iGen < bt.feedMaterial().count())
+        if (iGen < fb->feedMaterial().count())
             addFeederAct(106, true, 103);
     }
     adddRobotAct(RobotMgr::OpenDoor);
-    adddRobotAct(RobotMgr::BottleOutBlance/*, bt.getBottleNumb()*/);
+    adddRobotAct(RobotMgr::BottleOutBlance, fb->getBottleNumb());
     adddRobotAct(RobotMgr::CloseDoor);
     addFeederAct(108);
     addFeederAct(110, false, 0);
-    adddRobotAct(RobotMgr::Bottle2Tube/*, bt.getBottleNumb()*/);
-    adddRobotAct(RobotMgr::MoveTube/*, bt.getBottleNumb()*/);
-    addStepMotorAct(CtrlType::Motor_Stove, bt.getChannel(), true, false);
-    m_actions << DeviceAct(1.5);//等1.5S
-    addStepMotorAct(CtrlType::Motor_Tube, bt.getChannel(), false, false);
 
-    auto pos = getStovePos(bt.getChannel());
+    adddRobotAct(RobotMgr::Bottle2Tube, fb->getBottleNumb());
+    if (auto bottle = fb->getBottle())
+        bottle->setFlag(B_Using);
+    if (auto tb = fb->getTube())
+        tb->setFlag(T_Preparing);
+ 
+    doAction();
+}
+
+void FeederMgr::genTubToStvoe(const WorkItem &bt)
+{
+    if (!m_actions.isEmpty())
+		return;
+	auto fb = getfeedParamsByTube(bt.nNumTube);
+	if (!fb)
+		return;
+ 
+    adddRobotAct(RobotMgr::MoveTube, bt.nNumTube);
+    addStepMotorAct(CtrlType::Motor_Stove, bt.chStove, true, false);
+    m_actions << DeviceAct(1.5);//等1.5S
+    addStepMotorAct(CtrlType::Motor_Tube, bt.chStove, false, false);
+
+    auto pos = getStovePos(bt.chStove);
     if (pos > 0)
         addServoMotorAct(pos);
 
-    adddRobotAct(RobotMgr::Tube2Stove/*, bt.getChannel()*/);
-    addStepMotorAct(CtrlType::Motor_Tube, bt.getChannel(), true);
-    adddRobotAct(RobotMgr::OutStove/*, bt.getChannel()*/);
-    addStepMotorAct(CtrlType::Motor_Stove, bt.getChannel(), false);
+    adddRobotAct(RobotMgr::Tube2Stove, bt.chStove);
+    addStepMotorAct(CtrlType::Motor_Tube, bt.chStove, true);
+    adddRobotAct(RobotMgr::OutStove, bt.chStove);
+    addStepMotorAct(CtrlType::Motor_Stove, bt.chStove, false);
 
-    if (auto bottle = getBottle(bt.getBottleNumb()))
-    {
-        if (C_Using != bottle->m_flag)
-        {
-            bottle->m_flag = C_Using;
-            emit bottleChanged(bottle);
-        }
-    }
-    doAction();
+	doAction();
+	if (auto tb = fb->getTube())
+		tb->setFlag(T_Fixing);
 }
 
-void FeederDecoder::genBackActions(const FeederBottle *fb)
+void FeederMgr::genBackActions(const WorkItem &bt)
 {
-    if (!m_actions.isEmpty() || m_feedParams.isEmpty() || fb)
-        return;
+    if (!m_actions.isEmpty())
+		return;
+	auto fb = getfeedParamsByTube(bt.nNumTube);
+	if (!fb)
+		return;
 
-    addStepMotorAct(CtrlType::Motor_Stove, fb->getChannel(), true, false);
-    addServoMotorAct(fb->getChannel()==0? Pos_Stove1 : Pos_Stove2);
-    adddRobotAct(RobotMgr::ClampStoveTube, fb->getChannel());
-    addStepMotorAct(CtrlType::Motor_Tube, fb->getChannel(), false);
-    adddRobotAct(RobotMgr::StoveTubeOut, fb->getChannel());
+    addStepMotorAct(CtrlType::Motor_Stove, bt.chStove, true, false);
+    addServoMotorAct(bt.chStove==0? Pos_Stove1 : Pos_Stove2);
+    adddRobotAct(RobotMgr::ClampStoveTube, bt.chStove);
+    addStepMotorAct(CtrlType::Motor_Tube, bt.chStove, false);
+    adddRobotAct(RobotMgr::StoveTubeOut, bt.chStove);
     addServoMotorAct(Pos_Home);
-    adddRobotAct(RobotMgr::TubeBack/*, fb->getTubeNumb()*/);
+    adddRobotAct(RobotMgr::TubeBack, bt.nNumTube);
 
-    doAction();
+	doAction();
+	if (auto tb = fb->getTube())
+		tb->setFlag(T_Recycling);
 }
 
-void FeederDecoder::checkActions()
+void FeederMgr::checkActions()
 {
-    if (m_actions.isEmpty() && !m_feedParams.isEmpty())
+    if (m_actions.isEmpty() && !m_jobs.isEmpty())
     {
-        bool bSet = false;
-        for (auto &itr : m_feedParams)
+        auto item = WorkItem::initFrom(m_jobs.takeFirst());
+        if (auto fp = getfeedParamsByTube(item.nNumTube))
         {
-            if (itr.canConvert<FeederBottle>())
-            {
-                auto fp = itr.value<FeederBottle>();
-                auto tb = fp.getTube();
-                if (!tb || tb->bFeeded)
-                    continue;
+            fp->feederFinish(item.type);
+            emit feedTubeChanged(item.type, item.chStove);
 
-                if (!bSet)
-                {
-                    bSet = true;
-                    fp.feedFinish();
-                    if (auto bt = getBottle(fp.getBottleNumb()))
-                    {
-                        bt->m_flag = C_Used;
-                        emit bottleChanged(bt);
-                    }
-					emit feedTubeChanged(fp.getChannel(), true);
-                    continue;
-                }
-                genActions(fp);
-                break;
-            }
-            else if (itr.canConvert<int>())
+            if (!m_jobs.isEmpty())
             {
-                if (auto tb = getTube(itr.toInt()))
+                item = WorkItem::initFrom(m_jobs.first());
+                switch (item.type)
                 {
-                    if (tb->flag >= C_Used)
-                        continue;
-					
-					auto fb = getfeedParamsByTube(tb->numb);
-                    if (!bSet)
-                    {
-                        bSet = true;
-                        tb->flag = C_Back;
-                    }
-                    genBackActions(fb);
+                case J_PrepareMate:
+                    genPrepareActions(item); break;
+                case J_StoveFixTube:
+                    genTubToStvoe(item); break;
+                case J_StoveTubeBack:
+                    genBackActions(item); break;
+                default:
                     break;
                 }
             }
@@ -919,7 +904,33 @@ void FeederDecoder::checkActions()
     }
 }
 
-QByteArray FeederDecoder::pickMsg()
+bool FeederMgr::addWorkItem(const struct WorkItem &item)
+{
+	auto tp = (JobType)item.type;
+	if (auto tb = getTube(item.nNumTube))
+	{
+		switch (tp)
+		{
+		case FeederMgr::J_PrepareMate:
+			break;
+		case FeederMgr::J_StoveFixTube:
+			if (tb->getFlag() == T_Prepared)
+				tb->setFlag(T_WaitFix);
+			break;
+		case FeederMgr::J_StoveTubeBack:
+			if (tb->getFlag() == T_Fixed)
+				tb->setFlag(T_WaitRecycle);
+			break;
+		default:
+			return false;
+		}
+		m_jobs << item.toInt();
+		return true;
+	}
+	return false;
+}
+
+QByteArray FeederMgr::pickMsg()
 {
     if (m_sends.isEmpty())
     {
@@ -936,7 +947,7 @@ QByteArray FeederDecoder::pickMsg()
             return QByteArray();
         }
         auto remian = m_buff.size() - idx;
-        if (remian < 4)
+        if (remian < 6)
             break;
         auto len = getAckLen((uint8_t*)m_buff.data()+idx, m_buff.size()-idx);
         if (len < 3)
@@ -964,7 +975,7 @@ QByteArray FeederDecoder::pickMsg()
     return QByteArray();
 }
 
-void FeederDecoder::timerEvent(QTimerEvent* e)
+void FeederMgr::timerEvent(QTimerEvent* e)
 {
     if (e->timerId() == m_idTimer)
     {
@@ -975,7 +986,7 @@ void FeederDecoder::timerEvent(QTimerEvent* e)
 	        else if (Flag_DoReadStore & m_flag)
 	            readStore();
 	        else
-	            readFeedStat();
+                readFeedStat();
         }
     }
     else if (e->timerId()==m_idRead)
@@ -985,19 +996,18 @@ void FeederDecoder::timerEvent(QTimerEvent* e)
             m_comStat = NoData;
             emit connectStatChanged(m_comStat);
         }
-        if (m_port->isOpen() && !m_sends.isEmpty() && QDateTime::currentMSecsSinceEpoch()-m_lastTmSnd>500)
-            send(m_sends.first(), false);
+        if (m_port->isOpen() && QDateTime::currentMSecsSinceEpoch()-m_lastTmSnd>500)
+        {
+            if (m_feedStore)
+                readFeedWeight();
+            else if (!m_sends.isEmpty())
+                send(m_sends.first(), false);
+        }
     }
 }
 
-void FeederDecoder::readMaterials(int idx)
+void FeederMgr::readMaterials(int idx)
 {
-    if (idx < 0 || idx >= MaterialMaxNum)
-    {
-        m_flag &= ~Flag_DoReadMaterial;
-        return;
-    }
-
     if (m_flag & Flag_CanReadMaterial)
     {
         uint8_t buff[6] = { 1, 3, 0, 0, 0, 16 };
@@ -1013,14 +1023,8 @@ void FeederDecoder::readMaterials(int idx)
     }
 }
 
-void FeederDecoder::readStore(int idx)
+void FeederMgr::readStore(int idx)
 {
-    if (idx < 0 || idx >= m_nStoreNum)
-    {
-        m_flag &= ~Flag_DoReadStore;
-        return;
-    }
-
     if (Flag_ReadStore == (m_flag & Flag_ReadStore))
     {
         uint8_t buff[6] = { 1, 4, 0, 0, 0, 4 };
@@ -1036,7 +1040,7 @@ void FeederDecoder::readStore(int idx)
     }
 }
 
-void FeederDecoder::append(uint8_t* buff, uint16_t len)
+void FeederMgr::append(uint8_t* buff, uint16_t len)
 {
     QByteArray arr(len+2, 0);
     memcpy(arr.data(), buff, len);
@@ -1046,28 +1050,29 @@ void FeederDecoder::append(uint8_t* buff, uint16_t len)
     m_sends << arr;
 }
 
-int FeederDecoder::getAckLen(uint8_t *buff, uint32_t)const
+int FeederMgr::getAckLen(uint8_t *buff, uint32_t)const
 {
     int ret = -1;
     switch (buff[1])
     {
     case 6:
+        ret = 8; break;	///回fu源数据
     case 0x10:
-        ret = 8; break;
+        ret = 8; break;	///回fu源数据
     case 3:
     case 4:
         ret = buff[2] + 5; break;
     }
 
-    return ret;
+    return ret < 256 ? ret : -1;
 }
 
-const QStringList &FeederDecoder::AllAvalidMaterials() const
+const QStringList &FeederMgr::AllAvalidMaterials() const
 {
     return m_canFeedMatesNames;
 }
 
-float FeederDecoder::MaterialsWeight(const QString& name) const
+float FeederMgr::MaterialsWeight(const QString& name) const
 {
     float ret = 0;
     if (name.isEmpty())
@@ -1075,13 +1080,13 @@ float FeederDecoder::MaterialsWeight(const QString& name) const
 
     for (auto& itr : m_allMaterials)
     {
-        if (GetContainer(itr->nfcid) && itr->name == name)
+        if (GetStore(itr->nfcid) && itr->name == name)
             ret += itr->weight-itr->weight;
     }
     return ret;
 }
 
-void FeederDecoder::AddMaterial(const QString& nfcid, const QString& name, float weight)
+void FeederMgr::AddMaterial(const QString& nfcid, const QString& name, float weight)
 {
 	MaterialStruct m(nfcid, name, weight);
 
@@ -1092,7 +1097,7 @@ void FeederDecoder::AddMaterial(const QString& nfcid, const QString& name, float
     addMaterial(m);
 }
 
-void FeederDecoder::ChangeMaterial(const QString& nfcid, float weight, const QString& name, const QString& idNew)
+void FeederMgr::ChangeMaterial(const QString& nfcid, float weight, const QString& name, const QString& idNew)
 {
     int i = 0;
     for (auto itr : m_allMaterials)
@@ -1110,7 +1115,7 @@ void FeederDecoder::ChangeMaterial(const QString& nfcid, float weight, const QSt
             {
                 itr->nfcid = idNew;
                 bChange = true;
-                if (auto c = getContainer(nfcid))
+                if (auto c = getStore(nfcid))
                     c->nfcid = nfcid;
             }
             if (bChange)
@@ -1120,8 +1125,8 @@ void FeederDecoder::ChangeMaterial(const QString& nfcid, float weight, const QSt
                 itr->data.month = date.month();
                 itr->data.day = date.day();
                 writeMaterial(itr, i);
-                if (auto c = getContainer(nfcid))
-                    emit containerChanged(c);
+                if (auto c = getStore(nfcid))
+                    emit storeChanged(c);
                 emit materialChanged(nfcid, *itr);
                 checkMatesCanFeed();
             }
@@ -1131,12 +1136,12 @@ void FeederDecoder::ChangeMaterial(const QString& nfcid, float weight, const QSt
     }
 }
 
-const MaterialStruct* FeederDecoder::GetMaterial(const QString& id)const
+const MaterialStruct* FeederMgr::GetMaterial(const QString& id)const
 {
     return getMaterial(id);
 }
 
-const StoreStruct* FeederDecoder::GetContainer(const QString& id)const
+const StoreStruct* FeederMgr::GetStore(const QString& id)const
 {
     if (id.isEmpty())
         return NULL;
@@ -1149,7 +1154,7 @@ const StoreStruct* FeederDecoder::GetContainer(const QString& id)const
     return NULL;
 }
 
-const StoreStruct* FeederDecoder::GetContainer(uint32_t idx)const
+const StoreStruct* FeederMgr::GetStore(uint32_t idx)const
 {
     if (idx >= m_nStoreNum)
         return NULL;
@@ -1162,7 +1167,7 @@ const StoreStruct* FeederDecoder::GetContainer(uint32_t idx)const
     return NULL;
 }
 
-QStringList FeederDecoder::GetStoreNfcId(bool bContainUse, const QString& cur)
+QStringList FeederMgr::GetStoreNfcId(bool bContainUse, const QString& cur)
 {
     QStringList ret;
     if (!cur.isEmpty())
@@ -1177,162 +1182,183 @@ QStringList FeederDecoder::GetStoreNfcId(bool bContainUse, const QString& cur)
     return ret;
 }
 
-const QList<BottleStruct*>& FeederDecoder::AllBottles()const
+const QList<BottleStruct*>& FeederMgr::AllBottles()const
 {
     return m_allBottle;
 }
 
-const QList<TubeStruct*>& FeederDecoder::AllTubes()const
+const QList<TubeStruct*>& FeederMgr::AllTubes()const
 {
     return m_allTube;
 }
 
-TubeStruct *FeederDecoder::ValidTube(int index)const
+TubeStruct *FeederMgr::ValidTube(int index)const
 {
     for (auto itr : m_allTube)
     {
-        if (C_CanUse != itr->flag)
+        if (T_WaitPrepare!=itr->getFlag())
             continue;
         if (index <0)
             return itr;
-        if (itr->numb == index)
+        if (itr->getNumber() == index)
             return itr;
     }
     return nullptr;
 }
 
-QList<TubeStruct*> FeederDecoder::ValidTubes()const
+QList<TubeStruct*> FeederMgr::ValidTubes(JobType t)const
 {
     QList<TubeStruct*> ret;
     for (auto itr : m_allTube)
     {
-        if (C_CanUse == itr->flag)
+		switch (t)
+		{
+		case FeederMgr::J_PrepareMate:
+			if (T_WaitPrepare == itr->getFlag())
+				ret << itr;
+			break;
+		case FeederMgr::J_StoveFixTube:
+			if (T_WaitFix == itr->getFlag())
+				ret << itr;
+			break;
+		case FeederMgr::J_StoveTubeBack:
+			if (T_WaitRecycle == itr->getFlag())
+				ret << itr;
+			break;
+		}
+    }
+    return ret;
+}
+
+QList<BottleStruct*> FeederMgr::ValidBottls() const
+{
+    QList<BottleStruct*> ret;
+    for (auto itr : m_allBottle)
+    {
+        if (B_CanUse == itr->getFlag())
             ret << itr;
     }
     return ret;
 }
 
-bool FeederDecoder::FeedSolidMaterial(const QMap<QString, float> &feeds, int numb, int nTube, int ch)
+bool FeederMgr::FeedSolidMaterial(const QMap<QString, float> &feeds, int numb, int nTube, bool bFix, int ch)
 {
-    if (feeds.isEmpty())
-        return false;
-
-    if (numb < 0)
-    {
-        for (auto itr : m_allBottle)
-        {
-            if (C_CanUse == itr->m_flag)
-            {
-                numb = itr->m_numb;
-                break;
-            }
-        }
-    }
-        
-    if (getfeedParams(numb))
-        return false;
+    if (feeds.isEmpty() || GetfeedParamsByBottleNum(numb))
+        return false; 
 
     if (nTube < 0)
     {
         for (auto itr : m_allTube)
         {
-            if (C_CanUse == itr->flag)
+            if (T_WaitPrepare == itr->getFlag())
             {
-                numb = itr->numb;
+                nTube = itr->getNumber();
                 break;
             }
         }
     }
+	if (!CanAddWork(J_PrepareMate, nTube))
+		return false;
+    auto bt = getBottle(numb);
+    if (!bt || bt->getFlag() != B_CanUse)
+        return false;
 
+    bt->setFlag(B_WaitStart);
     QMap<int, float> preDistrs;
     sumFeederWeight(&preDistrs);
     QList<QPair<int, float> > preNumDistrs;
     for (auto itr = feeds.begin(); itr != feeds.end(); ++itr)
     {
-        auto store = getPropContainer(itr.value(), itr.key(), preDistrs);
+        auto store = getPropStore(itr.value(), itr.key(), preDistrs);
         if (!store)
             return false;
         preNumDistrs << QPair<int, float>(store->numb, itr.value());
     }
-    if (auto bt = getBottle(numb))
+    m_feedParams << FeederParam(preNumDistrs, (uint16_t)numb, nTube);
+    auto item = WorkItem::initFrom(J_PrepareMate, nTube, ch);
+	addWorkItem(item);
+    genPrepareActions(item);
+    if (bFix)
     {
-        if (auto tb = getTube(nTube))
-        {
-            if (tb->flag != C_WaitStart)
-            {
-                tb->flag = C_WaitStart;
-                emit tubeChanged(tb);
-            }
-        }
-        if (C_WaitStart!=bt->m_flag)
-        {
-            bt->m_flag = C_WaitStart;
-            emit bottleChanged(bt);
-        }
-        FeederBottle fb(preNumDistrs, (uint16_t)numb, nTube);
-        fb.setChannel(ch);
-        m_feedParams << QVariant::fromValue(fb);
-        genActions(fb);
-        readFeedStat();
-        return true;
+        item.type = J_StoveFixTube;
+        addWorkItem(item);
     }
+
+    readFeedStat();
+    return true;
+}
+
+bool FeederMgr::FixTube(uint16_t nTb, uint16_t ch)
+{
+	auto fb = getfeedParamsByTube(nTb);
+	auto tb = getTube(nTb);
+	if (!tb || !fb || !CanAddWork(J_StoveFixTube, nTb))
+		return false;
+
+	WorkItem item = WorkItem::initFrom(J_StoveFixTube, nTb, ch);
+	if (tb->getFlag() == T_Fixed)
+	{
+		addWorkItem(item);
+		genTubToStvoe(item);
+		return true;
+	}
+
+	addWorkItem(item);
+	return false;
+}
+
+bool FeederMgr::StoveTubeBack(int ch, int nBack)
+{
+    auto tb = GetInSotveTube(ch);
+    if (!tb)
+        return false;
+
+    auto fb = getfeedParamsByTube(tb->getNumber());
+    if (!fb && !CanAddWork(J_StoveFixTube, tb->getNumber()))
+        return false;
+
+	WorkItem item = WorkItem::initFrom(J_StoveTubeBack, tb->getNumber(), ch, nBack < 0 ? 0 : nBack);
+    if (tb->getFlag() == T_Fixed)
+	{
+		addWorkItem(item);
+        genBackActions(item);
+		return true;
+    }
+
+	addWorkItem(item);
     return false;
 }
 
-bool FeederDecoder::StoveTubeBack(int num)
-{
-    for (auto &itr : m_feedParams)
-    {
-        if (itr.type() != QVariant::Int)
-            continue;
-
-        if (itr.toInt() == num)
-            return false;
-    }
-
-    if (auto tb = getTube(num))
-    {
-        if (tb->bFeeded && tb->flag==C_Using)
-        {
-            m_feedParams << num;
-            genBackActions(getfeedParamsByTube(num));
-            tb->flag = C_Back;
-            return true;
-        }
-    }
-    return false;
-}
-
-void FeederDecoder::CancleFeed(BottleStruct*)
+void FeederMgr::CancleFeed(BottleStruct*)
 {
 }
 
-uint32_t FeederDecoder::GetStoreNum()const
+uint32_t FeederMgr::GetStoreNum()const
 {
     return m_nStoreNum;
 }
 
-QString FeederDecoder::GetCurPortName()const
+QString FeederMgr::GetCurPortName()const
 {
     return m_port ? m_port->portName() : QString();
 }
 
-int FeederDecoder::GetCurPortBaut()const
+int FeederMgr::GetCurPortBaut()const
 {
     return m_port ? m_port->baudRate() : 9600;
 }
 
-QSerialPort * FeederDecoder::serialPort() const
+QSerialPort * FeederMgr::serialPort() const
 {
     return m_port;
 }
 
-FeederDecoder::PortStat FeederDecoder::serialPortStat() const
+FeederMgr::PortStat FeederMgr::serialPortStat() const
 {
     return m_comStat;
 }
 
-void FeederDecoder::writeMaterial(const MaterialStruct *m, uint16_t index)
+void FeederMgr::writeMaterial(const MaterialStruct *m, uint16_t index)
 {
     uint8_t buff[39] = { 1, 0x10, 0, 0, 0, 16, 32 };
     uint16_t addr = 600+ index * 16;
@@ -1353,26 +1379,32 @@ void FeederDecoder::writeMaterial(const MaterialStruct *m, uint16_t index)
     writeFunc(404);
 }
 
-void FeederDecoder::writeCmd(uint16_t cmd, const QString& id, float w)
+void FeederMgr::writeCmd(const DeviceAct &act)
 {
+    if (Dev_Feeder != act.type)
+        return;
+
     uint8_t buff[23] = { 1, 0x10, 0, 0, 0, 1, 2, 0};
     int len = 9;
     AddModbusData(buff + 2, 2000);
-    AddModbusData(buff + 7, cmd);
-    if (!id.isEmpty())
+    AddModbusData(buff + 7, act.cmdFeeder);
+    if (auto c = act.cmdFeeder == 104 ? getStore(act.idStore) : nullptr)
     {
-        auto arr = QByteArray::fromHex(id.toUtf8());
+        auto arr = QByteArray::fromHex(c->nfcid.toUtf8());
         uint16_t sz = arr.size();
         memcpy(buff + 9, arr.data(), sz > 8 ? 8 : sz);
-        AddModbusFloat(buff + 17, w);
+        AddModbusFloat(buff + 17, act.wFeed);
         len = 23;
         buff[5] = 8;
         buff[6] = 16;
+        c->setStat(S_Feeding);
+        m_feedStore = c;
+        emit feedingChanged(act.wFeed, true);
     }
     append(buff, len);
 }
 
-void FeederDecoder::writeFunc(uint16_t cmd, uint16_t val)
+void FeederMgr::writeFunc(uint16_t cmd, uint16_t val)
 {
     uint8_t buff2[6] = { 1, 6, 0, 0, 0, 1 };
     AddModbusData(buff2 + 2, cmd);
@@ -1380,13 +1412,19 @@ void FeederDecoder::writeFunc(uint16_t cmd, uint16_t val)
     append(buff2, 6);
 }
 
-void FeederDecoder::readFeedStat()
+void FeederMgr::readFeedStat()
 {
     uint8_t buff[6] = { ModBussAddr, 4, 0, 105, 0, 1 };
     append(buff, 6);
 }
 
-int FeederDecoder::indexOfMaterial(const QString& id)
+void FeederMgr::readFeedWeight()
+{
+    uint8_t buff[6] = { ModBussAddr, 4, 0, 108, 0, 1 };
+    append(buff, 6);
+}
+
+int FeederMgr::indexOfMaterial(const QString& id)
 {
     int i = 0;
     for (auto itr = m_allMaterials.begin(); itr != m_allMaterials.end(); ++itr, ++i)
@@ -1397,7 +1435,7 @@ int FeederDecoder::indexOfMaterial(const QString& id)
     return i;
 }
 
-void FeederDecoder::addMaterial(const MaterialStruct& m, bool bAdd)
+void FeederMgr::addMaterial(const MaterialStruct& m, bool bAdd)
 {
     int i = 0;
 
@@ -1413,9 +1451,12 @@ void FeederDecoder::addMaterial(const MaterialStruct& m, bool bAdd)
                     writeMaterial(&m, i);
 
                 emit materialChanged(itr->nfcid, *itr);
-                if (auto c = GetContainer(itr->nfcid))
+                if (auto c = getStore(itr->nfcid))
                 {
-                    emit containerChanged(c);
+					if (c->getStat() == S_NoMate)
+						c->setStat(S_CanFeed);
+					else
+						emit storeChanged(c);
                     checkMatesCanFeed();
                 }
             }
@@ -1426,10 +1467,10 @@ void FeederDecoder::addMaterial(const MaterialStruct& m, bool bAdd)
     if (auto tmp = new MaterialStruct(m))
     {
         m_allMaterials << tmp;
-        if (auto c = getContainer(m.nfcid))
+        if (auto c = getStore(m.nfcid))
         { 
             c->pMate = tmp;
-            emit containerChanged(c);
+            emit storeChanged(c);
         }
         if(bAdd)
             writeMaterial(&m, i);
@@ -1439,23 +1480,36 @@ void FeederDecoder::addMaterial(const MaterialStruct& m, bool bAdd)
     }
 }
 
-void FeederDecoder::updateStore(const QString& nfcid, int idx)
+void FeederMgr::updateStore(const QString& nfcid, int idx)
 {
-    auto m = nfcid.isEmpty() ? nullptr : GetMaterial(nfcid);
+	auto stat = nfcid.isEmpty() ? S_None : S_NoMate;
+    auto m = S_NoMate==stat ? GetMaterial(nfcid) : nullptr;
+	if (m)
+		stat = S_CanFeed;
+
+    if (idx + 1 == m_nStoreNum)
+        m_flag &= ~Flag_DoReadStore;
 
     for (auto& itr : m_allStore)
     {
-        if (itr->numb == idx && itr->pMate!=m)
+        if (itr->numb==idx)
         {
-            itr->numb = idx;
-            itr->pMate = m;
-            emit containerChanged(itr);
-            checkMatesCanFeed();
+            if (itr->pMate != m)
+            {
+                itr->pMate = m;
+                if (itr->getStat() < S_CanFeed)
+                    itr->setStat(stat);
+                else
+                    emit storeChanged(itr);
+
+                checkMatesCanFeed();
+            }
             return;
         }
     }
 	auto tmp = new StoreStruct(idx, m, nfcid);
+	tmp->setStat(stat);
     m_allStore << tmp;
-    emit containerChanged(tmp);
+    emit storeChanged(tmp);
     checkMatesCanFeed();
 }

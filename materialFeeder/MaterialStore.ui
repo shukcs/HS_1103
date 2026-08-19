@@ -31,7 +31,7 @@
         background-color: white;
 		font-family: &quot;宋体&quot;;
         font-size:16px;
-        gridline-color: #d0d0d0;  /*/ 建议添加网格线颜色*/
+        gridline-color: #transparent;
 }
 QTableWidget::item {
         border: none;
@@ -104,23 +104,22 @@ QLabel#lb_unused,  #lb_unused_2,  #lb_unused3{
     background-color: white; 
 	padding: 1px;
 }
-QLabel#lb_using2, #lb_using3 {
+QLabel#lb_using,  #lb_using2,  #lb_using3{
     border: 1px  solid black;
 	border-radius: 7px; 
-    background-color: #00b0f0; 
+    background-color: #46bbdb; 
 	padding: 1px;
 }
-
-QLabel#lb_ok, #lb_using_3, #lb_used2, #lb_used3 {
+QLabel#lb_ok, #lb_used2, #lb_used3 {
     border: 1px  solid black;
 	border-radius: 7px; 
-    background-color: green; 
+    background-color: darkgreen; 
 	padding: 1px;
 }
-QLabel#lb_using, #lb_wait2, #lb_used_3 {
+QLabel#lb_wait2, #lb_wait3 {
     border: 1px  solid black;
 	border-radius: 7px; 
-    background-color: orange; 
+    background-color: #ffbf00; 
 	padding: 1px;
 }
 QLabel#lb_erro2 {
@@ -559,7 +558,7 @@ QListWidget#list_container {
        <item>
         <widget class="QLabel" name="label_6">
          <property name="text">
-          <string>未开始</string>
+          <string>待用</string>
          </property>
         </widget>
        </item>
@@ -601,9 +600,25 @@ QListWidget#list_container {
        <item>
         <widget class="QLabel" name="label_8">
          <property name="text">
-          <string>进料中</string>
+          <string>使用中</string>
          </property>
         </widget>
+       </item>
+       <item>
+        <spacer name="horizontalSpacer_16">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeType">
+          <enum>QSizePolicy::Fixed</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>6</width>
+           <height>0</height>
+          </size>
+         </property>
+        </spacer>
        </item>
        <item>
         <widget class="QLabel" name="lb_used2">
@@ -625,7 +640,14 @@ QListWidget#list_container {
         </widget>
        </item>
        <item>
-        <spacer name="horizontalSpacer_16">
+        <widget class="QLabel" name="label_14">
+         <property name="text">
+          <string>已用</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="horizontalSpacer_17">
          <property name="orientation">
           <enum>Qt::Horizontal</enum>
          </property>
@@ -639,13 +661,6 @@ QListWidget#list_container {
           </size>
          </property>
         </spacer>
-       </item>
-       <item>
-        <widget class="QLabel" name="label_14">
-         <property name="text">
-          <string>已用</string>
-         </property>
-        </widget>
        </item>
        <item>
         <widget class="QLabel" name="lb_erro2">
@@ -665,22 +680,6 @@ QListWidget#list_container {
           <string/>
          </property>
         </widget>
-       </item>
-       <item>
-        <spacer name="horizontalSpacer_17">
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
-         </property>
-         <property name="sizeType">
-          <enum>QSizePolicy::Fixed</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>6</width>
-           <height>0</height>
-          </size>
-         </property>
-        </spacer>
        </item>
        <item>
         <widget class="QLabel" name="label_15">
@@ -798,8 +797,8 @@ QListWidget#list_container {
        </property>
        <property name="iconSize">
         <size>
-         <width>32</width>
-         <height>32</height>
+         <width>20</width>
+         <height>20</height>
         </size>
        </property>
       </widget>
@@ -848,8 +847,8 @@ QListWidget#list_container {
        </property>
        <property name="iconSize">
         <size>
-         <width>32</width>
-         <height>32</height>
+         <width>20</width>
+         <height>20</height>
         </size>
        </property>
       </widget>
@@ -1029,7 +1028,7 @@ QListWidget#list_container {
          </property>
          <property name="sizeHint" stdset="0">
           <size>
-           <width>20</width>
+           <width>0</width>
            <height>0</height>
           </size>
          </property>
@@ -1197,6 +1196,48 @@ QListWidget#list_container {
        </item>
        <item>
         <spacer name="horizontalSpacer_19">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeType">
+          <enum>QSizePolicy::Fixed</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>6</width>
+           <height>0</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <widget class="QLabel" name="lb_wait3">
+         <property name="minimumSize">
+          <size>
+           <width>14</width>
+           <height>14</height>
+          </size>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>14</width>
+           <height>14</height>
+          </size>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="label_11">
+         <property name="text">
+          <string>待用</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="horizontalSpacer_20">
          <property name="orientation">
           <enum>Qt::Horizontal</enum>
          </property>

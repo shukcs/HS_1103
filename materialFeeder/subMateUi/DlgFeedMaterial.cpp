@@ -28,11 +28,11 @@ bool DlgFeedMaterial::FeedBottle(QMap<QString, float>* mates)
 
 int DlgFeedMaterial::GetTubeNumb()
 {
-    auto tub = FeederDecoder::Instance().ValidTube(m_ui->widget->GetTubeNumber());
-    return tub ? tub->numb : -1;
+    auto tub = FeederMgr::Instance().ValidTube(m_ui->widget->GetTubeNumber());
+    return tub ? tub->getNumber() : -1;
 }
 
-void DlgFeedMaterial::Init(const FeederBottle* bt)
+void DlgFeedMaterial::Init(const FeederParam* bt)
 {
     m_ui->widget->SetFeedMaterials(bt);
 }

@@ -31,7 +31,7 @@ void DlgMaterialModify::Modify(const MaterialStruct* m, const QString &id)
         }
 
         m_ui->cmb_id->clear();
-        m_ui->cmb_id->addItems(FeederDecoder::Instance().GetStoreNfcId(false, m ? m->nfcid : id));
+        m_ui->cmb_id->addItems(FeederMgr::Instance().GetStoreNfcId(false, m ? m->nfcid : id));
     }
 }
 
@@ -62,7 +62,7 @@ void DlgMaterialModify::GetMaterial(MaterialStruct* m)const
 
 void DlgMaterialModify::initUi()
 {
-    m_ui->cmb_id->addItems(FeederDecoder::Instance().GetStoreNfcId(false));
+    m_ui->cmb_id->addItems(FeederMgr::Instance().GetStoreNfcId(false));
     connect(m_ui->btn_cancle, &QPushButton::clicked, this, &QDialog::reject);
     connect(m_ui->btn_ok, &QPushButton::clicked, this, &QDialog::accept);
 }

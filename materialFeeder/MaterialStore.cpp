@@ -8,6 +8,7 @@
 #include "subMateUi/DlgFeedMaterial.h"
 #include "subMateUi/DlgTubeBack.h"
 #include "common/DlgSerialSettings.h"
+#include "common/DlgSocketSettings.h"
 #include "RobotMgr.h"
 
 #include "ui_MaterialStore.h"
@@ -30,12 +31,19 @@ public:
 		QColor col(Qt::lightGray);
 		if (auto c = index.data(Qt::UserRole + 1).value<const StoreStruct*>())
 		{
-			if (c->stat != 0)
-				col = QColor("orange");
-			else if (c->pMate && c->pMate->weight > 0)
-				col = Qt::darkGreen;
-			else if (!c->nfcid.isEmpty())
-                col = Qt::white;
+			switch (c->getStat())
+			{
+			case  S_NoMate:
+				col = Qt::white; break;
+			case S_CanFeed:
+			case S_WaitFeed:
+			case S_Feeded:
+				col = Qt::darkGreen; break;
+			case S_Feeding:
+				col = QColor("#ffbf00"); break;
+			default:
+				break;
+			}
             auto ft = QFont(tr("宋体"));
             ft.setPointSize(c->nfcid.isEmpty() ? 30 : 12);
             p->setFont(ft);
@@ -67,16 +75,19 @@ public:
 		int idx=0;
 		if (auto bt = index.data(Qt::UserRole + 1).value<BottleStruct*>())
 		{
-			if (C_CanUse == bt->m_flag)
-				idx = 1;
-			else if (C_WaitStart == bt->m_flag)
-				idx = 2;
-			else if (C_Using == bt->m_flag)
-				idx = 3;
-			else if (C_Used == bt->m_flag)
-				idx = 4;
-			else if (C_Error == bt->m_flag)
-				idx = 5;
+            switch (bt->getFlag())
+            {
+            case B_CanUse:
+                idx = 1; break;
+            case B_WaitStart:
+                idx = 2; break;
+            case B_Using:
+                idx = 3; break;
+            case B_Used:
+                idx = 4; break;
+            case B_Error:
+                idx = 5; break;
+            }
 		}
 		ic[idx].paint(p, opt.rect);
 		p->drawText(opt.rect, Qt::AlignCenter, index.data(Qt::DisplayRole).toString());
@@ -98,16 +109,20 @@ public:
         QColor col(Qt::lightGray);
         if (auto tube = index.data(Qt::UserRole + 1).value<TubeStruct*>())
         {
-			switch (tube->flag)
+			switch (tube->getFlag())
 			{
-			case C_CanUse:
+			case T_WaitPrepare:
 				col = Qt::white; break;
-			case C_WaitStart:
-				col = QColor("orange"); break;
-			case C_Using:
-			case C_Back:
-				col = QColor("00c0f0"); break;
-			case C_Used:
+			case T_Prepared:
+			case T_WaitFix:
+			case T_Fixed:
+			case T_WaitRecycle:
+				col = QColor("#ffbf00"); break;
+			case T_Preparing:
+			case T_Fixing:
+			case T_Recycling:
+				col = QColor("#00c0f0"); break;
+			case T_Recyced:
 				col = Qt::darkGreen; break;
 			default:
 				break;
@@ -177,28 +192,28 @@ void MaterialStore::initFeederDecode()
 {
     m_ui->list_container->setItemDelegate(new ContainerDelegate(m_ui->list_container));
     m_ui->listWidget->setItemDelegate(new BottleDelegate(m_ui->listWidget));
-    for (auto itr : FeederDecoder::Instance().AllBottles())
+    for (auto itr : FeederMgr::Instance().AllBottles())
     {
         auto ite = new QListWidgetItem(QString::number(itr->m_numb+1));
         ite->setData(Qt::UserRole + 1, QVariant::fromValue(itr));
         m_ui->listWidget->addItem(ite);
     }
     m_ui->listWidget_2->setItemDelegate(new TubeDelegate(m_ui->listWidget_2));
-    for (auto itr : FeederDecoder::Instance().AllTubes())
+    for (auto itr : FeederMgr::Instance().AllTubes())
     {
-        auto ite = new QListWidgetItem(QString::number(itr->numb+1));
+        auto ite = new QListWidgetItem(QString::number(itr->getNumber()+1));
         ite->setData(Qt::UserRole + 1, QVariant::fromValue(itr));
         m_ui->listWidget_2->addItem(ite);
     }
-    connect(&FeederDecoder::Instance(), &FeederDecoder::materialAdded, m_ui->table_material, &MaterialTableWidget::AddMaterial);
-    connect(&FeederDecoder::Instance(), &FeederDecoder::materialChanged, m_ui->table_material, &MaterialTableWidget::ChangeMaterial);
-    connect(&FeederDecoder::Instance(), &FeederDecoder::containerChanged, this, &MaterialStore::updateStore);
-    connect(&FeederDecoder::Instance(), &FeederDecoder::bottleChanged, this, [=] {m_ui->listWidget->update(); });
-    connect(&FeederDecoder::Instance(), &FeederDecoder::tubeChanged, this, [=] {m_ui->listWidget_2->update(); });
+    connect(&FeederMgr::Instance(), &FeederMgr::materialAdded, m_ui->table_material, &MaterialTableWidget::AddMaterial);
+    connect(&FeederMgr::Instance(), &FeederMgr::materialChanged, m_ui->table_material, &MaterialTableWidget::ChangeMaterial);
+    connect(&FeederMgr::Instance(), &FeederMgr::storeChanged, this, &MaterialStore::updateStore);
+    connect(&FeederMgr::Instance(), &FeederMgr::bottleChanged, this, [=] {m_ui->listWidget->update(); });
+    connect(&FeederMgr::Instance(), &FeederMgr::tubeChanged, this, [=] {m_ui->listWidget_2->update(); });
 
     for (int i = 0; ; i++)
     {
-        if (auto c = FeederDecoder::Instance().GetContainer(i))
+        if (auto c = FeederMgr::Instance().GetStore(i))
             updateStore(c);
         else
             break;
@@ -216,19 +231,19 @@ void MaterialStore::initUi()
         dlg.setWindowTitle(title);
         dlg.Modify(c->pMate, c->nfcid);
         if (dlg.exec() == QDialog::Accepted)
-            FeederDecoder::Instance().AddMaterial(c->nfcid, dlg.GetName(), dlg.GetWeight());
+            FeederMgr::Instance().AddMaterial(c->nfcid, dlg.GetName(), dlg.GetWeight());
     });
 
     connect(m_ui->listWidget, &QListWidget::itemClicked, this, [=](QListWidgetItem* item) {
         auto bt = item->data(Qt::UserRole + 1).value<BottleStruct*>();
-        if (bt->m_flag == C_Used)
+        if (bt->getFlag() == B_Used)
             return;
         DlgFeedMaterial dlg(this);
-        dlg.Init(FeederDecoder::Instance().getfeedParams(bt->m_numb));
-        dlg.SetBottleAvlible(bt->m_flag ==C_CanUse);
+        dlg.Init(FeederMgr::Instance().GetfeedParamsByBottleNum(bt->m_numb));
+        dlg.SetBottleAvlible(bt->getFlag() == T_WaitPrepare);
         dlg.setWindowTitle(tr("料瓶%1投料").arg(bt->m_numb + 1));
         connect(&dlg, &DlgFeedMaterial::bottleAvlibleChanged, this, [=](bool b) {
-            bt->m_flag = (b ? C_CanUse : C_None);
+            bt->setFlag(b ? B_CanUse : B_None);
             m_ui->listWidget->update();
         });
         if (QDialog::Accepted == dlg.exec())
@@ -236,14 +251,15 @@ void MaterialStore::initUi()
             QMap<QString, float> mates;
             if (dlg.FeedBottle(&mates) && !mates.isEmpty())
             {
-                FeederDecoder::Instance().FeedSolidMaterial(mates, (int)bt->m_numb, dlg.GetTubeNumb(), dlg.GetChannel());
+				auto idx = dlg.GetChannel();
+				FeederMgr::Instance().FeedSolidMaterial(mates, (int)bt->m_numb, dlg.GetTubeNumb(), idx < 0 ? false : true, idx);
                 m_ui->listWidget->update();
             }
         }
     });
     connect(m_ui->listWidget_2, &QListWidget::itemClicked, this, [=](QListWidgetItem* item) {
         auto tb = item->data(Qt::UserRole+1).value<TubeStruct*>();
-        if (tb->bFeeded && tb->flag == C_Using)
+        if (tb->getFlag()==T_Fixed)
         {
             DlgTubeBack dlg(this);
             dlg.Init(tb);
@@ -251,20 +267,19 @@ void MaterialStore::initUi()
             return;
         }
 
-        if (C_None!=tb->flag && C_CanUse!=tb->flag)
+        if (T_None!=tb->getFlag() && T_WaitPrepare!=tb->getFlag())
             return;
 
-        tb->flag = tb->flag == C_None ? C_CanUse : C_None;
-        m_ui->listWidget_2->update();
+        tb->setFlag(tb->getFlag() == T_None ? T_WaitPrepare : T_None);
     });
-    connect(&FeederDecoder::Instance(), &FeederDecoder::connectStatChanged, this, [=](FeederDecoder::PortStat st) {
+    connect(&FeederMgr::Instance(), &FeederMgr::connectStatChanged, this, [=](FeederMgr::PortStat st) {
         QString strIcon = ":/stateBar/image/closed.png";
         switch (st)
         {
-        case FeederDecoder::NoData:
+        case FeederMgr::NoData:
             strIcon = ":/stateBar/image/disconnected.png";
             break;
-        case FeederDecoder::Communicate:
+        case FeederMgr::Communicate:
             strIcon = ":/stateBar/image/connected.png";
             break;
         default:
@@ -274,12 +289,12 @@ void MaterialStore::initUi()
     });
     connect(m_ui->btn_com, &QPushButton::clicked, this, [=] {
         DlgSerialSettings dlg(this);
-        dlg.Inital(FeederDecoder::Instance().serialPort());
+        dlg.Inital(FeederMgr::Instance().serialPort());
         if (dlg.exec() == QDialog::Accepted)
-            FeederDecoder::Instance().ConnectPort();
+            FeederMgr::Instance().ConnectPort();
     });
 
-    connect(m_robot, &RobotMgr::connectStatChanged, this, [=](RobotMgr::PortStat st) {
+    connect(m_robot, &RobotMgr::connectStatChanged, this, [=](RobotMgr::RobotStat st) {
         QString strIcon = ":/stateBar/image/closed.png";
         switch (st)
         {
@@ -287,6 +302,9 @@ void MaterialStore::initUi()
             strIcon = ":/stateBar/image/disconnected.png";
             break;
         case RobotMgr::Communicate:
+        case RobotMgr::PowerOff:
+        case RobotMgr::PowerOn:
+        case RobotMgr::RobotStart:
             strIcon = ":/stateBar/image/connected.png";
             break;
         default:
@@ -295,10 +313,10 @@ void MaterialStore::initUi()
         m_ui->btn_robot->setIcon(QIcon(strIcon));
     });
     connect(m_ui->btn_robot, &QPushButton::clicked, this, [=] {
-        DlgSerialSettings dlg(this);
-        dlg.Inital(m_robot->serialPort());
+        DlgSocketSettings dlg(this);
+        dlg.Inital(m_robot->GetHost(), m_robot->GetPort());
         if (dlg.exec() == QDialog::Accepted)
-            m_robot->ConnectPort();
+            m_robot->ConnectSocket(dlg.GetHost(), dlg.GetPort());
     });
     connect(m_ui->btn_balance, &QPushButton::clicked, this, [=] {m_ui->stackedWidget->setCurrentWidget(m_ui->demo); });
     connect(m_ui->btn_list, &QPushButton::clicked, this, [=] {m_ui->stackedWidget->setCurrentWidget(m_ui->page); });

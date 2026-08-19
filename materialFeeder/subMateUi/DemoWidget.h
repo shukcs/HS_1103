@@ -20,7 +20,9 @@ protected:
 private:
     QPixmap *m_bg;
     const StoreStruct *m_feeding=nullptr;
-    bool  m_bFeeding = false;
+    uint8_t  m_statStore = 0;
+    float    m_wFeed;
+    float    m_wFeeding;
 };
 
 #endif

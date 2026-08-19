@@ -4,9 +4,7 @@
 # 全自动加氢仪
 #-------------------------------------------------
 
-QT       += core gui serialport opengl
-
-greaterThan(QT_MAJOR_VERSION, 4): QT += widgets  printsupport
+QT       += core gui serialport opengl widgets  printsupport network
 
 TARGET = HS_1103
 TEMPLATE = app
@@ -28,6 +26,7 @@ INCLUDEPATH += $$PWD
 LIBS+=-lopengl32
 
 SOURCES += $$PWD/common/DlgSerialSettings.cpp \
+	$$PWD/common/DlgSocketSettings.cpp \
 	$$PWD/common/MaskWidget.cpp \
 	$$PWD/common/mymessagebox.cpp \
     $$PWD/collectorOp/collectorop.cpp \
@@ -41,16 +40,17 @@ SOURCES += $$PWD/common/DlgSerialSettings.cpp \
     $$PWD/Diagram/diagram.cpp \
     $$PWD/Diagram/flowset.cpp \
     $$PWD/manualOp/manualop.cpp \
-	$$PWD/materialFeeder/FeederDecoder.cpp \
-	$$PWD/materialFeeder/MaterialStore.cpp \
-	$$PWD/materialFeeder/RobotMgr.cpp \
-	$$PWD/materialFeeder/subMateUi/DemoWidget.cpp \
-	$$PWD/materialFeeder/subMateUi/DlgFeedMaterial.cpp \
-	$$PWD/materialFeeder/subMateUi/DlgMaterialModify.cpp \
-	$$PWD/materialFeeder/subMateUi/DlgTubeBack.cpp \
-	$$PWD/materialFeeder/subMateUi/MaterialsSelect.cpp \
-	$$PWD/materialFeeder/subMateUi/MaterialTableWidget.cpp \
-	$$PWD/materialFeeder/subMateUi/SpinCust.cpp \
+    $$PWD/materialFeeder/FeederDecoder.cpp \
+    $$PWD/materialFeeder/FeederStruct.cpp \
+    $$PWD/materialFeeder/MaterialStore.cpp \
+    $$PWD/materialFeeder/RobotMgr.cpp \
+    $$PWD/materialFeeder/subMateUi/DemoWidget.cpp \
+    $$PWD/materialFeeder/subMateUi/DlgFeedMaterial.cpp \
+    $$PWD/materialFeeder/subMateUi/DlgMaterialModify.cpp \
+    $$PWD/materialFeeder/subMateUi/DlgTubeBack.cpp \
+    $$PWD/materialFeeder/subMateUi/MaterialsSelect.cpp \
+    $$PWD/materialFeeder/subMateUi/MaterialTableWidget.cpp \
+    $$PWD/materialFeeder/subMateUi/SpinCust.cpp \
     $$PWD/programConfig/hslist.cpp \
     $$PWD/programConfig/programlist.cpp \
     $$PWD/programConfig/qcirculation.cpp \
@@ -61,10 +61,10 @@ SOURCES += $$PWD/common/DlgSerialSettings.cpp \
     $$PWD/programConfig/swpanel.cpp \
     $$PWD/programConfig/qtcdpanel.cpp \
     $$PWD/programConfig/qsfunction.cpp \
-	$$PWD/programConfig/FeederGroupBox.cpp \
-	$$PWD/programConfig/HeatGroupBox.cpp \
-	$$PWD/programConfig/MotorGroupBox.cpp \
-	$$PWD/programConfig/Valve3ChGroupBox.cpp \
+    $$PWD/programConfig/FeederGroupBox.cpp \
+    $$PWD/programConfig/HeatGroupBox.cpp \
+    $$PWD/programConfig/MotorGroupBox.cpp \
+    $$PWD/programConfig/Valve3ChGroupBox.cpp \
     $$PWD/programConfig/qpumpctrl.cpp \
     $$PWD/programConfig/progconfig.cpp \
     $$PWD/programConfig/qvalvectrl.cpp \
@@ -89,10 +89,11 @@ SOURCES += $$PWD/common/DlgSerialSettings.cpp \
     $$PWD/main.cpp
 
 HEADERS += $$PWD/common/DlgSerialSettings.h \
+    $$PWD/common/DlgSocketSettings.h \
     $$PWD/common/MaskWidget.h \
-	$$PWD/common/mymessagebox.h \
-	$$PWD/collectorOp/collectorop.h \
-	$$PWD/customGraph/qcustomplot.h \
+    $$PWD/common/mymessagebox.h \
+    $$PWD/collectorOp/collectorop.h \
+    $$PWD/customGraph/qcustomplot.h \
     $$PWD/customGraph/customgraph.h \
     $$PWD/customGraph/debuggraph.h \
     $$PWD/customGraph/customTool/graphopen.h \
@@ -102,16 +103,16 @@ HEADERS += $$PWD/common/DlgSerialSettings.h \
     $$PWD/Diagram/diagram.h \
     $$PWD/Diagram/flowset.h \
     $$PWD/manualOp/manualop.h \
-	$$PWD/materialFeeder/FeederDecoder.h \
-	$$PWD/materialFeeder/MaterialStore.h \
-	$$PWD/materialFeeder/RobotMgr.h \
-	$$PWD/materialFeeder/subMateUi/DemoWidget.h \
-	$$PWD/materialFeeder/subMateUi/DlgFeedMaterial.h \
-	$$PWD/materialFeeder/subMateUi/DlgMaterialModify.h \
-	$$PWD/materialFeeder/subMateUi/DlgTubeBack.h \
-	$$PWD/materialFeeder/subMateUi/MaterialsSelect.h \
-	$$PWD/materialFeeder/subMateUi/MaterialTableWidget.h \
-	$$PWD/materialFeeder/subMateUi/SpinCust.h \
+    $$PWD/materialFeeder/FeederDecoder.h \
+    $$PWD/materialFeeder/MaterialStore.h \
+    $$PWD/materialFeeder/RobotMgr.h \
+    $$PWD/materialFeeder/subMateUi/DemoWidget.h \
+    $$PWD/materialFeeder/subMateUi/DlgFeedMaterial.h \
+    $$PWD/materialFeeder/subMateUi/DlgMaterialModify.h \
+    $$PWD/materialFeeder/subMateUi/DlgTubeBack.h \
+    $$PWD/materialFeeder/subMateUi/MaterialsSelect.h \
+    $$PWD/materialFeeder/subMateUi/MaterialTableWidget.h \
+    $$PWD/materialFeeder/subMateUi/SpinCust.h \
     $$PWD/programConfig/hslist.h \
     $$PWD/programConfig/programlist.h \
     $$PWD/programConfig/qcirculation.h \
@@ -125,10 +126,10 @@ HEADERS += $$PWD/common/DlgSerialSettings.h \
     $$PWD/programConfig/qsfunction.h \
     $$PWD/programConfig/progconfig.h \
     $$PWD/programConfig/qpumpctrl.h \
-	$$PWD/programConfig/FeederGroupBox.h \
-	$$PWD/programConfig/HeatGroupBox.h \
-	$$PWD/programConfig/MotorGroupBox.h \
-	$$PWD/programConfig/Valve3ChGroupBox.h \
+    $$PWD/programConfig/FeederGroupBox.h \
+    $$PWD/programConfig/HeatGroupBox.h \
+    $$PWD/programConfig/MotorGroupBox.h \
+    $$PWD/programConfig/Valve3ChGroupBox.h \
     $$PWD/programConfig/qvalvectrl.h \
     $$PWD/programConfig/qcollectorctrl.h \
     $$PWD/programConfig/customTool/ToolBox.h \
@@ -155,7 +156,8 @@ RESOURCES += \
     $$PWD/programConfig/customTool/qss.qrc
 
 FORMS += \
-	$$PWD/common/DlgSerialSettings.ui \
+    $$PWD/common/DlgSerialSettings.ui \
+    $$PWD/common/DlgSocketSettings.ui \
     $$PWD/customGraph/customgraph.ui \
     $$PWD/Diagram/diagram.ui \
     $$PWD/manualOp/manualop.ui \
@@ -169,10 +171,10 @@ FORMS += \
     $$PWD/programConfig/customTool/ToolBox.ui \
     $$PWD/programConfig/customTool/ToolPage.ui \
     $$PWD/programConfig/progconfig.ui \
-	$$PWD/programConfig/FeederGroupBox.ui \
-	$$PWD/programConfig/HeatGroupBox.ui \
-	$$PWD/programConfig/MotorGroupBox.ui \
-	$$PWD/programConfig/Valve3ChGroupBox.ui \
+    $$PWD/programConfig/FeederGroupBox.ui \
+    $$PWD/programConfig/HeatGroupBox.ui \
+    $$PWD/programConfig/MotorGroupBox.ui \
+    $$PWD/programConfig/Valve3ChGroupBox.ui \
     $$PWD/programConfig/customTool/fileexport.ui \
     $$PWD/programConfig/customTool/filesave.ui \
     $$PWD/programConfig/customTool/fileopen.ui \
@@ -182,9 +184,9 @@ FORMS += \
     $$PWD/Diagram/flowset.ui \
     $$PWD/projectMode/projectmode.ui \
     $$PWD/collectorOp/collectorop.ui \
-	$$PWD/materialFeeder/MaterialStore.ui \
-	$$PWD/materialFeeder/subMateUi/DlgFeedMaterial.ui \
-	$$PWD/materialFeeder/subMateUi/DlgMaterialModify.ui \
-	$$PWD/materialFeeder/subMateUi/DlgTubeBack.ui \
-	$$PWD/materialFeeder/subMateUi/MaterialsSelect.ui \
-	$$PWD/materialFeeder/subMateUi/SpinCust.ui
+    $$PWD/materialFeeder/MaterialStore.ui \
+    $$PWD/materialFeeder/subMateUi/DlgFeedMaterial.ui \
+    $$PWD/materialFeeder/subMateUi/DlgMaterialModify.ui \
+    $$PWD/materialFeeder/subMateUi/DlgTubeBack.ui \
+    $$PWD/materialFeeder/subMateUi/MaterialsSelect.ui \
+    $$PWD/materialFeeder/subMateUi/SpinCust.ui

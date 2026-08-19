@@ -164,10 +164,10 @@ strDecoder::strDecoder(QObject *parent, const QString &name) : QObject(parent)
     connect(thread, &portThread::port_disconnected, this, &strDecoder::app_disconnected);
     connect(thread, &portThread::ackRecved, this, &strDecoder::onAckRecved);
     connect(m_timer, &QTimer::timeout, this, &strDecoder::timer_out);
-	connect(&FeederDecoder::Instance(), &FeederDecoder::actionRun, this, &strDecoder::onActionRun);
-	connect(&FeederDecoder::Instance(), &FeederDecoder::feedTubeChanged, this, &strDecoder::onFeedTubeChanged);
-    connect(this, &strDecoder::stepMotorStatChanged, &FeederDecoder::Instance(), &FeederDecoder::OnStepMotor);
-    connect(this, &strDecoder::servoMotorStatChanged, &FeederDecoder::Instance(), &FeederDecoder::OnServoMotor);
+    connect(&FeederMgr::Instance(), &FeederMgr::actionRun, this, &strDecoder::onActionRun);
+    connect(&FeederMgr::Instance(), &FeederMgr::feedTubeChanged, this, &strDecoder::stoveTubeChaned);
+    connect(this, &strDecoder::stepMotorStatChanged, &FeederMgr::Instance(), &FeederMgr::OnStepMotor);
+    connect(this, &strDecoder::servoMotorStatChanged, &FeederMgr::Instance(), &FeederMgr::OnServoMotor);
     m_stepMotorStat[0].SetType(CtrlType::Motor_Pipelet);
     m_stepMotorStat[1].SetType(CtrlType::Motor_Pipelet);
     m_stepMotorStat[2].SetType(CtrlType::Motor_Tube);
@@ -253,14 +253,6 @@ void strDecoder::app_disconnected()
 {
     emit setConnectionState(false);
     com_open(true,portName);  //  打开指定端口
-}
-
-void strDecoder::onProgramRun(const QString &cmd)
-{
-	bool bSnd = m_programList.isEmpty();
-    m_programList.append(cmd);
-	if (bSnd)
-		strTocmd(m_programList.first());
 }
 
 void strDecoder::strTocmd(const QString &cmd)
@@ -477,24 +469,41 @@ void strDecoder::strTocmd(const QString &cmd)
 		strlist = cmd.split(" ", QString::SkipEmptyParts);  //  以空格符分割
 		if (strlist.size() > 2)
 		{
-			if (strlist.at(1) == tr("装载炉膛"))
+            if (strlist.at(1) == tr("配料"))
+            {
+                auto bottle = strlist.at(3).toInt()-1;
+                if (bottle<0)
+                {
+                    auto bts = FeederMgr::Instance().ValidBottls();
+                    if (bts.isEmpty())
+                    {
+                        emit stoveTubeChaned(FeederMgr::J_PrepareMate, 0);
+                        return;
+                    }
+                    bottle = bts.first()->m_numb;
+                }
+
+                auto nTube = strlist.at(5).toInt() - 1;
+                QMap<QString, float> feeds;
+                for (int i = 3; i + 1 < strlist.size(); i += 2)
+                {
+                    feeds[strlist.at(i)] = strlist.at(i + 1).toFloat();
+                }
+                if (!FeederMgr::Instance().FeedSolidMaterial(feeds, bottle, nTube, false))
+                    emit stoveTubeChaned(FeederMgr::J_PrepareMate, 0);
+            }
+            else if (strlist.at(1) == tr("装载炉膛"))
 			{
-				auto ch = strlist.at(2).toInt();
-				QMap<QString, float> feeds;
-				for (int i = 3; i+1 < strlist.size(); i+=2)
-				{
-					feeds[strlist.at(i)] = strlist.at(i+1).toFloat();
-				}
-				if (!FeederDecoder::Instance().FeedSolidMaterial(feeds, -1, -1, ch) && !m_cmdlist.isEmpty())
-					m_cmdlist.removeFirst();
+				auto ch = strlist.at(2).toInt()-1;
+				auto tube = strlist.at(4).toInt() - 1;
+				if (!FeederMgr::Instance().FixTube(ch, tube))
+					emit stoveTubeChaned(ch, true);
 			}
 			else if (strlist.at(1) == tr("收回反应管"))
 			{
-				if (auto tb = FeederDecoder::Instance().GetInSotveTube(strlist.at(2).toInt()))
-				{
-					if (!FeederDecoder::Instance().StoveTubeBack(tb->numb) && !m_cmdlist.isEmpty())
-						m_cmdlist.removeFirst();
-				}
+                auto ch = strlist.at(2).toInt()-1;
+                if (!FeederMgr::Instance().StoveTubeBack(ch))
+                    emit stoveTubeChaned(FeederMgr::J_StoveTubeBack, ch);
 			}
 			else if (!m_cmdlist.isEmpty())
 			{
@@ -579,7 +588,7 @@ static int16_t checkPcMsgAndLength(const uint8_t* str, uint16_t* len)
             else
             {
                 uint16_t crc = str[posEnd] << 8 | str[posEnd + 1];
-                if (FeederDecoder::Modbus_crc16(str + i, posEnd-i) == crc)
+                if (FeederMgr::Modbus_crc16(str + i, posEnd-i) == crc)
                 {
                     *len = posEnd + 2;
                     return i;
@@ -610,7 +619,7 @@ void strDecoder::board_msg_request()
         break;
     }
     buff[1] = len;
-    auto crc = FeederDecoder::Modbus_crc16(buff, len);
+    auto crc = FeederMgr::Modbus_crc16(buff, len);
     buff[len] = (crc >> 8) & 0xFF;
     buff[len+1] = crc & 0xFF;
     thread->port_write(buff, len + 2);
@@ -1099,7 +1108,7 @@ void strDecoder::collector_conn(QString cmd)
 void strDecoder::appendToQue(const uint8_t* cmd, uint32_t len)
 {
     QByteArray arr((const char*)cmd, len);
-    auto crc = FeederDecoder::Modbus_crc16(cmd, len - 2);
+    auto crc = FeederMgr::Modbus_crc16(cmd, len - 2);
     arr[len-2] = (crc >> 8) & 0xFF;
     arr[len-1] = crc & 0xFF;
     m_cmdlist << arr;
@@ -1150,25 +1159,5 @@ void strDecoder::onActionRun(const DeviceAct *act)
         ctrlServoMotor(act->servoPos);
     else if (Dev_StepMotor == act->type)
         ctrlStepMotor((CtrlType::StepMotorType)act->stepType, act->stepCh==0?1:2, act->stepDirCont ? 1 : 0);
-}
-
-void strDecoder::onFeedTubeChanged(uint8_t ch, bool bFixed)
-{
-	auto cmd = m_cmdlist.isEmpty() ? QString() : m_cmdlist.first();
-	if (cmd.startsWith(tr("固体投料")))
-	{
-		auto strlist = cmd.split(" ", QString::SkipEmptyParts);  //  以空格符分割
-		if (strlist.size() > 2)
-		{
-			if (strlist.at(1) == tr("装载炉膛") && strlist.at(2).toInt()==ch)
-			{
-				m_cmdlist.removeFirst();
-			}
-			else if (strlist.at(1) == tr("收回反应管") && strlist.at(2).toInt()==ch)
-			{
-				m_cmdlist.removeFirst();
-			}
-		}
-	}
 }
 

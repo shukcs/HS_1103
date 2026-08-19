@@ -525,6 +525,9 @@
     <ClCompile Include="..\HS_1103\manualOp\manualop.cpp">
       <Filter>manualop</Filter>
     </ClCompile>
+    <ClCompile Include="..\HS_1103\materialFeeder\FeederStruct.cpp">
+      <Filter>materialFeeder</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ui_Valve3ChGroupBox.h">

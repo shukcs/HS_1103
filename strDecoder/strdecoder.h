@@ -92,7 +92,6 @@ public slots:
     bool com_open(bool state,const QString &name);
     void app_connected();
     void app_disconnected();
-    void onProgramRun(const QString &cmd);
 private:
     void board_msg_request();   // 查询
     void swCtrl(int id,bool state);  // 阀门控制
@@ -127,7 +126,6 @@ private:
 
     void appendToQue(const uint8_t* cmd, uint32_t len);
 	void onActionRun(const DeviceAct *act);
-	void onFeedTubeChanged(uint8_t ch, bool bFixed);
 signals:
     void setConnectionState(bool state);
     void startRecord(bool state);
@@ -137,6 +135,7 @@ signals:
     void set_flow_sw_state(bool state);
     void stepMotorStatChanged(StepMotorStat*);
     void servoMotorStatChanged(int pos, bool);
+    void stoveTubeChaned(uint16_t type, uint16_t idx);
 private:
     void onAckRecved(const QByteArray &arr);
 
@@ -150,7 +149,6 @@ private:
     QList<QByteArray>   m_cmdlist;   // 发送队列
     StepMotorStat   m_stepMotorStat[6];
     ServoMotorStat  m_servoMotorStat;
-    QStringList     m_programList;
 };
 
 #endif // STRDECODER_H

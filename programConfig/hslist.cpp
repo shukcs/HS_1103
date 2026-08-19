@@ -8,25 +8,15 @@
 
 HsList::HsList(QWidget *parent) : QListWidget(parent)
 {
-    this->setFocusPolicy(Qt::NoFocus);  //这禁用tab键和上下方向键并且除去复选框
-
-//    this->setAcceptDrops(true);
-//    this->setDragEnabled(true);
-
- //   connect(this,SIGNAL(itemDoubleClicked(QListWidgetItem*)),this,SLOT(DeleteWarning(QListWidgetItem *)));
+    setFocusPolicy(Qt::NoFocus);  //这禁用tab键和上下方向键并且除去复选框
 }
 
 void HsList::dropEvent(QDropEvent *event)
 {
-    Q_UNUSED(event);
-//    QListWidget::dropEvent(event);
-//    performDrag();
 }
 
 void HsList::performDrag()
 {
-//    QListWidgetItem *item = this->takeItem(this->currentRow());
-//    delete  item;
 }
 
 void HsList::DeleteWarning(QListWidgetItem *item)

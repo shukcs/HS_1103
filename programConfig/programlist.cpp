@@ -16,8 +16,9 @@
 #include <QCoreApplication>
 #include <QScrollArea>
 #include "common/mymessageBox.h"
-#include "programConfig/customTool/ToolBox.h"
-#include "programConfig/customTool/objlist.h"
+#include "customTool/ToolBox.h"
+#include "customTool/objlist.h"
+#include "materialFeeder/FeederDecoder.h"
 #pragma execution_character_set("utf-8")
 
 ProgramList::ProgramList(QWidget *parent)
@@ -175,6 +176,7 @@ void ProgramList::state_change()
        runTime = 0;
        runTimer.stop();
        _obj->setAllBtn_Enable();
+       m_bReady = true;
     }
     else
     {
@@ -258,6 +260,9 @@ void ProgramList::pauseBtn_clicked()
 
 void ProgramList::timer_slot()
 {
+	if (!m_bReady)
+		return;
+	 
      timer.stop();
      if(obj_index < total_obj)
      {
@@ -314,7 +319,11 @@ void ProgramList::timer_slot()
        }
        else
        {
-            emit readyTorun(_proList->item(programCnt)->text());
+            auto str = _proList->item(programCnt)->text();	
+            if (str.startsWith(tr("固体投料")))
+                m_bReady = false;
+
+       		emit readyTorun(str);
             timer.start(1000);
        }
        programCnt++;
@@ -419,5 +428,33 @@ void ProgramList::obj_clicked(int index)
     for(i=0;i<count;i++)
     {
        _proList->addItem(ListMain.at(index).list.at(i));
+    }
+}
+
+void ProgramList::OnStoveTubeChanged(uint16_t type, uint16_t idx)
+{
+    if (programCnt < 0 || programCnt >= _proList->count() || !m_bReady)
+        return;
+    auto cmd = _proList->item(programCnt)->text();
+    if (cmd.startsWith(tr("固体投料")))
+    {
+        auto strlist = cmd.split(" ", QString::SkipEmptyParts);  //  以空格符分割
+        if (strlist.size() <= 2)
+            return;
+        switch (type)
+        {
+        case FeederMgr::J_PrepareMate:
+            if (strlist.at(1) == tr("配料"))
+                m_bReady = true;
+            break;
+        case FeederMgr::J_StoveFixTube:
+            if (strlist.at(1) == tr("装载炉膛") && strlist.at(2).toInt() == idx)
+                m_bReady = true;
+            break;
+        case FeederMgr::J_StoveTubeBack:
+            if (strlist.at(1) == tr("收回反应管") && strlist.at(2).toInt() == idx)
+                m_bReady = true;
+            break;
+        }
     }
 }

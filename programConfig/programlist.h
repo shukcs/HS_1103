@@ -41,6 +41,7 @@ public slots:
     void runTimer_slot(void);
     void clear_sub_list();
     void obj_clicked(int index);
+    void OnStoveTubeChanged(uint16_t type, uint16_t idx);
 private:
     bool state;
     QTimer timer;
@@ -68,6 +69,7 @@ private:
     //    QPushButton *circulate;
 
     QListWidget* _proList;
+    bool   m_bReady = true;
 };
 
 #endif // PROGRAMLIST_H

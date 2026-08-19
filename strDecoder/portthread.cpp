@@ -349,7 +349,7 @@ QByteArray portThread::pickMsg()
                 break;
 
             uint16_t crc = (data[pos + len] << 8) | data[pos + len + 1];
-            if (crc == FeederDecoder::Modbus_crc16(data + pos, len))
+            if (crc == FeederMgr::Modbus_crc16(data + pos, len))
             {
                 auto ret = m_buff.mid(pos, len + 2);
                 m_buff = m_buff.mid(pos + len + 2);

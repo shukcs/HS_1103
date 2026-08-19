@@ -9,7 +9,7 @@
 #include "projectMode/projectmode.h"
 #include "collectorOp/collectorop.h"
 #include "Diagram/diagram.h"
-#include "materialFeeder/RobotMgr.h"
+#include "materialFeeder/FeederDecoder.h"
 
 #include "ui_desktop.h"
 #pragma execution_character_set("utf-8")
@@ -73,7 +73,8 @@ deskTop::deskTop(QWidget *parent) :
     connect(ui->state, &stateBar::storeBtn_clicked, this, &deskTop::StoreShow);
     connect(ui->tool,SIGNAL(logoBtn_clicked()),deviceOperation,SLOT(tempAdjustEnable()));
 
-    connect(ui->autoRunStep, &ProgramList::readyTorun, decoder, &strDecoder::onProgramRun);
+    connect(ui->autoRunStep, &ProgramList::readyTorun, decoder, &strDecoder::strTocmd);
+    connect(decoder, &strDecoder::stoveTubeChaned, ui->autoRunStep, &ProgramList::OnStoveTubeChanged);
     connect(ui->autoRunStep, &ProgramList::readyTorun_toColl, collectorOperation, &collectorOp::updateCmd);
     connect(ui->autoRunStep, &ProgramList::sendRunTime, this, &deskTop::updateRunTime);
     connect(ui->autoRunStep,SIGNAL(readyTorun(const QString&)),manualOperation,SLOT(strToState(const QString&)));

@@ -14,18 +14,21 @@ enum
     Robot_CtrlAddr = 300,
     Robot_StatAddr = 1400,
     Robot_SpeedAddr = 1401,
+    Robot_RobotStatAddr = 1303,
+    Robot_ProgmaStatAddr = 1398,
     ConnetTimeOut = 3000,
 };
 
 struct InitAct{
     uint16_t addr;
     uint8_t  setting;
+    int8_t  robotStat;
 };
 
-static QMap<RobotMgr::RobotStat, InitAct> sInit = { { RobotMgr::PowerOff,{ Robot_StatAddr, 2 } }
-    , {RobotMgr::PowerOn, { Robot_StatAddr, 3}} ///机器臂启动
-    , { RobotMgr::RobotStart,{ Robot_StatAddr, 5 } }
-    , { RobotMgr::ProgmaStart,{ Robot_SpeedAddr, 0} } };///启动工程
+static QMap<RobotMgr::RobotStat, InitAct> sInit = { { RobotMgr::PowerOff,{ Robot_StatAddr, 2 ,5} }
+    , {RobotMgr::PowerOn, { Robot_StatAddr, 3, 8}} ///机器臂启动
+    , { RobotMgr::RobotStart,{ Robot_StatAddr, 5, -1} }
+    , { RobotMgr::ProgmaStart,{ Robot_SpeedAddr, 0, -1} } };///启动工程
 
 RobotMgr::RobotMgr(QObject* p) : QObject(p), m_socket(new QTcpSocket(this))
 {
@@ -61,7 +64,7 @@ void RobotMgr::DoAction(const DeviceAct *act)
     {
         m_curAct = (RobotAction)act->robotStep;
         m_curIdx = act->robotIndex;
-        QTimer::singleShot(50, this, &RobotMgr::ctrl);
+        QTimer::singleShot(200, this, &RobotMgr::ctrl);
     }
 }
 
@@ -91,12 +94,16 @@ void RobotMgr::ConnectSocket(const QString &ip, uint16_t port)
     settings.setValue("ip", m_ip);
     settings.setValue("port", (int)m_port);
     settings.endGroup();
-
     if (PortClose == m_comStat)
     {
         m_comStat = NoData;
         emit connectStatChanged(m_comStat);
     }
+    uint8_t buff[12] = { 0,0,0,0,0,0, Robot_ModbusAddr, 6,0,0,0,0 };
+    FeederMgr::AddModbusData(buff, m_seq++);
+    FeederMgr::AddModbusU32(buff + 2, 6);
+    FeederMgr::AddModbusData(buff + 8, Robot_StatAddr);
+    m_socket->write((char*)buff, sizeof(buff));
 }
 
 RobotMgr::RobotStat RobotMgr::tcpSocketStat() const
@@ -123,7 +130,7 @@ void RobotMgr::timerEvent(QTimerEvent* e)
         else if (m_bStart)
             readStat();
 
-        if (Communicate == m_comStat && QDateTime::currentMSecsSinceEpoch() - m_lastTmRcv > ConnetTimeOut)
+        if (Communicate<=m_comStat && QDateTime::currentMSecsSinceEpoch()-m_lastTmRcv>ConnetTimeOut)
         {
             m_comStat = NoData;
             emit connectStatChanged(NoData);
@@ -223,7 +230,21 @@ void RobotMgr::onRead()
             }
             else
             {
-                RobotStat rdt = fromRead(FeederMgr::PichModbusU16(mdbs.data() + 3));
+                auto rdt = m_comStat;
+                switch (m_comStat)
+                {
+                case RobotMgr::PowerOff:
+                case RobotMgr::PowerOn:
+                    st = FeederMgr::PichModbusU16(mdbs.data() + 3);
+                    if (5 == st)
+                        rdt = PowerOn;
+                    else if (8 == st)
+                        rdt = RobotStart;
+                    break;
+                default:
+                    rdt = fromRead(FeederMgr::PichModbusU16(mdbs.data() + 3));
+                    break;
+                }
                 if (rdt != m_comStat)
                 {
                     m_comStat = rdt;
@@ -274,7 +295,21 @@ void RobotMgr::readStat()
     uint8_t buff[12] = {0,0,0,0,0,0, Robot_ModbusAddr, 3,0,0,0,1 };
     FeederMgr::AddModbusData(buff, m_seq++);
     FeederMgr::AddModbusU32(buff + 2, 6);
-    FeederMgr::AddModbusData(buff+ 8, m_bReadRobotStat ? Robot_StatAddr : Robot_CtrlAddr);
+    auto st = Robot_CtrlAddr;
+    if (m_bReadRobotStat)
+    {
+        switch (m_comStat)
+        {
+        case RobotMgr::PowerOff:
+        case RobotMgr::PowerOn:
+            st = Robot_RobotStatAddr;
+            break;
+        default:
+            st = Robot_StatAddr;
+            break;
+        }
+    }
+    FeederMgr::AddModbusData(buff+ 8, st);
 
     m_socket->write((char*)buff, sizeof(buff));
     m_bWait = true;

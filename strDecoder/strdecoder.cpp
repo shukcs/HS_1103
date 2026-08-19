@@ -485,7 +485,7 @@ void strDecoder::strTocmd(const QString &cmd)
 
                 auto nTube = strlist.at(5).toInt() - 1;
                 QMap<QString, float> feeds;
-                for (int i = 3; i + 1 < strlist.size(); i += 2)
+                for (int i = 6; i + 1 < strlist.size(); i += 2)
                 {
                     feeds[strlist.at(i)] = strlist.at(i + 1).toFloat();
                 }
@@ -497,7 +497,7 @@ void strDecoder::strTocmd(const QString &cmd)
 				auto ch = strlist.at(2).toInt()-1;
 				auto tube = strlist.at(4).toInt() - 1;
 				if (!FeederMgr::Instance().FixTube(ch, tube))
-					emit stoveTubeChaned(ch, true);
+					emit stoveTubeChaned(FeederMgr::J_StoveFixTube, ch);
 			}
 			else if (strlist.at(1) == tr("收回反应管"))
 			{

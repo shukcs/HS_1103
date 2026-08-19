@@ -834,7 +834,8 @@ void FeederMgr::genTubToStvoe(const WorkItem &bt)
 	auto fb = getfeedParamsByTube(bt.nNumTube);
 	if (!fb)
 		return;
- 
+
+    addServoMotorAct(Pos_BlanceDoor);
     adddRobotAct(RobotMgr::MoveTube, bt.nNumTube);
     addStepMotorAct(CtrlType::Motor_Stove, bt.chStove, true, false);
     m_actions << DeviceAct(1.5);//等1.5S
@@ -883,7 +884,7 @@ void FeederMgr::checkActions()
         if (auto fp = getfeedParamsByTube(item.nNumTube))
         {
             fp->feederFinish(item.type);
-            emit feedTubeChanged(item.type, item.chStove);
+            QTimer::singleShot(10, this, [=] {emit feedTubeChanged(item.type, item.chStove); });
 
             if (!m_jobs.isEmpty())
             {
@@ -1296,8 +1297,9 @@ bool FeederMgr::FixTube(uint16_t nTb, uint16_t ch)
 		return false;
 
 	WorkItem item = WorkItem::initFrom(J_StoveFixTube, nTb, ch);
-	if (tb->getFlag() == T_Fixed)
-	{
+	if (tb->getFlag() == T_Prepared)
+    {
+        tb->setStoveCh(ch);
 		addWorkItem(item);
 		genTubToStvoe(item);
 		return true;

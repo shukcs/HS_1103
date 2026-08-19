@@ -433,7 +433,7 @@ void ProgramList::obj_clicked(int index)
 
 void ProgramList::OnStoveTubeChanged(uint16_t type, uint16_t idx)
 {
-    if (programCnt < 0 || programCnt >= _proList->count() || !m_bReady)
+    if (programCnt < 0 || programCnt >= _proList->count() || m_bReady)
         return;
     auto cmd = _proList->item(programCnt)->text();
     if (cmd.startsWith(tr("固体投料")))
@@ -448,11 +448,11 @@ void ProgramList::OnStoveTubeChanged(uint16_t type, uint16_t idx)
                 m_bReady = true;
             break;
         case FeederMgr::J_StoveFixTube:
-            if (strlist.at(1) == tr("装载炉膛") && strlist.at(2).toInt() == idx)
+            if (strlist.at(1) == tr("装载炉膛") && strlist.at(2).toInt()-1 == idx)
                 m_bReady = true;
             break;
         case FeederMgr::J_StoveTubeBack:
-            if (strlist.at(1) == tr("收回反应管") && strlist.at(2).toInt() == idx)
+            if (strlist.at(1) == tr("收回反应管") && strlist.at(2).toInt()-1 == idx)
                 m_bReady = true;
             break;
         }

@@ -40,7 +40,7 @@ public:
 			case S_Feeded:
 				col = Qt::darkGreen; break;
 			case S_Feeding:
-				col = QColor("#ffbf00"); break;
+				col = QColor("#00c0f0"); break;
 			default:
 				break;
 			}
@@ -305,6 +305,7 @@ void MaterialStore::initUi()
         case RobotMgr::PowerOff:
         case RobotMgr::PowerOn:
         case RobotMgr::RobotStart:
+        case RobotMgr::ProgmaStart:
             strIcon = ":/stateBar/image/connected.png";
             break;
         default:

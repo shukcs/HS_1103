@@ -10,6 +10,11 @@ class RobotMgr : public QObject
 {
     Q_OBJECT
 public:
+    enum ProgmaFlag {
+        Progma_None = 0,
+        Progma_Pause = 6,
+        Progma_Contniue = 7,
+    };
     enum RobotStat {
         PortClose,
         NoData,
@@ -18,6 +23,7 @@ public:
         PowerOn,
         RobotStart,
         ProgmaStart,
+        ProgmaPause,
     };
     enum RobotAction {
         None = -1,
@@ -47,6 +53,8 @@ public:
     RobotStat tcpSocketStat()const;
     const QString &GetHost()const;
     uint16_t GetPort()const;
+    bool IsProgmaRun()const;
+    void SetPause();
 public slots:
     void DoAction(const DeviceAct *act);//step RobotAction, idx
 protected:
@@ -55,14 +63,16 @@ protected:
     RobotStat fromRead(uint16_t s);
 protected:
     void ctrl();
+    void ctrlProgma();
     QByteArray pickTcpModbus();
-    uint32_t getAckLen(const uint8_t *buf, uint32_t len);
+    int32_t getAckLen(const uint8_t *buf, uint32_t len);
     void onRead();
-
-    bool parse();
 
     void readStat();
     void initRobot();
+    void prcsAction(const QByteArray &msg);
+    void prcsStat(const QByteArray &msg);
+    void writeInit();
 signals:
     void actionDone(int); //RobotStep
     void connectStatChanged(RobotStat);
@@ -86,6 +96,7 @@ private:
     bool            m_bSetSpeed = false;
     //QSerialPort     *m_port=nullptr;
     QByteArray      m_rcvs;
+    ProgmaFlag      m_progmaFlag = Progma_None;
     //QString         m_portName;
 };
 

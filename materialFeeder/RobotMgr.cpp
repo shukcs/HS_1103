@@ -15,20 +15,19 @@ enum
     Robot_StatAddr = 1400,
     Robot_SpeedAddr = 1401,
     Robot_RobotStatAddr = 1303,
-    Robot_ProgmaStatAddr = 1398,
-    ConnetTimeOut = 3000,
+    Robot_ProgmaStatAddr = 1202,
+    ConnetTimeOut = 30000,
 };
 
 struct InitAct{
     uint16_t addr;
     uint8_t  setting;
-    int8_t  robotStat;
 };
 
-static QMap<RobotMgr::RobotStat, InitAct> sInit = { { RobotMgr::PowerOff,{ Robot_StatAddr, 2 ,5} }
-    , {RobotMgr::PowerOn, { Robot_StatAddr, 3, 8}} ///机器臂启动
-    , { RobotMgr::RobotStart,{ Robot_StatAddr, 5, -1} }
-    , { RobotMgr::ProgmaStart,{ Robot_SpeedAddr, 0, -1} } };///启动工程
+static QMap<RobotMgr::RobotStat, InitAct> sInit = { { RobotMgr::PowerOff,{ Robot_StatAddr, 2} }
+    , {RobotMgr::PowerOn, { Robot_StatAddr, 3}} ///机器臂启动
+    , { RobotMgr::RobotStart,{ Robot_StatAddr, 5} }  ///启动工程
+    , { RobotMgr::ProgmaStart,{ Robot_SpeedAddr, 0} } };///工程速度
 
 RobotMgr::RobotMgr(QObject* p) : QObject(p), m_socket(new QTcpSocket(this))
 {
@@ -50,6 +49,7 @@ RobotMgr::RobotMgr(QObject* p) : QObject(p), m_socket(new QTcpSocket(this))
 
 RobotMgr::~RobotMgr()
 {
+    m_socket->blockSignals(true);
     m_socket->close();
 }
 
@@ -99,11 +99,7 @@ void RobotMgr::ConnectSocket(const QString &ip, uint16_t port)
         m_comStat = NoData;
         emit connectStatChanged(m_comStat);
     }
-    uint8_t buff[12] = { 0,0,0,0,0,0, Robot_ModbusAddr, 6,0,0,0,0 };
-    FeederMgr::AddModbusData(buff, m_seq++);
-    FeederMgr::AddModbusU32(buff + 2, 6);
-    FeederMgr::AddModbusData(buff + 8, Robot_StatAddr);
-    m_socket->write((char*)buff, sizeof(buff));
+    writeInit();
 }
 
 RobotMgr::RobotStat RobotMgr::tcpSocketStat() const
@@ -121,13 +117,29 @@ uint16_t RobotMgr::GetPort() const
     return m_port;
 }
 
+bool RobotMgr::IsProgmaRun() const
+{
+    return ProgmaStart == m_comStat;
+}
+
+void RobotMgr::SetPause()
+{
+    if (ProgmaStart == m_comStat)
+        m_progmaFlag = Progma_Pause;
+    else if (ProgmaPause)
+        m_progmaFlag = Progma_Contniue;
+    ctrlProgma();
+}
+
 void RobotMgr::timerEvent(QTimerEvent* e)
 {
     if (e->timerId() == m_idTimer)
     {
         if (m_curAct > 0 && m_curIdx >= 0)
             ctrl();
-        else if (m_bStart)
+        if (m_progmaFlag != Progma_None)
+            ctrlProgma();
+        else
             readStat();
 
         if (Communicate<=m_comStat && QDateTime::currentMSecsSinceEpoch()-m_lastTmRcv>ConnetTimeOut)
@@ -191,7 +203,7 @@ QByteArray RobotMgr::pickTcpModbus()
     return QByteArray();
 }
 
-uint32_t RobotMgr::getAckLen(const uint8_t* buf, uint32_t)
+int32_t RobotMgr::getAckLen(const uint8_t* buf, uint32_t)
 {
     switch (buf[1])
     {
@@ -202,7 +214,7 @@ uint32_t RobotMgr::getAckLen(const uint8_t* buf, uint32_t)
         return buf[2] + 3;
     }
 
-    return 5;
+    return -1;
 }
 
 void RobotMgr::onRead()
@@ -212,7 +224,6 @@ void RobotMgr::onRead()
 
     m_rcvs += m_socket->readAll();
     auto mdbs = pickTcpModbus();
-    uint16_t st = 0;
     if (!mdbs.isEmpty())
     {
         m_bWait = false;
@@ -220,41 +231,9 @@ void RobotMgr::onRead()
         {
         case 3:
             if (!m_bReadRobotStat)
-            {
-                if (FeederMgr::PichModbusU16(mdbs.data() + 3)==0 && m_actWrite>None)
-                {
-                    auto tmp = m_actWrite;
-                    m_actWrite = None;
-                    emit actionDone(tmp);
-                }
-            }
+                prcsAction(mdbs);
             else
-            {
-                auto rdt = m_comStat;
-                switch (m_comStat)
-                {
-                case RobotMgr::PowerOff:
-                case RobotMgr::PowerOn:
-                    st = FeederMgr::PichModbusU16(mdbs.data() + 3);
-                    if (5 == st)
-                        rdt = PowerOn;
-                    else if (8 == st)
-                        rdt = RobotStart;
-                    break;
-                default:
-                    rdt = fromRead(FeederMgr::PichModbusU16(mdbs.data() + 3));
-                    break;
-                }
-                if (rdt != m_comStat)
-                {
-                    m_comStat = rdt;
-                    emit connectStatChanged(rdt);
-                    if (rdt != ProgmaStart)
-                        m_bSetSpeed = false;
-                    if (m_bStart && (rdt!=ProgmaStart || !m_bSetSpeed))
-                        initRobot();
-                }
-            }
+                prcsStat(mdbs);
             break;
         case 6:
             switch (FeederMgr::PichModbusU16(mdbs.data() + 2))
@@ -264,6 +243,10 @@ void RobotMgr::onRead()
                 m_curAct = None;
                 break;
             case Robot_StatAddr:
+                if (Progma_None != m_progmaFlag)
+                    m_progmaFlag = Progma_None;
+                else if (RobotStart == m_comStat)
+                    m_comStat = ProgmaStart;
                 readStat();
                 break;
             case Robot_SpeedAddr:
@@ -281,11 +264,6 @@ void RobotMgr::onRead()
     }
 }
 
-bool RobotMgr::parse()
-{
-    return false;
-}
-
 void RobotMgr::readStat()
 {
     if (m_comStat == PortClose || m_bWait)
@@ -295,22 +273,22 @@ void RobotMgr::readStat()
     uint8_t buff[12] = {0,0,0,0,0,0, Robot_ModbusAddr, 3,0,0,0,1 };
     FeederMgr::AddModbusData(buff, m_seq++);
     FeederMgr::AddModbusU32(buff + 2, 6);
-    auto st = Robot_CtrlAddr;
+    auto addr = Robot_CtrlAddr;
     if (m_bReadRobotStat)
     {
         switch (m_comStat)
         {
         case RobotMgr::PowerOff:
         case RobotMgr::PowerOn:
-            st = Robot_RobotStatAddr;
+            addr = Robot_RobotStatAddr;
             break;
-        default:
-            st = Robot_StatAddr;
+        case ProgmaStart:
+        case ProgmaPause:
+            addr = Robot_ProgmaStatAddr;
             break;
         }
     }
-    FeederMgr::AddModbusData(buff+ 8, st);
-
+    FeederMgr::AddModbusData(buff+ 8, addr);
     m_socket->write((char*)buff, sizeof(buff));
     m_bWait = true;
 }
@@ -337,6 +315,61 @@ void RobotMgr::initRobot()
     }
 }
 
+void RobotMgr::prcsAction(const QByteArray &msg)
+{
+    if (FeederMgr::PichModbusU16(msg.data() + 3) == 0 && m_actWrite > None)
+    {
+        auto tmp = m_actWrite;
+        m_actWrite = None;
+        emit actionDone(tmp);
+    }
+}
+
+void RobotMgr::prcsStat(const QByteArray &msg)
+{
+    auto rdt = m_comStat;
+    uint16_t st = FeederMgr::PichModbusU16(msg.data() + 3);
+    switch (m_comStat)
+    {
+    case RobotMgr::PowerOff:
+    case RobotMgr::PowerOn:
+        if (5 == st)
+            rdt = PowerOn;
+        else if (8 == st)
+            rdt = RobotStart;
+        break;
+    case RobotMgr::ProgmaStart:
+    case RobotMgr::ProgmaPause:
+        if (0 == st)
+            rdt = ProgmaStart;
+        else if (2 == st)
+            rdt = ProgmaPause;
+        break;
+    default:
+        rdt = fromRead(st);
+        break;
+    }
+    if (rdt != m_comStat)
+    {
+        m_comStat = rdt;
+        emit connectStatChanged(rdt);
+        if (rdt != ProgmaStart)
+            m_bSetSpeed = false;
+        if (m_bStart && (rdt != ProgmaStart || !m_bSetSpeed))
+            initRobot();
+    }
+}
+
+void RobotMgr::writeInit()
+{
+    uint8_t buff[12] = { 0,0,0,0,0,0, Robot_ModbusAddr, 6,0,0,0,0 };
+    FeederMgr::AddModbusData(buff, m_seq++);
+    FeederMgr::AddModbusU32(buff + 2, 6);
+    FeederMgr::AddModbusData(buff + 8, Robot_StatAddr);
+
+    m_socket->write((char*)buff, sizeof(buff));
+}
+
 void RobotMgr::ctrl()
 {
     if (m_comStat == PortClose || m_bWait)
@@ -356,4 +389,18 @@ void RobotMgr::ctrl()
         m_bWait = true;
         m_actWrite = None;
     }
+}
+
+void RobotMgr::ctrlProgma()
+{
+    if (m_progmaFlag == Progma_None)
+        return;
+
+    uint16_t st = m_progmaFlag == Progma_Pause ? 6 : 7;
+    uint8_t buff[12] = { 0,0,0,0,0,0, Robot_ModbusAddr, 6,0,0,0,0 };
+    FeederMgr::AddModbusData(buff, m_seq++);
+    FeederMgr::AddModbusU32(buff + 2, 6);
+    FeederMgr::AddModbusData(buff + 8, Robot_StatAddr);
+    FeederMgr::AddModbusData(buff + 10, st);
+    m_socket->write((char*)buff, sizeof(buff));
 }

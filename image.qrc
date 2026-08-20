@@ -12,6 +12,8 @@
         <file>image/bottle_sky.png</file>
         <file>image/bottle_red.png</file>
         <file>image/feeding.png</file>
+        <file>image/pause.png</file>
+        <file>image/start.png</file>
         <file>stateBar/image/connected.png</file>
         <file>stateBar/image/disconnected.png</file>
         <file>stateBar/image/closed.png</file>

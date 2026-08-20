@@ -222,6 +222,7 @@ void MaterialStore::initFeederDecode()
 
 void MaterialStore::initUi()
 {
+    m_ui->btn_progma->setEnabled(false);
     connect(m_ui->list_container, &QListWidget::itemClicked, this, [=](QListWidgetItem* item) {
         auto c = item->data(Qt::UserRole + 1).value<const StoreStruct*>();
         if (!c || c->nfcid.isEmpty())
@@ -295,9 +296,14 @@ void MaterialStore::initUi()
     });
 
     connect(m_robot, &RobotMgr::connectStatChanged, this, [=](RobotMgr::RobotStat st) {
-        QString strIcon = ":/stateBar/image/closed.png";
+        QString strIcon = ":/stateBar/image/connected.png";
+        QString strProgma = ":/image/start.png";
+        m_ui->btn_progma->setEnabled(false);
         switch (st)
         {
+        case RobotMgr::PortClose:
+            strIcon = ":/stateBar/image/closed.png";
+            break;
         case RobotMgr::NoData:
             strIcon = ":/stateBar/image/disconnected.png";
             break;
@@ -306,7 +312,14 @@ void MaterialStore::initUi()
         case RobotMgr::PowerOn:
         case RobotMgr::RobotStart:
         case RobotMgr::ProgmaStart:
+            strProgma = ":/image/start.png";
+            m_ui->btn_progma->setIcon(QIcon(":/image/pause.png"));
+            m_ui->btn_progma->setEnabled(true);
+            break;
+        case RobotMgr::ProgmaPause:
             strIcon = ":/stateBar/image/connected.png";
+            m_ui->btn_progma->setIcon(QIcon(":/image/start.png"));
+            m_ui->btn_progma->setEnabled(true);
             break;
         default:
             break;
@@ -321,4 +334,5 @@ void MaterialStore::initUi()
     });
     connect(m_ui->btn_balance, &QPushButton::clicked, this, [=] {m_ui->stackedWidget->setCurrentWidget(m_ui->demo); });
     connect(m_ui->btn_list, &QPushButton::clicked, this, [=] {m_ui->stackedWidget->setCurrentWidget(m_ui->page); });
+    connect(m_ui->btn_progma, &QPushButton::clicked, m_robot, &RobotMgr::SetPause);
 }

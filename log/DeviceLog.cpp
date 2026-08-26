@@ -28,7 +28,7 @@ void DeviceLog::Add(const QString &log)
         return;
 
     m_logs.push_front(LogItem(log));
-    emit itemAdded(m_logs.last());
+    emit itemAdded(m_logs.first());
 }
 
 const QList<LogItem> & DeviceLog::AllLogs() const

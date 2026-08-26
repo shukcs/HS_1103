@@ -164,11 +164,15 @@ public:
     DeviceAct(DeviceType type = Dev_Robot, bool bWait = true);
     DeviceAct(float tmWait);
     void SetFeedCmd(uint16_t cmd, int ack = -1);
+    QString ToString(bool bStart=true)const;
+private:
+    QString stepMotorActToString()const;
 };
 
 class QSerialPort;
 class StepMotorStat;
 struct WorkItem;
+class ModubosProtocol;
 class FeederMgr :  public QObject
 {
     Q_OBJECT
@@ -229,41 +233,31 @@ public:
 	const FeederParam *GetfeedParamsByBottleNum(int numb) const;
 	bool CanAddWork(JobType t, int numTub, bool bProg = false)const;
 public:
-    static FeederMgr& Instance();
-    static uint16_t Modbus_crc16(const uint8_t* buff, uint16_t Len);
-    static bool Equal(double f1, double f2);
-    static void AddModbusFloat(uint8_t* buff, float f);
-    static void AddModbusData(uint8_t* buff, uint16_t f);
-    static void AddModbusU32(uint8_t* buff, uint32_t f);
-    static float PichModbusFloat(const void* buff);
-    static uint16_t PichModbusU16(const void* buff);
-    static uint32_t PichModbusU32(const void* buff);
     static RobotPostion getStovePos(int ch);
     static QString DefaultConfigFile();
+    static FeederMgr& Instance();
+    static QString CmdDescrib(uint16_t cmd);
+    static QString ServoPosDescrib(RobotPostion pos);
 public slots:
     void OnRobotDone(int step);
     void OnServoMotor(int pos, bool bReached);
     void OnStepMotor(StepMotorStat *st);
 protected:
     void timerEvent(QTimerEvent* event)override;
-
-    void decode(const QByteArray& msg);
-    int send(const QByteArray& arr, bool bWaitWAck=true);
-    QByteArray pickMsg();
-    void append(uint8_t* buff, uint16_t len);
+    void decode(const uint8_t *buff, uint16_t len);
     int indexOfMaterial(const QString& id);
     void addMaterial(const MaterialStruct& m, bool bAdd=true);
     void updateStore(const QString& nfcid, int idx);
 
-    bool prcsRead(uint16_t addr, const QByteArray& msg);
-	bool prcsStat(uint16_t addr, const QByteArray& msg);
-	bool prcsWriteCmd(uint16_t addr, uint16_t cmd);
+    bool prcsRead(uint16_t addr, const uint8_t *buff, uint16_t len);
+	bool prcsStat(uint16_t addr, const uint8_t *buff, uint16_t len);
+	bool prcsWriteCmd(uint16_t addr);
     bool prcsFeederStat(uint16_t stat);
     void checkMatesCanFeed();
     void sumFeederWeight(QMap<int, float> *feeds) const;
+
+    void onWait();
 private:
-    int getAckLen(uint8_t* buff, uint32_t len)const;
-    void readByets();
     void readMaterials(int idx = 0);
     void readStore(int idx = 0);
     void writeMaterial(const MaterialStruct *m, uint16_t idx);
@@ -285,14 +279,13 @@ private:
     const FeederParam *getfeedParamsByTube(int numb) const;
     StoreStruct* getPropStore(float weight, const QString& name, const QMap<int, float> &preDistrs)const;
     BottleStruct *getBottle(int numb) const;
+    void actionDone(QList<DeviceAct>::iterator itr);
 
     void addFeederAct(uint16_t cmd, bool bWait = true, int32_t act = -1, uint8_t numStore=0xff, float wFeed=0.0);
     void addServoMotorAct(RobotPostion pos, bool bWait = true);
     void addStepMotorAct(uint8_t type, uint8_t ch, bool bCont, bool bWait = true);
     void adddRobotAct(uint16_t type, uint8_t index = 0, bool bWait = true);
-	void onWait();
 signals:
-    void serialPortError(bool);
     void connectStatChanged(PortStat);
     void materialChanged(const QString &, const MaterialStruct&);
     void materialAdded(const MaterialStruct &);
@@ -313,20 +306,16 @@ private:
     friend class TubeStruct;
 private:
     bool                    m_bOk;
-    QSerialPort             *m_port;
+    ModubosProtocol         *m_modbus;
     StoreStruct             *m_feedStore = nullptr;
     bool                    m_bPortChaned = false;
-    int                     m_idTimer=-1;
     int                     m_idRead=-1;
     int64_t                 m_lastTmRcv;
-    int64_t                 m_lastTmSnd=-1;
     PortStat                m_comStat = PortClose;
     uint16_t                m_flag = 0;
 	uint16_t                m_nStoreNum = 12;
     uint16_t                m_nBottle;
     uint16_t                m_nTube;
-    QByteArray              m_buff;
-    QList<QByteArray>       m_sends;
     QList<MaterialStruct *> m_allMaterials;
     QList<StoreStruct *>    m_allStore;
     QList<BottleStruct*>    m_allBottle;

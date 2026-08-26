@@ -1,6 +1,6 @@
 #include "desktop.h"
 #include "materialFeeder/MaterialStore.h"
-#include "materialFeeder/FeederDecoder.h"
+#include "materialFeeder/FeederMgr.h"
 #include "manualOp/manualop.h"
 #include "deviceOp/deviceop.h"
 #include "customGraph/customgraph.h"
@@ -9,7 +9,6 @@
 #include "projectMode/projectmode.h"
 #include "collectorOp/collectorop.h"
 #include "Diagram/diagram.h"
-#include "materialFeeder/FeederDecoder.h"
 
 #include "ui_desktop.h"
 #pragma execution_character_set("utf-8")

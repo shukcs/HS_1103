@@ -1,7 +1,7 @@
 ﻿#include "FeederGroupBox.h"
 #include "common/mymessageBox.h"
 #include "strDecoder/strdecoder.h"
-#include "materialFeeder/FeederDecoder.h"
+#include "materialFeeder/FeederMgr.h"
 
 #include "Ui_FeederGroupBox.h"
 #pragma execution_character_set("utf-8")

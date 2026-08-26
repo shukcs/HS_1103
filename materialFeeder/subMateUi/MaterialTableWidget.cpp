@@ -1,7 +1,7 @@
 #include "MaterialTableWidget.h"
 #include <QScrollBar>
 #include <QEvent>
-#include "../FeederDecoder.h"
+#include "../FeederMgr.h"
 
 MaterialTableWidget::MaterialTableWidget(QWidget* p) : QTableWidget(p)
 {

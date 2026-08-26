@@ -6,7 +6,8 @@
 #include "portthread.h"
 #include "stove/stove.h"
 #include "programConfig/HeatGroupBox.h"
-#include "materialFeeder/FeederDecoder.h"
+#include "materialFeeder/FeederMgr.h"
+#include "common/ModubosProtocol.h"
 #pragma execution_character_set("utf-8")
 
 bool operator==(const StepMotorStat& m1, const StepMotorStat& m2)
@@ -588,7 +589,7 @@ static int16_t checkPcMsgAndLength(const uint8_t* str, uint16_t* len)
             else
             {
                 uint16_t crc = str[posEnd] << 8 | str[posEnd + 1];
-                if (FeederMgr::Modbus_crc16(str + i, posEnd-i) == crc)
+                if (ModubosProtocol::ModbusCrc(str + i, posEnd-i) == crc)
                 {
                     *len = posEnd + 2;
                     return i;
@@ -619,7 +620,7 @@ void strDecoder::board_msg_request()
         break;
     }
     buff[1] = len;
-    auto crc = FeederMgr::Modbus_crc16(buff, len);
+    auto crc = ModubosProtocol::ModbusCrc(buff, len);
     buff[len] = (crc >> 8) & 0xFF;
     buff[len+1] = crc & 0xFF;
     thread->port_write(buff, len + 2);
@@ -1108,7 +1109,7 @@ void strDecoder::collector_conn(QString cmd)
 void strDecoder::appendToQue(const uint8_t* cmd, uint32_t len)
 {
     QByteArray arr((const char*)cmd, len);
-    auto crc = FeederMgr::Modbus_crc16(cmd, len - 2);
+    auto crc = ModubosProtocol::ModbusCrc(cmd, len - 2);
     arr[len-2] = (crc >> 8) & 0xFF;
     arr[len-1] = crc & 0xFF;
     m_cmdlist << arr;

@@ -1,17 +1,24 @@
 #include "objlist.h"
-#pragma execution_character_set("utf-8")
+#include <QVBoxLayout>
+#include <QPushButton>
+#include <QLabel>
+#include <QDebug>
+#include <QLayoutItem>
+#include <QScrollArea>
+#include <QScroller>
+#include <QTimer>
 
-objList::objList(QWidget *parent) : QWidget(parent)
+ObjList::ObjList(QWidget *parent) : QWidget(parent)
 {
     initComponent();
 }
 
-objList::~objList()
+ObjList::~ObjList()
 {
     m_pChatListScrollArea->deleteLater();
 }
 
-void objList::initComponent()
+void ObjList::initComponent()
 {
     m_pChatListScrollArea = new QScrollArea(this);
     m_pChatListScrollArea->setStyleSheet("QScrollArea{border:none}");
@@ -33,7 +40,7 @@ void objList::initComponent()
     QScroller::grabGesture(m_pChatListScrollArea->viewport(), QScroller::LeftMouseButtonGesture);
 }
 
-void objList::add_Btn(QString name,int index)
+void ObjList::add_Btn(QString name,int index)
 {
       QPushButton* pushButton = new QPushButton(widget);
       pushButton->setText(name);
@@ -41,10 +48,10 @@ void objList::add_Btn(QString name,int index)
       pushButton->setObjectName(QString::number(index));
       this->m_pSCVLayout->addWidget(pushButton);
 
-      connect(pushButton,&QPushButton::clicked,this,&objList::btn_clicked);
+      connect(pushButton,&QPushButton::clicked,this,&ObjList::btn_clicked);
 }
 
-void objList::list_clear()
+void ObjList::list_clear()
 {
    while (QLayoutItem* item = this->m_pSCVLayout->takeAt(0))
    {
@@ -57,38 +64,59 @@ void objList::list_clear()
        delete item;
    }
 }
+static QString qss1 = "QPushButton {"
+    "background-color: rgb(121, 80, 148);"
+    "color: rgb(255, 255, 255);"
+    "border-radius: 8;"
+    "border: 1px solid rgb(154, 127, 167);"
+    "font - family:SimHei;"
+    "font - size:16px;"
+    "}"
+    "QPushButton::pressed{"
+    "background-color: rgb(120, 127, 167);"
+    "}";
+static QString qss2 = "QPushButton {"
+    "background-color: rgb(121, 80, 148);"
+    "color: darkGreen;"
+    "border-radius: 8;"
+    "border: 1px solid rgb(154, 127, 167);"
+    "font - family:SimHei;"
+    "font - size:16px;"
+    "}";
 
-void objList::setBtn_Enable(int index)
+void ObjList::setRun(int index)
 {
-    int i;
-    for(i=0;i<m_pSCVLayout->count();i++)
+    for (auto i = 0; i < m_pSCVLayout->count(); i++)
     {
-       QPushButton *btn = qobject_cast<QPushButton *> (m_pSCVLayout->itemAt(i)->widget());
-       if(i == index)
-       {
-          btn->setEnabled(true);
-          obj_clicked(btn->objectName().toInt());  // 发出信号
-       }
-       else
-       {
-          btn->setEnabled(false);
-       }
+        if (QPushButton *btn = qobject_cast<QPushButton *> (m_pSCVLayout->itemAt(i)->widget()))
+        {
+            auto idx = btn->objectName().toInt();
+            btn->setStyleSheet(idx == index  ? qss2 : qss1);
+        }
     }
-
+    m_idxRun = index;
+    emit obj_clicked(index);  // 发出信号
 }
 
-void objList::setAllBtn_Enable()
+void ObjList::setAllBtn_Enable()
 {
-    int i;
-    for(i=0;i<m_pSCVLayout->count();i++)
+    for(auto itr : m_pSCVLayout->findChildren<QPushButton*>())
     {
-       QPushButton *btn = qobject_cast<QPushButton *> (m_pSCVLayout->itemAt(i)->widget());
-       btn->setEnabled(true);
+       itr->setEnabled(true);
     }
+    if (auto btn = m_idxRun >= 0 ? findChild<QPushButton*>(QString::number(m_idxRun)) : nullptr)
+        btn->setStyleSheet(qss1);
+    m_idxRun = -1;
 }
 
-void objList::btn_clicked()
+void ObjList::btn_clicked()
 {
      QPushButton *btn = qobject_cast<QPushButton *>(sender());
-     obj_clicked(btn->objectName().toInt());
+     auto idx = btn->objectName().toInt();
+     obj_clicked(idx);
+     if (m_idxRun >= 0 && idx != m_idxRun)
+         QTimer::singleShot(2500, this, [=] {
+         if (m_idxRun>=0)
+            emit obj_clicked(m_idxRun);
+     });
 }

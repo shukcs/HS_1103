@@ -1,4 +1,7 @@
-﻿#include "FeederDecoder.h"
+﻿#include "FeederMgr.h"
+#include <QApplication>
+#include "RobotMgr.h"
+#include "strDecoder/strdecoder.h"
 
 /*
 * MaterialStruct
@@ -183,4 +186,45 @@ void DeviceAct::SetFeedCmd(uint16_t cmd, int ack /*= -1*/)
         cmdFeeder = cmd;
         cmdAck = ack < 0 ? cmd + 1 : ack;
     }
+}
+
+QString DeviceAct::ToString(bool b) const
+{
+    auto str = b ? QApplication::translate("DeviceAct", "开始") : QApplication::translate("DeviceAct", "完成");
+    switch (type)
+    {
+    case Dev_Robot:
+        return QApplication::translate("DeviceAct", "机械臂") + RobotMgr::actionDescribe((RobotMgr::RobotAction)robotStep, robotIndex) + str;
+    case Dev_Feeder:
+        if (!b)
+            break;
+        if (auto c = cmdFeeder == 104 ? FeederMgr::Instance().GetStore(idStore) : nullptr)
+            return  QApplication::translate("DeviceAct", "进料器") + FeederMgr::CmdDescrib(cmdFeeder) + (c->pMate ? c->pMate->name : QString());
+        return  QApplication::translate("DeviceAct", "进料器") + FeederMgr::CmdDescrib(cmdFeeder);
+    case Dev_Servo:
+        return QApplication::translate("DeviceAct", "伺服电机执行")+ FeederMgr::ServoPosDescrib((FeederMgr::RobotPostion)servoPos)+str;
+    case Dev_StepMotor:
+        return stepMotorActToString() + str;
+    case Dev_NextWait:
+        if (!b)
+            break;
+        return QApplication::translate("DeviceAct", "等待%1秒").arg(fWaitTime);
+    default:
+        break;
+    }
+    return QString();
+}
+
+QString DeviceAct::stepMotorActToString() const
+{
+    switch ((CtrlType::StepMotorType)stepType)
+    {
+    case CtrlType::Motor_Tube:   ///反应管上下电机
+        return stepDirCont ? QApplication::translate("DeviceAct", "反应管上升") : QApplication::translate("DeviceAct", "反应管下降");
+    case CtrlType::Motor_Stove:  ///炉膛开合电机
+        return stepDirCont ? QApplication::translate("DeviceAct", "炉膛打开") : QApplication::translate("DeviceAct", "炉膛闭合");
+    default:
+        break;
+    }
+    return QString();
 }

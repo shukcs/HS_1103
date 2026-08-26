@@ -28,6 +28,7 @@ LIBS+=-lopengl32
 SOURCES += $$PWD/common/DlgSerialSettings.cpp \
 	$$PWD/common/DlgSocketSettings.cpp \
 	$$PWD/common/MaskWidget.cpp \
+	$$PWD/common/ModubosProtocol.cpp \
 	$$PWD/common/mymessagebox.cpp \
     $$PWD/collectorOp/collectorop.cpp \
     $$PWD/customGraph/customgraph.cpp \
@@ -39,8 +40,9 @@ SOURCES += $$PWD/common/DlgSerialSettings.cpp \
     $$PWD/deviceOp/deviceop.cpp \
     $$PWD/Diagram/diagram.cpp \
     $$PWD/Diagram/flowset.cpp \
+    $$PWD/log/DeviceLog.cpp \
     $$PWD/manualOp/manualop.cpp \
-    $$PWD/materialFeeder/FeederDecoder.cpp \
+    $$PWD/materialFeeder/FeederMgr.cpp \
     $$PWD/materialFeeder/FeederStruct.cpp \
     $$PWD/materialFeeder/MaterialStore.cpp \
     $$PWD/materialFeeder/RobotMgr.cpp \
@@ -91,6 +93,7 @@ SOURCES += $$PWD/common/DlgSerialSettings.cpp \
 HEADERS += $$PWD/common/DlgSerialSettings.h \
     $$PWD/common/DlgSocketSettings.h \
     $$PWD/common/MaskWidget.h \
+    $$PWD/common/ModubosProtocol.h \
     $$PWD/common/mymessagebox.h \
     $$PWD/collectorOp/collectorop.h \
     $$PWD/customGraph/qcustomplot.h \
@@ -102,8 +105,9 @@ HEADERS += $$PWD/common/DlgSerialSettings.h \
     $$PWD/deviceOp/deviceop.h \
     $$PWD/Diagram/diagram.h \
     $$PWD/Diagram/flowset.h \
+    $$PWD/log/DeviceLog.h \	
     $$PWD/manualOp/manualop.h \
-    $$PWD/materialFeeder/FeederDecoder.h \
+    $$PWD/materialFeeder/FeederMgr.h \
     $$PWD/materialFeeder/MaterialStore.h \
     $$PWD/materialFeeder/RobotMgr.h \
     $$PWD/materialFeeder/subMateUi/DemoWidget.h \

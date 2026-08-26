@@ -5,7 +5,7 @@
 
 class QSerialPort;
 class DeviceAct;
-class QTcpSocket;
+class ModubosProtocol;
 class RobotMgr : public QObject
 {
     Q_OBJECT
@@ -21,7 +21,7 @@ public:
         Communicate,
         PowerOff,
         PowerOn,
-        RobotStart,
+        RobotSArmed,
         ProgmaStart,
         ProgmaPause,
     };
@@ -55,6 +55,8 @@ public:
     uint16_t GetPort()const;
     bool IsProgmaRun()const;
     void SetPause();
+
+    static QString actionDescribe(RobotAction t, uint16_t a1=1);
 public slots:
     void DoAction(const DeviceAct *act);//step RobotAction, idx
 protected:
@@ -64,15 +66,11 @@ protected:
 protected:
     void ctrl();
     void ctrlProgma();
-    QByteArray pickTcpModbus();
-    int32_t getAckLen(const uint8_t *buf, uint32_t len);
-    void onRead();
-
+    void onRead(const uint8_t *buf, uint16_t len);
     void readStat();
     void initRobot();
-    void prcsAction(const QByteArray &msg);
-    void prcsStat(const QByteArray &msg);
-    void writeInit();
+    void prcsAction(const uint8_t *buf, uint16_t len);
+    void prcsStat(const uint8_t *buf, uint16_t len);
 signals:
     void actionDone(int); //RobotStep
     void connectStatChanged(RobotStat);
@@ -80,24 +78,21 @@ private:
     RobotAction     m_curAct = None;
     int             m_curIdx = -1;
     uint16_t        m_seq = 0;
-    bool            m_bWait = false;
     bool            m_bRobotToPos = false;
     RobotAction     m_actWrite = None;
     int             m_idTimer = -1;
     int64_t         m_lastTmRcv;
     int64_t         m_lastTmCtrl = 0;
     RobotStat       m_comStat = PortClose;
-    QTcpSocket      *m_socket = nullptr;
+    ModubosProtocol *m_modbusTcp;
     bool            m_bReadRobotStat=false;
     QString         m_ip;
     uint16_t        m_port;
     bool            m_bStart = true;
     uint16_t        m_speed = 25; ///默认运行速度25%
     bool            m_bSetSpeed = false;
-    //QSerialPort     *m_port=nullptr;
     QByteArray      m_rcvs;
     ProgmaFlag      m_progmaFlag = Progma_None;
-    //QString         m_portName;
 };
 
 #endif //__RobotMgr_H__

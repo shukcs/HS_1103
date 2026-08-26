@@ -11,11 +11,11 @@ public:
    QList<QString> list;
 };
 
-class objList;
-class QVBoxLayout;
 class QComboBox;
 class QPushButton;
 class QListWidget;
+class ObjList;
+class QVBoxLayout;
 class ProgramList : public QWidget
 {
     Q_OBJECT
@@ -31,7 +31,6 @@ signals:
     void readyTorun_toColl(const QString& str);
     void sendRunTime(int time);
     void autoRun(bool run);
-
 public slots:
     void refreshBtn_clicked(void);
     void runBtn_clicked(void);
@@ -43,6 +42,11 @@ public slots:
     void obj_clicked(int index);
     void OnStoveTubeChanged(uint16_t type, uint16_t idx);
 private:
+    QComboBox *nameList;
+    QPushButton *refresh;
+    QPushButton *run;
+    QPushButton *pause;
+    QListWidget *proList;
     bool state;
     QTimer timer;
     QTimer runTimer;
@@ -54,21 +58,14 @@ private:
     int delayTime;  // 延时时间(s)
     int CirculateStartLine;  // 开始循环的位置
     int CirculateStopLine;   // 结束循环的位置
-    objList *_obj;
+    ObjList *obj;
     QVBoxLayout *V2layout;
-    QList<ListTextContent> ListMain;
+    QList<ListTextContent> m_titles;
     int total_obj = 0;
-    int obj_index = 0; // 当前运行到第几个大类
-    int run_index; // 每个大类的计数器
-    int sub_num; // 子类数量
-
-    QComboBox* nameList;
-    QPushButton* refresh;
-    QPushButton* _btnrun;
-    QPushButton* pause;
-    //    QPushButton *circulate;
-
-    QListWidget* _proList;
+    int m_runIndex = 0; // 当前运行到第几个大类
+    int run_index;      // 每个大类的计数器
+    int sub_num;        // 子类数量
+    int m_curIndex=-1;     //当前显示的标签
     bool   m_bReady = true;
 };
 

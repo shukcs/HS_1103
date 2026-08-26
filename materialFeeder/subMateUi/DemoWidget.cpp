@@ -1,7 +1,8 @@
 #include "DemoWidget.h"
 #include <QPainter>
 #include <QSet>
-#include "materialFeeder/FeederDecoder.h"
+#include "materialFeeder/FeederMgr.h"
+#include "common/ModubosProtocol.h"
 #pragma execution_character_set("utf-8")
 
 DemoWidget::DemoWidget(QWidget *p) : QWidget(p)
@@ -35,7 +36,7 @@ DemoWidget::DemoWidget(QWidget *p) : QWidget(p)
             m_wFeed = w;
             update();
         }
-        else if(!FeederMgr::Equal(w, m_wFeeding))
+        else if(!ModubosProtocol::Equal(w, m_wFeeding))
         {
             m_wFeeding = w;
             update();

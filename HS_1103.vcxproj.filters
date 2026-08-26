@@ -51,12 +51,6 @@
     <ClCompile Include="release\moc_DlgMaterialModify.cpp">
       <Filter>Genarated Files</Filter>
     </ClCompile>
-    <ClCompile Include="debug\moc_FeederDecoder.cpp">
-      <Filter>Genarated Files</Filter>
-    </ClCompile>
-    <ClCompile Include="release\moc_FeederDecoder.cpp">
-      <Filter>Genarated Files</Filter>
-    </ClCompile>
     <ClCompile Include="release\moc_FeederGroupBox.cpp">
       <Filter>Genarated Files</Filter>
     </ClCompile>
@@ -360,9 +354,6 @@
     <ClCompile Include="..\HS_1103\materialFeeder\subMateUi\DlgMaterialModify.cpp">
       <Filter>materialFeeder\subMateUi</Filter>
     </ClCompile>
-    <ClCompile Include="..\HS_1103\materialFeeder\FeederDecoder.cpp">
-      <Filter>materialFeeder</Filter>
-    </ClCompile>
     <ClCompile Include="..\HS_1103\strDecoder\portthread.cpp">
       <Filter>strdecoder</Filter>
     </ClCompile>
@@ -528,6 +519,36 @@
     <ClCompile Include="..\HS_1103\materialFeeder\FeederStruct.cpp">
       <Filter>materialFeeder</Filter>
     </ClCompile>
+    <ClCompile Include="..\HS_1103\common\DlgSocketSettings.cpp">
+      <Filter>common</Filter>
+    </ClCompile>
+    <ClCompile Include="debug\moc_FeederMgr.cpp">
+      <Filter>Genarated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="release\moc_FeederMgr.cpp">
+      <Filter>Genarated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\HS_1103\materialFeeder\FeederMgr.cpp">
+      <Filter>materialFeeder</Filter>
+    </ClCompile>
+    <ClCompile Include="..\HS_1103\common\ModubosProtocol.cpp">
+      <Filter>common</Filter>
+    </ClCompile>
+    <ClCompile Include="debug\moc_ModubosProtocol.cpp">
+      <Filter>Genarated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="release\moc_ModubosProtocol.cpp">
+      <Filter>Genarated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\HS_1103\log\DeviceLog.cpp">
+      <Filter>log</Filter>
+    </ClCompile>
+    <ClCompile Include="debug\moc_DeviceLog.cpp">
+      <Filter>Genarated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="release\moc_DeviceLog.cpp">
+      <Filter>Genarated Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ui_Valve3ChGroupBox.h">
@@ -644,6 +665,12 @@
     <ClInclude Include="ui_DlgTubeBack.h">
       <Filter>Genarated Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\HS_1103\common\DlgSocketSettings.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="ui_DlgSocketSettings.h">
+      <Filter>Genarated Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\HS_1103\desktop.h" />
@@ -670,9 +697,6 @@
     </CustomBuild>
     <CustomBuild Include="..\HS_1103\materialFeeder\subMateUi\DlgMaterialModify.h">
       <Filter>materialFeeder\subMateUi</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\HS_1103\materialFeeder\FeederDecoder.h">
-      <Filter>materialFeeder</Filter>
     </CustomBuild>
     <CustomBuild Include="..\HS_1103\strDecoder\portthread.h">
       <Filter>strdecoder</Filter>
@@ -916,6 +940,18 @@
     </CustomBuild>
     <CustomBuild Include="..\HS_1103\materialFeeder\subMateUi\MaterialsSelect.h">
       <Filter>materialFeeder\subMateUi</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\HS_1103\common\DlgSocketSettings.ui">
+      <Filter>common</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\HS_1103\materialFeeder\FeederMgr.h">
+      <Filter>materialFeeder</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\HS_1103\common\ModubosProtocol.h">
+      <Filter>common</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\HS_1103\log\DeviceLog.h">
+      <Filter>log</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
@@ -1162,6 +1198,12 @@
     <None Include="..\HS_1103\image\feeding.png">
       <Filter>res</Filter>
     </None>
+    <None Include="..\HS_1103\image\pause.png">
+      <Filter>res</Filter>
+    </None>
+    <None Include="..\HS_1103\image\start.png">
+      <Filter>res</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="res">
@@ -1218,8 +1260,13 @@
     <Filter Include="manualop">
       <UniqueIdentifier>{bbcad364-2ef4-4888-83a9-667209f7d5ea}</UniqueIdentifier>
     </Filter>
+    <Filter Include="log">
+      <UniqueIdentifier>{1a41c9ea-f54e-4d9f-b0bf-c6b8a0987105}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="E:\project\work\buildHS_1103\HS_1103_resource.rc" />
+    <ResourceCompile Include="D:\work\1104\build\HS_1103_resource.rc">
+      <Filter>res</Filter>
+    </ResourceCompile>
   </ItemGroup>
 </Project>

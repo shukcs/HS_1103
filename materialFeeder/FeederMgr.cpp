@@ -1,4 +1,4 @@
-﻿#include "FeederDecoder.h"
+﻿#include "FeederMgr.h"
 #include <QSerialPort>
 #include <QApplication>
 #include <QDateTime>
@@ -9,6 +9,8 @@
 #include <QFileInfo>
 #include "RobotMgr.h"
 #include "strDecoder/strdecoder.h"
+#include "common/ModubosProtocol.h"
+#include "log/DeviceLog.h"
 #pragma execution_character_set("utf-8")
 
 #define ModBussAddr 1
@@ -26,11 +28,12 @@ union DataU
 struct WorkItem {
     uint8_t type;
     uint8_t nNumTube;
-    uint8_t chStove; ///
     uint8_t index;   ///归还位 type=FeederMgr::J_StoveTubeBack有效
-	static WorkItem initFrom(FeederMgr::JobType t, uint8_t n, uint8_t ch = 0, uint8_t idx = 0);
+    uint8_t chStove; ///炉膛位
+	static WorkItem initFrom(FeederMgr::JobType t, uint8_t n, uint8_t idx = 0);
 	static WorkItem initFrom(int n);
 	int toInt()const;
+    QString toString(bool bStart)const; ///bStart true: 开始的文字; false: 结束的文字
 };
 
 WorkItem WorkItem::initFrom(int n)
@@ -39,9 +42,9 @@ WorkItem WorkItem::initFrom(int n)
 	return ret;
 }
 
-WorkItem WorkItem::initFrom(FeederMgr::JobType t, uint8_t n, uint8_t ch /*= 0*/, uint8_t idx /*= 0*/)
+WorkItem WorkItem::initFrom(FeederMgr::JobType t, uint8_t n, uint8_t idx /*= 0*/)
 {
-	WorkItem ret = { (uint8_t)t, n, ch, idx };
+	WorkItem ret = { (uint8_t)t, n, idx, 0};
 	return ret;
 }
 
@@ -51,17 +54,36 @@ int WorkItem::toInt() const
 	return ret;
 }
 
+QString WorkItem::toString(bool b) const
+{
+    auto str = b ? QApplication::translate("WorkItem", "开始") : QApplication::translate("WorkItem", "结束");
+    switch ((FeederMgr::JobType)type)
+    {
+    case FeederMgr::J_PrepareMate:
+        return QApplication::translate("WorkItem", "备料 反应管%1%2备料").arg(nNumTube + 1).arg(str);
+    case FeederMgr::J_StoveFixTube:
+        return QApplication::translate("WorkItem", "装填 反应管%1%2装填炉膛%3").arg(nNumTube + 1).arg(str).arg(chStove + 1);
+    case FeederMgr::J_StoveTubeBack:
+        return QApplication::translate("WorkItem", "回收 反应管%1%2回收到回收位%3").arg(nNumTube + 1).arg(str).arg(index + 1);
+    default:
+        break;
+    }
+    return QString();
+}
+
 /*
 * FeederMgr
 */
 FeederMgr::FeederMgr(QObject* p) : QObject(p)
-, m_port(new QSerialPort(qApp))
+, m_modbus(new ModubosProtocol(new QSerialPort, ModBussAddr))
 {
-    connect(m_port, &QSerialPort::readyRead, this, &FeederMgr::readByets);
-    connect(m_port, &QSerialPort::errorOccurred, this, [=](QSerialPort::SerialPortError err) {
-        emit serialPortError(err != QSerialPort::NoError);
+    auto port = (QSerialPort*)m_modbus->GetIO();
+//    connect(m_port, &QSerialPort::readyRead, this, &FeederMgr::readByets);
+    connect(port, &QSerialPort::errorOccurred, this, [=](QSerialPort::SerialPortError err) {
+        if (m_comStat != PortClose)
+            emit connectStatChanged(PortClose);
     });
-    m_idTimer = startTimer(2000);
+    connect(m_modbus, &ModubosProtocol::modbusRcvd, this, &FeederMgr::decode);
     m_idRead = startTimer(500);
     m_flag = Flag_DoReadMaterial|Flag_DoReadStore;
 
@@ -71,16 +93,15 @@ FeederMgr::FeederMgr(QObject* p) : QObject(p)
     auto baut = settings.value("baut", 9600).toInt();
     settings.endGroup();
     settings.beginGroup("FeederConfig");
-    m_port->setPortName(m_portName);
-    m_port->setBaudRate(baut);
-    m_port->setDataBits(QSerialPort::Data8);
-    m_port->setParity(QSerialPort::NoParity);
-    m_port->setStopBits(QSerialPort::OneStop);
-    connect(m_port, &QSerialPort::baudRateChanged, this, [=] {m_bPortChaned = true; });
-    m_port->open(QSerialPort::ReadWrite);
+    port->setPortName(m_portName);
+    port->setBaudRate(baut);
+    port->setDataBits(QSerialPort::Data8);
+    port->setParity(QSerialPort::NoParity);
+    port->setStopBits(QSerialPort::OneStop);
+    connect(port, &QSerialPort::baudRateChanged, this, [=] {m_bPortChaned = true; });
+    port->open(QSerialPort::ReadWrite);
     QTimer::singleShot(50, this, &FeederMgr::ConnectPort);
-    writeFunc(406);
-	m_nBottle = settings.value("nBottle", 6).toInt();
+	m_nBottle = settings.value("nBottle", 8).toInt();
     for (int i = 0; i < m_nBottle; ++i)
     {
         m_allBottle << new BottleStruct(i);
@@ -110,89 +131,50 @@ FeederMgr& FeederMgr::Instance()
     return s_ins;
 }
 
-uint16_t FeederMgr::Modbus_crc16(const uint8_t* buff, uint16_t len)
+QString FeederMgr::CmdDescrib(uint16_t cmd)
 {
-    unsigned short crc = 0xffff;
-    while (len--)
+    switch (cmd)
     {
-        crc = crc ^ (*buff++);
-        for (int i = 0; i < 8; ++i)
-        {
-            bool b = (crc & 1) == 1;
-            crc >>= 1;
-            if (b)
-                crc ^= 0xA001;
-        }
+    case 100:
+        return tr("进料开始");
+    case 102:
+        return tr("天平料瓶就绪");
+    case 104:
+        return tr("开始加料");
+    case 106:
+        return tr("料仓归位");
+    case 108:
+        return tr("配料结束");
+    case 110:
+        return tr("料瓶归位");
+    default:
+        break;
     }
-
-    return (crc >> 8) | (crc << 8);
+    return QString();
 }
 
-bool FeederMgr::Equal(double f1, double f2)
+QString FeederMgr::ServoPosDescrib(RobotPostion pos)
 {
-    return fabs(f1 - f2) < 0.000001;
-}
-
-void FeederMgr::AddModbusFloat(uint8_t* buff, float f)
-{
-    DataU tmp;
-    tmp.fD = f;
-    buff[0] = tmp.cD[2];
-    buff[1] = tmp.cD[3];
-    buff[2] = tmp.cD[0];
-    buff[3] = tmp.cD[1];
-}
-
-void FeederMgr::AddModbusData(uint8_t* buff, uint16_t u)
-{
-    DataU tmp;
-    tmp.u16D = u;
-    buff[0] = tmp.cD[1];
-    buff[1] = tmp.cD[0];
-}
-
-void FeederMgr::AddModbusU32(uint8_t* buff, uint32_t u)
-{
-    DataU tmp;
-    tmp.u32D = u;
-    buff[0] = tmp.cD[3];
-    buff[1] = tmp.cD[2];
-    buff[2] = tmp.cD[1];
-    buff[3] = tmp.cD[0];
-}
-
-float FeederMgr::PichModbusFloat(const void* src)
-{
-    auto buff = (const uint8_t*)src;
-    DataU tmp;
-    tmp.cD[2] = buff[0];
-    tmp.cD[3] = buff[1];
-    tmp.cD[0] = buff[2];
-    tmp.cD[1] = buff[3];
-
-    return tmp.fD;
-}
-
-uint16_t FeederMgr::PichModbusU16(const void* src)
-{
-    auto buff = (const uint8_t*)src;
-    DataU tmp;
-    tmp.cD[0] = buff[1];
-    tmp.cD[1] = buff[0];
-
-    return tmp.u16D;
-}
-
-uint32_t FeederMgr::PichModbusU32(const void* src)
-{
-    auto buff = (const uint8_t*)src;
-    DataU tmp;
-    tmp.cD[0] = buff[3];
-    tmp.cD[1] = buff[2];
-    tmp.cD[2] = buff[1];
-    tmp.cD[3] = buff[0];
-
-    return tmp.u32D;
+    switch (pos)
+    {
+    case FeederMgr::Pos_Tube:
+        return tr("移动到反应管架位");
+    case FeederMgr::Pos_Store:
+        return tr("移动到料仓架位");
+    case FeederMgr::Pos_InOutBlance:
+        return tr("移动到天平门位");
+    case FeederMgr::Pos_BlanceDoor:
+        return tr("移动到天平位");
+    case FeederMgr::Pos_Stove1:
+        return tr("移动到炉膛1位");
+    case FeederMgr::Pos_Stove2:
+        return tr("移动到炉膛2位");
+    case FeederMgr::Pos_Home:
+        return tr("移动到原点位");
+    default:
+        break;
+    }
+    return QString();
 }
 
 FeederMgr::RobotPostion FeederMgr::getStovePos(int ch)
@@ -225,22 +207,23 @@ QString FeederMgr::DefaultConfigFile()
 
 void FeederMgr::ConnectPort()
 {
-    if (!m_port->isOpen())
+    auto port = (QSerialPort*)m_modbus->GetIO();
+    if (!port->isOpen())
     {
         if (m_comStat != PortClose)
             emit connectStatChanged(PortClose);
         m_comStat = PortClose;
-        m_portName = m_port->portName();
+        m_portName = port->portName();
     }
     else
     {
-        if (m_portName!=m_port->portName() || m_bPortChaned)
+        if (m_portName!=port->portName() || m_bPortChaned)
         {
-            m_portName = m_port->portName();
+            m_portName = port->portName();
             QSettings settings(DefaultConfigFile(), QSettings::IniFormat);
             settings.beginGroup("FeederPort");
             settings.setValue("port", m_portName);
-            settings.setValue("baut", (int)m_port->baudRate());
+            settings.setValue("baut", (int)port->baudRate());
             settings.endGroup();
         }
         if (PortClose == m_comStat)
@@ -248,6 +231,7 @@ void FeederMgr::ConnectPort()
             m_comStat = NoData;
             emit connectStatChanged(m_comStat);
         }
+        writeFunc(406);
     }
 }
 
@@ -276,7 +260,7 @@ void FeederMgr::OnRobotDone(int typeRobot)
             if (auto c = bChange ? getStore(itr->robotIndex) : nullptr)
                 c->setStat(RobotMgr::MoveStore == typeRobot ? S_WaitFeed : S_CanFeed);
 
-            m_actions.erase(itr);
+            actionDone(itr);
             bDoNext = true;
             break;
         }
@@ -299,7 +283,7 @@ void FeederMgr::OnServoMotor(int pos, bool bReached)
     {
         if (Dev_Servo==itr->type && itr->servoPos==pos)
         {
-            itr = m_actions.erase(itr);
+            actionDone(itr);
             bDoNext = true;
             break;
         }
@@ -325,7 +309,7 @@ void FeederMgr::OnStepMotor(StepMotorStat* st)
         bool bReached = itr->stepDirCont ? st->IsLimitH() : st->IsLimitL();
         if (bReached)
         {
-            itr = m_actions.erase(itr);
+            actionDone(itr);
             bDoNext = true;
             break;
         }
@@ -336,48 +320,23 @@ void FeederMgr::OnStepMotor(StepMotorStat* st)
         doAction();
 }
 
-void FeederMgr::readByets()
+bool FeederMgr::prcsRead(uint16_t addr, const uint8_t *buff, uint16_t len)
 {
-    if (m_port->bytesAvailable() < 1)
-        return;
-
-    m_buff += m_port->readAll();
-    auto msg = pickMsg();
-    bool bRcv = false;
-    if (!msg.isEmpty())
-    {
-        decode(msg);
-        bRcv = true;
-    }
-
-    if (bRcv)
-    {
-        if (m_comStat != Communicate)
-        {
-            m_comStat = Communicate;
-            emit connectStatChanged(m_comStat);
-        }
-        m_lastTmRcv = QDateTime::currentMSecsSinceEpoch();
-    }
-}
-
-bool FeederMgr::prcsRead(uint16_t addr, const QByteArray& msg)
-{
-    if (addr >= 600 && addr < 600 * 32 * 16)
+    if (addr >= 600 && addr < 600 * 32 * 16 && len>=32)
     {
         auto idx = (addr - 600) / 16;
-        MaterialStruct m(msg.mid(3, 8).toHex().toUpper());
+        MaterialStruct m(QByteArray((const char*)buff, 8).toHex().toUpper());
         if (m.nfcid=="0000000000000000")
         {
             m_flag &= ~Flag_DoReadMaterial;
             return false;
         }
 
-        m.name = QString::fromStdString(std::string(msg.data() + 11, 10).c_str());
-        m.type = PichModbusFloat(msg.data() + 21);
-        m.usedRate = PichModbusFloat(msg.data() + 23);
-        m.weight = PichModbusFloat(msg.data() + 27);
-        memcpy(&m.ch, msg.data() + 31, 2);
+        m.name = QString::fromStdString(std::string((const char*)buff + 8, 10).c_str());
+        m.type = ModubosProtocol::PichModbusU16(buff + 18);
+        m.usedRate = ModubosProtocol::PichModbusFloat(buff + 20);
+        m.weight = ModubosProtocol::PichModbusFloat(buff + 24);
+        memcpy(&m.ch, buff + 28, 2);
 
         addMaterial(m, false);
 		if (idx + 1 < MaterialMaxNum)
@@ -389,23 +348,23 @@ bool FeederMgr::prcsRead(uint16_t addr, const QByteArray& msg)
 	return false;
 }
 
-bool FeederMgr::prcsStat(uint16_t addr, const QByteArray& msg)
+bool FeederMgr::prcsStat(uint16_t addr, const uint8_t *buff, uint16_t len)
 {
 	bool ret = false;
     switch (addr)
     {
     case 103:
-        if (m_nStoreNum >0 && m_nStoreNum < 12 && PichModbusU16(msg.data() + 3) != m_nStoreNum)
+        if (m_nStoreNum >0 && m_nStoreNum < 12 && ModubosProtocol::PichModbusU16(buff) != m_nStoreNum)
 			writeFunc(402, m_nStoreNum);
         m_flag |= Flag_StoreNumRead;
 		readStore();
 		ret = true;
 		break;
     case 105:
-        ret = prcsFeederStat(PichModbusU16(msg.data() + 3));
+        ret = prcsFeederStat(ModubosProtocol::PichModbusU16(buff));
 		break;
     case 106:
-        if (0==PichModbusU16(msg.data()+3))
+        if (0== ModubosProtocol::PichModbusU16(buff))
         {
             m_flag |= Flag_CanReadStore;
             readStore();
@@ -413,20 +372,20 @@ bool FeederMgr::prcsStat(uint16_t addr, const QByteArray& msg)
         }
         break;
     case 107:
-        if (0 == PichModbusU16(msg.data() + 3))
+        if (0 == ModubosProtocol::PichModbusU16(buff))
         {
             m_flag |= Flag_CanReadMaterial;
             readMaterials();
 			ret = true;
         }
     case 108:
-        emit feedingChanged(PichModbusFloat(msg.data() + 3), false);
+        emit feedingChanged(ModubosProtocol::PichModbusFloat(buff), false);
         break;
     default:
         if (138 <= addr && addr < 138 + 4 * m_nStoreNum)
         {
             uint32_t idx = (addr - 138) / 4;
-            QString nfcif(QByteArray(msg.data() + 3, 8).toHex());
+            QString nfcif(QByteArray((const char*)buff, 8).toHex());
             bool b = nfcif != "0100000000000000" && nfcif != "0000000000000000";
             updateStore(b ? nfcif.toUpper() : QString(), idx);
 			if (idx+1 < m_nStoreNum)
@@ -440,7 +399,7 @@ bool FeederMgr::prcsStat(uint16_t addr, const QByteArray& msg)
 	return ret;
 }
 
-bool FeederMgr::prcsWriteCmd(uint16_t addr, uint16_t cmd)
+bool FeederMgr::prcsWriteCmd(uint16_t addr)
 {
 	if (2000 != addr)
 		return false;
@@ -497,7 +456,7 @@ bool FeederMgr::prcsFeederStat(uint16_t stat)
                 c->setStat(S_Feeded);
                 m_feedStore = nullptr;
             }
-            m_actions.erase(itr);
+            actionDone(itr);
             bDoNext = true;
             break;
         }
@@ -545,6 +504,7 @@ bool FeederMgr::doAction()
             break;
         }
         act.bStart = true;
+        DeviceLog::Instance() << act.ToString();
         if (act.bWaitFinish)
             break;
     }
@@ -631,6 +591,12 @@ BottleStruct * FeederMgr::getBottle(int numb) const
     return nullptr;
 }
 
+void FeederMgr::actionDone(QList<DeviceAct>::iterator itr)
+{
+    DeviceLog::Instance() << itr->ToString();
+    m_actions.erase(itr);
+}
+
 void FeederMgr::onWait()
 {
     bool bDoNext = false;
@@ -639,7 +605,7 @@ void FeederMgr::onWait()
     {
         if (Dev_NextWait == itr->type)
         {
-            m_actions.erase(itr);
+            actionDone(itr);
             bDoNext = true;
             break;
         }
@@ -742,43 +708,29 @@ TubeStruct *FeederMgr::getTube(int idx)const
     return nullptr;
 }
 
-void FeederMgr::decode(const QByteArray& msg)
+void FeederMgr::decode(const uint8_t *buff, uint16_t len)
 {
-    if (m_sends.isEmpty())
-        return;
-
-    auto arr = m_sends.first();
-    auto addr = PichModbusU16(arr.data()+2);
-    if (arr.at(1) != msg.at(1))
-        return;
-    m_sends.removeFirst();
-	bool bSnd = false;
-    switch (arr.at(1))
+    auto addr = m_modbus->GetCurCmdAddr();
+    switch (*buff)
     {
     case 3:
-        bSnd = prcsRead(addr, msg);
+        prcsRead(addr, buff+2, len);
         break;
     case 4:
-        bSnd = prcsStat(addr, msg);
+        prcsStat(addr, buff+2, len);
         break;
     case 0x10:
-		bSnd = prcsWriteCmd(addr, PichModbusU16(arr.data() + 7));
+		prcsWriteCmd(addr);
         break;
     default:
         break;
     }
-	if (!bSnd && !m_sends.isEmpty())
-		send(m_sends.first());
-}
-
-int FeederMgr::send(const QByteArray& arr, bool bWaitWAck)
-{
-    auto ret = m_port->write(arr.data(), arr.size());
-    if (!bWaitWAck && !m_sends.isEmpty() && 404== PichModbusU16(arr.data() + 2) && arr==m_sends.first())
-        m_sends.removeFirst();
-    else
-        m_lastTmSnd = QDateTime::currentMSecsSinceEpoch();
-    return ret;
+    if (m_comStat != Communicate)
+    {
+        m_comStat = Communicate;
+        emit connectStatChanged(Communicate);
+        DeviceLog::Instance() << tr("进料器已连接");
+    }
 }
 
 void FeederMgr::genPrepareActions(const WorkItem &item)
@@ -791,24 +743,19 @@ void FeederMgr::genPrepareActions(const WorkItem &item)
 
     addFeederAct(100);
     int iGen = 0;
+    addServoMotorAct(Pos_BlanceDoor);
+    adddRobotAct(RobotMgr::OpenDoor);
+    //addServoMotorAct(Pos_InOutBlance);
+    adddRobotAct(RobotMgr::BottleInBlance, fb->getBottleNumb());
+    //addServoMotorAct(Pos_BlanceDoor);
+    adddRobotAct(RobotMgr::CloseDoor);
+    addFeederAct(102);
 	for (auto &itr : fb->feedMaterial())
     {
         iGen++;
-        addServoMotorAct(Pos_BlanceDoor);
-        adddRobotAct(RobotMgr::OpenDoor);
-        //addServoMotorAct(Pos_InOutBlance);
-        adddRobotAct(RobotMgr::BottleInBlance, fb->getBottleNumb());
-        //addServoMotorAct(Pos_BlanceDoor);
-        adddRobotAct(RobotMgr::CloseDoor);
-
-        addFeederAct(102);
-
         adddRobotAct(RobotMgr::MoveStore, itr.first);
-
         addFeederAct(104, true, 105, itr.first, itr.second);///投料
-
         adddRobotAct(RobotMgr::StoreBack, itr.first);
-
         if (iGen < fb->feedMaterial().count())
             addFeederAct(106, true, 103);
     }
@@ -824,6 +771,7 @@ void FeederMgr::genPrepareActions(const WorkItem &item)
     if (auto tb = fb->getTube())
         tb->setFlag(T_Preparing);
  
+    DeviceLog::Instance() << item.toString(true);
     doAction();
 }
 
@@ -850,6 +798,7 @@ void FeederMgr::genTubToStvoe(const WorkItem &bt)
     adddRobotAct(RobotMgr::OutStove, bt.chStove);
     addStepMotorAct(CtrlType::Motor_Stove, bt.chStove, false);
 
+    DeviceLog::Instance() << bt.toString(true);
 	doAction();
 	if (auto tb = fb->getTube())
 		tb->setFlag(T_Fixing);
@@ -871,6 +820,7 @@ void FeederMgr::genBackActions(const WorkItem &bt)
     addServoMotorAct(Pos_Home);
     adddRobotAct(RobotMgr::TubeBack, bt.nNumTube);
 
+    DeviceLog::Instance() << bt.toString(true);
 	doAction();
 	if (auto tb = fb->getTube())
 		tb->setFlag(T_Recycling);
@@ -931,78 +881,26 @@ bool FeederMgr::addWorkItem(const struct WorkItem &item)
 	return false;
 }
 
-QByteArray FeederMgr::pickMsg()
-{
-    if (m_sends.isEmpty())
-    {
-        m_buff.clear();
-        return QByteArray();
-    }
-    int idx = 0;
-    while (1)
-    {
-        idx = m_buff.indexOf(char(ModBussAddr), idx);
-        if (idx < 0)
-        {
-            m_buff.clear();
-            return QByteArray();
-        }
-        auto remian = m_buff.size() - idx;
-        if (remian < 6)
-            break;
-        auto len = getAckLen((uint8_t*)m_buff.data()+idx, m_buff.size()-idx);
-        if (len < 3)
-        {
-            ++idx;
-            continue;
-        }
-
-        if (remian < len)
-            break;
-
-        auto data = (uint8_t*)m_buff.data() + idx;
-        uint16_t crc = PichModbusU16(data+len-2);
-        if (crc == Modbus_crc16(data, len - 2))
-        {
-            auto arr = m_buff.mid(idx, len);
-            m_buff.remove(0, len + idx);
-            return arr;
-        }
-        idx++;
-    }
-    if (idx > 0)
-        m_buff.remove(0, idx);
-
-    return QByteArray();
-}
-
 void FeederMgr::timerEvent(QTimerEvent* e)
 {
-    if (e->timerId() == m_idTimer)
-    {
-        if (m_sends.isEmpty())
-        {
-	        if (Flag_DoReadMaterial & m_flag)
-	            readMaterials();
-	        else if (Flag_DoReadStore & m_flag)
-	            readStore();
-	        else
-                readFeedStat();
-        }
-    }
-    else if (e->timerId()==m_idRead)
+    if (e->timerId()==m_idRead)
     {
         if (m_comStat==Communicate && QDateTime::currentMSecsSinceEpoch() - m_lastTmRcv > ConnetTimeOut)
         {
             m_comStat = NoData;
             emit connectStatChanged(m_comStat);
+            DeviceLog::Instance() << tr("进料器连接断开");
         }
-        if (m_port->isOpen() && QDateTime::currentMSecsSinceEpoch()-m_lastTmSnd>500)
+        if (m_modbus->IsSndAll())
         {
-            if (m_feedStore)
+            if (Flag_DoReadMaterial & m_flag)
+                readMaterials();
+            else if (Flag_DoReadStore & m_flag)
+                readStore();
+            else if (m_feedStore)
                 readFeedWeight();
-            else if (!m_sends.isEmpty())
-                send(m_sends.first(), false);
+            else
+                readFeedStat();
         }
     }
 }
@@ -1010,62 +908,21 @@ void FeederMgr::timerEvent(QTimerEvent* e)
 void FeederMgr::readMaterials(int idx)
 {
     if (m_flag & Flag_CanReadMaterial)
-    {
-        uint8_t buff[6] = { 1, 3, 0, 0, 0, 16 };
-        uint16_t addr = 600 + idx * 16;
-        buff[2] = (addr >> 8);
-        buff[3] = addr & 0xff;
-        append(buff, 6);
-    }
+        m_modbus->ReadReg(600 + idx * 16, 16);
     else if (Flag_DoReadMaterial & m_flag)
-    {
-        uint8_t buff[6] = { 1, 4, 0, 107, 0, 1 };
-        append(buff, 6);
-    }
+        m_modbus->ReadRegOthor(107, 1);
 }
 
 void FeederMgr::readStore(int idx)
 {
     if (Flag_ReadStore == (m_flag & Flag_ReadStore))
     {
-        uint8_t buff[6] = { 1, 4, 0, 0, 0, 4 };
-        uint16_t addr = 138 + idx * 4;
-        buff[2] = (addr >> 8);
-        buff[3] = addr & 0xff;
-        append(buff, 6);
+        m_modbus->ReadRegOthor(138 + idx * 4, 4);
     }
     else if ((Flag_DoReadStore & m_flag) && Flag_ReadyReadStore!=(Flag_ReadyReadStore&m_flag))
     {
-        uint8_t buff[6] = { 1, 4, 0, (m_flag & Flag_StoreNumRead) ? 106:103, 0, 1 };
-        append(buff, 6);
+        m_modbus->ReadRegOthor((m_flag & Flag_StoreNumRead) ? 106:103, 1);
     }
-}
-
-void FeederMgr::append(uint8_t* buff, uint16_t len)
-{
-    QByteArray arr(len+2, 0);
-    memcpy(arr.data(), buff, len);
-    AddModbusData((uint8_t*)arr.data()+len, Modbus_crc16(buff, len));
-    if (m_sends.isEmpty())
-        send(arr);
-    m_sends << arr;
-}
-
-int FeederMgr::getAckLen(uint8_t *buff, uint32_t)const
-{
-    int ret = -1;
-    switch (buff[1])
-    {
-    case 6:
-        ret = 8; break;	///回fu源数据
-    case 0x10:
-        ret = 8; break;	///回fu源数据
-    case 3:
-    case 4:
-        ret = buff[2] + 5; break;
-    }
-
-    return ret < 256 ? ret : -1;
 }
 
 const QStringList &FeederMgr::AllAvalidMaterials() const
@@ -1106,7 +963,7 @@ void FeederMgr::ChangeMaterial(const QString& nfcid, float weight, const QString
         if (nfcid == itr->nfcid)
         {
             bool bChange = false;
-            if (itr->name != name || !Equal(itr->weight, weight))
+            if (itr->name != name || !ModubosProtocol::Equal(itr->weight, weight))
             {
                 itr->name = name;
                 itr->weight = weight;
@@ -1276,12 +1133,13 @@ bool FeederMgr::FeedSolidMaterial(const QMap<QString, float> &feeds, int numb, i
         preNumDistrs << QPair<int, float>(store->numb, itr.value());
     }
     m_feedParams << FeederParam(preNumDistrs, (uint16_t)numb, nTube);
-    auto item = WorkItem::initFrom(J_PrepareMate, nTube, ch);
+    auto item = WorkItem::initFrom(J_PrepareMate, nTube);
 	addWorkItem(item);
     genPrepareActions(item);
     if (bFix)
     {
         item.type = J_StoveFixTube;
+        item.chStove = ch;
         addWorkItem(item);
     }
 
@@ -1296,7 +1154,7 @@ bool FeederMgr::FixTube(uint16_t nTb, uint16_t ch)
 	if (!tb || !fb || !CanAddWork(J_StoveFixTube, nTb))
 		return false;
 
-	WorkItem item = WorkItem::initFrom(J_StoveFixTube, nTb, ch);
+	WorkItem item = WorkItem::initFrom(J_StoveFixTube, nTb);
 	if (tb->getFlag() == T_Prepared)
     {
         tb->setStoveCh(ch);
@@ -1319,7 +1177,7 @@ bool FeederMgr::StoveTubeBack(int ch, int nBack)
     if (!fb && !CanAddWork(J_StoveFixTube, tb->getNumber()))
         return false;
 
-	WorkItem item = WorkItem::initFrom(J_StoveTubeBack, tb->getNumber(), ch, nBack < 0 ? 0 : nBack);
+	WorkItem item = WorkItem::initFrom(J_StoveTubeBack, tb->getNumber(), nBack < 0 ? 0 : nBack);
     if (tb->getFlag() == T_Fixed)
 	{
 		addWorkItem(item);
@@ -1342,17 +1200,19 @@ uint32_t FeederMgr::GetStoreNum()const
 
 QString FeederMgr::GetCurPortName()const
 {
-    return m_port ? m_port->portName() : QString();
+    auto port = (QSerialPort*)m_modbus->GetIO();
+    return port ? port->portName() : QString();
 }
 
 int FeederMgr::GetCurPortBaut()const
 {
-    return m_port ? m_port->baudRate() : 9600;
+    auto port = (QSerialPort*)m_modbus->GetIO();
+    return port ? port->baudRate() : 9600;
 }
 
 QSerialPort * FeederMgr::serialPort() const
 {
-    return m_port;
+    return (QSerialPort*)m_modbus->GetIO();
 }
 
 FeederMgr::PortStat FeederMgr::serialPortStat() const
@@ -1362,23 +1222,20 @@ FeederMgr::PortStat FeederMgr::serialPortStat() const
 
 void FeederMgr::writeMaterial(const MaterialStruct *m, uint16_t index)
 {
-    uint8_t buff[39] = { 1, 0x10, 0, 0, 0, 16, 32 };
-    uint16_t addr = 600+ index * 16;
-    AddModbusData(buff + 2, addr);
     if (m)
     {
+        uint8_t buff[32] = { 0 };
         auto tmp = QByteArray::fromHex(m->nfcid.toUtf8());
         auto sz = tmp.size() > 8 ? 8 : tmp.size();
-        memcpy((char*)buff+15-sz, tmp.data(), sz);
-        strncpy((char*)buff + 15, m->name.toStdString().c_str(), 10);
-        AddModbusData(buff + 25, m->type);
-        AddModbusFloat(buff + 27, m->usedRate);
-        AddModbusFloat(buff + 31, m->weight);
-        memcpy((char*)buff + 35, (char*)&m->ch, 2);
+        memcpy(buff+8-sz, tmp.data(), sz);
+        strncpy((char*)buff + 8, m->name.toStdString().c_str(), 10);
+        ModubosProtocol::AddModbusU16(buff +18, m->type);
+        ModubosProtocol::AddModbusFloat(buff + 20, m->usedRate);
+        ModubosProtocol::AddModbusFloat(buff + 24, m->weight);
+        memcpy((char*)buff + 28, (char*)&m->ch, 2);
+        m_modbus->WriteMultiReg(600 + index * 16, buff, 32);
+        writeFunc(404);
     }
-    append(buff, 39);
-
-    writeFunc(404);
 }
 
 void FeederMgr::writeCmd(const DeviceAct &act)
@@ -1386,44 +1243,38 @@ void FeederMgr::writeCmd(const DeviceAct &act)
     if (Dev_Feeder != act.type)
         return;
 
-    uint8_t buff[23] = { 1, 0x10, 0, 0, 0, 1, 2, 0};
-    int len = 9;
-    AddModbusData(buff + 2, 2000);
-    AddModbusData(buff + 7, act.cmdFeeder);
+    uint8_t buff[16] = { 0 };
+    int len = 2;
+    ModubosProtocol::AddModbusU16(buff, act.cmdFeeder);
     if (auto c = act.cmdFeeder == 104 ? getStore(act.idStore) : nullptr)
     {
         auto arr = QByteArray::fromHex(c->nfcid.toUtf8());
         uint16_t sz = arr.size();
-        memcpy(buff + 9, arr.data(), sz > 8 ? 8 : sz);
-        AddModbusFloat(buff + 17, act.wFeed);
-        len = 23;
+        memcpy(buff + 2, arr.data(), sz > 8 ? 8 : sz);
+        ModubosProtocol::AddModbusFloat(buff + 10, act.wFeed);
+        len = 16;
         buff[5] = 8;
         buff[6] = 16;
         c->setStat(S_Feeding);
         m_feedStore = c;
         emit feedingChanged(act.wFeed, true);
     }
-    append(buff, len);
+    m_modbus->WriteMultiReg(2000, buff, len);
 }
 
 void FeederMgr::writeFunc(uint16_t cmd, uint16_t val)
 {
-    uint8_t buff2[6] = { 1, 6, 0, 0, 0, 1 };
-    AddModbusData(buff2 + 2, cmd);
-    AddModbusData(buff2 + 4, val);
-    append(buff2, 6);
+    m_modbus->WriteReg(cmd, val);
 }
 
 void FeederMgr::readFeedStat()
 {
-    uint8_t buff[6] = { ModBussAddr, 4, 0, 105, 0, 1 };
-    append(buff, 6);
+    m_modbus->ReadRegOthor(105);
 }
 
 void FeederMgr::readFeedWeight()
 {
-    uint8_t buff[6] = { ModBussAddr, 4, 0, 108, 0, 1 };
-    append(buff, 6);
+    m_modbus->ReadRegOthor(108);
 }
 
 int FeederMgr::indexOfMaterial(const QString& id)
@@ -1445,7 +1296,7 @@ void FeederMgr::addMaterial(const MaterialStruct& m, bool bAdd)
     {
         if (m.nfcid==itr->nfcid) ///相同id，看时间顺序使用最新的
         {
-            if (itr->name != m.name || !Equal(itr->weight, m.weight))
+            if (itr->name != m.name || !ModubosProtocol::Equal(itr->weight, m.weight))
             {
                 itr->name = m.name;
                 itr->weight = m.weight;

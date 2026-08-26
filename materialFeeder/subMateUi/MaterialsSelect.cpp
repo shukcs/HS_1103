@@ -1,7 +1,7 @@
 ﻿#include "MaterialsSelect.h"
 #include <qEvent.h>
 #include <QMap>
-#include "../FeederDecoder.h"
+#include "../FeederMgr.h"
 #include "common/MaskWidget.h"
 
 #include "ui_MaterialsSelect.h"

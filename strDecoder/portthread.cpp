@@ -7,7 +7,8 @@
 #include <QApplication>
 
 #include "strdecoder.h"
-#include "materialFeeder/FeederDecoder.h"
+#include "materialFeeder/FeederMgr.h"
+#include "common/ModubosProtocol.h"
 
 /******************************************************************************************
 * portThread
@@ -349,7 +350,7 @@ QByteArray portThread::pickMsg()
                 break;
 
             uint16_t crc = (data[pos + len] << 8) | data[pos + len + 1];
-            if (crc == FeederMgr::Modbus_crc16(data + pos, len))
+            if (crc == ModubosProtocol::ModbusCrc(data + pos, len))
             {
                 auto ret = m_buff.mid(pos, len + 2);
                 m_buff = m_buff.mid(pos + len + 2);

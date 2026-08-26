@@ -1,5 +1,5 @@
 ﻿#include "DlgFeedMaterial.h"
-#include "../FeederDecoder.h"
+#include "../FeederMgr.h"
 
 #include "ui_DlgFeedMaterial.h"
 #pragma execution_character_set("utf-8")

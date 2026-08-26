@@ -1,6 +1,6 @@
 ﻿#include "DlgMaterialModify.h"
 #include <QCheckBox>
-#include "../FeederDecoder.h"
+#include "../FeederMgr.h"
 
 #include "ui_DlgMaterialModify.h"
 #pragma execution_character_set("utf-8")

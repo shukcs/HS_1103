@@ -3,12 +3,13 @@
 #include <QSerialPort>
 #include <QItemDelegate>
 #include <QPainter>
-#include "FeederDecoder.h"
+#include "FeederMgr.h"
 #include "subMateUi/DlgMaterialModify.h"
 #include "subMateUi/DlgFeedMaterial.h"
 #include "subMateUi/DlgTubeBack.h"
 #include "common/DlgSerialSettings.h"
 #include "common/DlgSocketSettings.h"
+#include "log/DeviceLog.h"
 #include "RobotMgr.h"
 
 #include "ui_MaterialStore.h"
@@ -25,56 +26,55 @@ public:
     }
     void paint(QPainter* p, const QStyleOptionViewItem& opt, const QModelIndex& index) const override
     {
-		static QIcon ic{ ":/image/store.png" };
-		ic.paint(p, opt.rect);
         p->setRenderHint(QPainter::Antialiasing);
-		QColor col(Qt::lightGray);
-		if (auto c = index.data(Qt::UserRole + 1).value<const StoreStruct*>())
-		{
-			switch (c->getStat())
-			{
-			case  S_NoMate:
-				col = Qt::white; break;
-			case S_CanFeed:
-			case S_WaitFeed:
-			case S_Feeded:
-				col = Qt::darkGreen; break;
-			case S_Feeding:
-				col = QColor("#00c0f0"); break;
-			default:
-				break;
-			}
+        static QIcon ic{ ":/image/store.png" };
+        ic.paint(p, opt.rect);
+        QColor col(Qt::lightGray);
+        if (auto c = index.data(Qt::UserRole + 1).value<const StoreStruct*>())
+        {
+            switch (c->getStat())
+            {
+            case  S_NoMate:
+                col = Qt::white; break;
+            case S_CanFeed:
+            case S_WaitFeed:
+            case S_Feeded:
+                col = Qt::darkGreen; break;
+            case S_Feeding:
+                col = QColor("#00c0f0"); break;
+            default:
+                break;
+            }
             auto ft = QFont(tr("宋体"));
             ft.setPointSize(c->nfcid.isEmpty() ? 30 : 12);
             p->setFont(ft);
-		}
-		auto rc = opt.rect.adjusted(17, 69, -15, -51);
+        }
+        auto rc = opt.rect.adjusted(17, 69, -15, -51);
         p->setBrush(col);
-		p->setPen(Qt::transparent);
-		p->drawRect(rc);
-		p->setPen(Qt::black);
-		p->drawText(rc, Qt::AlignCenter, index.data(Qt::DisplayRole).toString());
-    }
+        p->setPen(Qt::transparent);
+        p->drawRect(rc);
+        p->setPen(Qt::black);
+        p->drawText(rc, Qt::AlignCenter, index.data(Qt::DisplayRole).toString());
+	}
 };
 
 class BottleDelegate : public QItemDelegate
 {
 public:
-    explicit BottleDelegate(QObject* p = nullptr) : QItemDelegate(p) {}
+	explicit BottleDelegate(QObject* p = nullptr) : QItemDelegate(p) {}
 
-    QSize sizeHint(const QStyleOptionViewItem&, const QModelIndex&)const override
+	QSize sizeHint(const QStyleOptionViewItem&, const QModelIndex&)const override
     {
         return QSize(98, 170);
-    }
-    void paint(QPainter* p, const QStyleOptionViewItem& opt, const QModelIndex& index) const override
+	}
+	void paint(QPainter* p, const QStyleOptionViewItem& opt, const QModelIndex& index) const override
     {
         p->setRenderHint(QPainter::Antialiasing);
-		static QIcon ic[] = {QIcon(":/image/bottle_gray.png"),QIcon(":/image/bottle_white.png"), QIcon(":/image/bottle_orange.png")
-			, QIcon(":/image/bottle_sky.png"), QIcon(":/image/bottle_green.png"), QIcon(":/image/bottle_red.png"), };
-
-		int idx=0;
-		if (auto bt = index.data(Qt::UserRole + 1).value<BottleStruct*>())
-		{
+        static QIcon ic[] = { QIcon(":/image/bottle_gray.png"),QIcon(":/image/bottle_white.png"), QIcon(":/image/bottle_orange.png")
+            , QIcon(":/image/bottle_sky.png"), QIcon(":/image/bottle_green.png"), QIcon(":/image/bottle_red.png"), };
+        int idx = 0;
+        if (auto bt = index.data(Qt::UserRole + 1).value<BottleStruct*>())
+        {
             switch (bt->getFlag())
             {
             case B_CanUse:
@@ -210,14 +210,6 @@ void MaterialStore::initFeederDecode()
     connect(&FeederMgr::Instance(), &FeederMgr::storeChanged, this, &MaterialStore::updateStore);
     connect(&FeederMgr::Instance(), &FeederMgr::bottleChanged, this, [=] {m_ui->listWidget->update(); });
     connect(&FeederMgr::Instance(), &FeederMgr::tubeChanged, this, [=] {m_ui->listWidget_2->update(); });
-
-    for (int i = 0; ; i++)
-    {
-        if (auto c = FeederMgr::Instance().GetStore(i))
-            updateStore(c);
-        else
-            break;
-    }
 }
 
 void MaterialStore::initUi()
@@ -310,7 +302,7 @@ void MaterialStore::initUi()
         case RobotMgr::Communicate:
         case RobotMgr::PowerOff:
         case RobotMgr::PowerOn:
-        case RobotMgr::RobotStart:
+        case RobotMgr::RobotSArmed:
         case RobotMgr::ProgmaStart:
             strProgma = ":/image/start.png";
             m_ui->btn_progma->setIcon(QIcon(":/image/pause.png"));
@@ -332,7 +324,21 @@ void MaterialStore::initUi()
         if (dlg.exec() == QDialog::Accepted)
             m_robot->ConnectSocket(dlg.GetHost(), dlg.GetPort());
     });
-    connect(m_ui->btn_balance, &QPushButton::clicked, this, [=] {m_ui->stackedWidget->setCurrentWidget(m_ui->demo); });
-    connect(m_ui->btn_list, &QPushButton::clicked, this, [=] {m_ui->stackedWidget->setCurrentWidget(m_ui->page); });
     connect(m_ui->btn_progma, &QPushButton::clicked, m_robot, &RobotMgr::SetPause);
+
+    static QMap<QPushButton *, QWidget*> sMap = { { m_ui->btn_lbalance, m_ui->demo },{ m_ui->btn_mbalance, m_ui->demo },
+    { m_ui->btn_llist, m_ui->page }, { m_ui->btn_blist, m_ui->page },
+    { m_ui->btn_mlog, m_ui->log }, { m_ui->btn_blog, m_ui->log } };
+
+    for (auto itr = sMap.begin(); itr != sMap.end(); ++itr)
+    {
+        connect(itr.key(), &QPushButton::clicked, this, [=] {
+            if (auto it = sMap.value(qobject_cast<QPushButton *>(sender())))
+                m_ui->stackedWidget->setCurrentWidget(it);
+        });
+    }
+
+    connect(&DeviceLog::Instance(), &DeviceLog::itemAdded, [=](const LogItem &it) {
+        m_ui->list_log->addItem(it.content());
+    });
 }

@@ -37,12 +37,13 @@ QString FeederGroupBox::_getFeedMateStr()const
     QString strBottle = tmp < 0 ? tr("自动") : QString::number(tmp + 1);
     tmp = m_ui->widget->GetTubeNumber();
     auto strTube = tmp < 0 ? tr("自动") : QString::number(tmp + 1);
-	QString ret = tr(" 配料 料瓶 %1 反应管 %2 ").arg(strBottle).arg(strTube);
+	QString ret = tr("固体配料: 称取");
 	for (auto itr=feeds.begin(); itr != feeds.end(); ++itr)
 	{
-		ret += itr.key();
-		ret += " " + QString::number(itr.value());
+		ret += " " + itr.key();
+		ret += " " + QString::number(itr.value())+tr("克");
 	}
+    ret += tr(" 入料瓶 %1 ,再倒入 反应管 %2").arg(strBottle).arg(strTube);
 	return ret;
 }
 
@@ -98,7 +99,7 @@ void FeederGroupBox::addTube(const TubeStruct* tube)
 
 void FeederGroupBox::onAdd()
 {
-    emit sig_Add(title() + _getFeedMateStr());
+    emit sig_Add(_getFeedMateStr());
 }
 
 void FeederGroupBox::onTubeBack()

@@ -3,21 +3,21 @@
 
 #include <QGroupBox>
 namespace Ui {
-    class Valve3ChGroupBox;
+    class FeedLiquidGroupBox;
 }
-class Valve3ChGroupBox : public QGroupBox
+class FeedLiquidGroupBox : public QGroupBox
 {
     Q_OBJECT
 public:
-    explicit Valve3ChGroupBox(QWidget *parent=nullptr);
-    ~Valve3ChGroupBox();
+    explicit FeedLiquidGroupBox(QWidget *parent=nullptr);
+    ~FeedLiquidGroupBox();
 protected:
-    QString _getChStr()const;
     QString _getOutString()const;
+    void onValueChanged();
 signals:
     void sig_Add(const QString &str);
 private:
-    Ui::Valve3ChGroupBox*  m_ui;
+    Ui::FeedLiquidGroupBox*  m_ui;
 };
 
 #endif // __Valve3ChGroupBox_H__

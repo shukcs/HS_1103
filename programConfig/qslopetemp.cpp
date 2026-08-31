@@ -157,13 +157,13 @@ void QSlopeTemp::helpBtn_clicked()
 
     layout->addStretch();
     QLabel text1;
-    text1.setAlignment(Qt::AlignHCenter);
-    text1.setText("输入框数值非空");
+    text1.setAlignment(Qt::AlignVCenter | Qt::AlignLeft);
+    text1.setText("输入框数值不允许为空！");
     layout->addWidget(&text1);
 
     QLabel text2;
-    text2.setAlignment(Qt::AlignHCenter);
-    text2.setText("时间>0，升温；时间=0，降温");
+    text2.setAlignment(Qt::AlignVCenter | Qt::AlignLeft);
+    text2.setText("当设定时间大于0时，炉膛执行升温；\n当设定时间等于0时，炉膛执行降温！");
     layout->addWidget(&text2);
     layout->addStretch();
 

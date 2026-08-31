@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>386</width>
-    <height>107</height>
+    <height>129</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -63,7 +63,7 @@ QListView{
   font-size:16px;
 }</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0,0">
+  <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0,0,0">
    <property name="sizeConstraint">
     <enum>QLayout::SetFixedSize</enum>
    </property>
@@ -99,9 +99,16 @@ QListView{
     </layout>
    </item>
    <item>
-    <widget class="QLabel" name="label_2">
+    <widget class="QLabel" name="lb_tipback">
      <property name="text">
       <string>  您确定要把炉膛中的反应管取回，并放入管架上？</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QLabel" name="lb_tipclear">
+     <property name="text">
+      <string>  您确定反应管已清理，并归放原位？</string>
      </property>
     </widget>
    </item>

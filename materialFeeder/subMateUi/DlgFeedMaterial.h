@@ -10,6 +10,7 @@ namespace Ui {
 class QComboBox;
 class SpinCust;
 class FeederParam;
+class BottleStruct;
 class DlgFeedMaterial : public QDialog
 {
     Q_OBJECT
@@ -22,13 +23,13 @@ public:
     explicit DlgFeedMaterial(QWidget *parent = 0);
     ~DlgFeedMaterial();
 
-    void Init(const FeederParam *bt);
-    bool FeedBottle(QMap<QString, float>* mates);
-    int GetTubeNumb();
-    void SetBottleAvlible(bool b);
+    void Init(const FeederParam *pr, BottleStruct *bt);
+    bool GetFeedParam(QMap<QString, float>* mates)const;
+    int GetTubeNumb()const;
     int GetChannel()const;
 private:
     void initUi();
+    void setBottleAvlible(bool b);
 signals:
     void bottleAvlibleChanged(bool);
 private:

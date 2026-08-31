@@ -33,7 +33,7 @@ struct WorkItem {
 	static WorkItem initFrom(FeederMgr::JobType t, uint8_t n, uint8_t idx = 0);
 	static WorkItem initFrom(int n);
 	int toInt()const;
-    QString toString(bool bStart)const; ///bStart true: 开始的文字; false: 结束的文字
+    QString toString(bool bStart=true)const; ///bStart true: 开始的文字; false: 结束的文字
 };
 
 WorkItem WorkItem::initFrom(int n)
@@ -56,7 +56,7 @@ int WorkItem::toInt() const
 
 QString WorkItem::toString(bool b) const
 {
-    auto str = b ? QApplication::translate("WorkItem", "开始") : QApplication::translate("WorkItem", "结束");
+    auto str = b ? QApplication::translate("WorkItem", "开始") : QApplication::translate("WorkItem", "完成");
     switch ((FeederMgr::JobType)type)
     {
     case FeederMgr::J_PrepareMate:
@@ -79,7 +79,7 @@ FeederMgr::FeederMgr(QObject* p) : QObject(p)
 {
     auto port = (QSerialPort*)m_modbus->GetIO();
 //    connect(m_port, &QSerialPort::readyRead, this, &FeederMgr::readByets);
-    connect(port, &QSerialPort::errorOccurred, this, [=](QSerialPort::SerialPortError err) {
+    connect(port, &QSerialPort::errorOccurred, this, [=](QSerialPort::SerialPortError) {
         if (m_comStat != PortClose)
             emit connectStatChanged(PortClose);
     });
@@ -105,16 +105,28 @@ FeederMgr::FeederMgr(QObject* p) : QObject(p)
     for (int i = 0; i < m_nBottle; ++i)
     {
         m_allBottle << new BottleStruct(i);
+        FeederRecover::Instance().RecoverBottle(m_allBottle.last());
     }
     m_nTube = settings.value("nTube", 8).toInt();
     for (int i = 0; i < m_nTube; ++i)
     {
         m_allTube << new TubeStruct(i);
+        FeederRecover::Instance().RecoverTube(m_allTube.last());
     }
     m_nStoreNum = settings.value("StoreNum", 6).toInt();
     settings.endGroup();
     ConnectPort();
     readMaterials();
+     QTimer::singleShot(50, this, [=] {
+         for (int i = 0; i < 6; i++)
+         {
+             AddMaterial("000" + QString::number(123 + i), "固体" + QString::number(i), 57.1 + i);
+         }
+         for (int i = 0; i < 6; i++)
+         {
+             updateStore(i > 0 ? "000" + QString::number(123 + i) : QString(), i);
+         }
+     });
 }
 
 FeederMgr::~FeederMgr()
@@ -192,17 +204,23 @@ FeederMgr::RobotPostion FeederMgr::getStovePos(int ch)
 
 QString FeederMgr::DefaultConfigFile()
 {
-    auto iniFile = QFileInfo(QCoreApplication::applicationDirPath() + "/user/config.ini");
-    auto dir = QFileInfo(iniFile).dir();
-    if (!dir.exists())
-        dir.mkdir(dir.absolutePath());
-    QFile f(iniFile.absoluteFilePath());
+    auto iniFile = AppDir("user") + "/config.ini";
+    QFile f(iniFile);
     if (!f.exists())
     {
         f.open(QIODevice::WriteOnly);
         f.close();
     }
-    return iniFile.absoluteFilePath();
+    return iniFile;
+}
+
+QString FeederMgr::AppDir(const QString& subDir)
+{
+    QDir dir(QCoreApplication::applicationDirPath() + "/" + subDir);
+    if (!dir.exists())
+        dir.mkdir(dir.absolutePath());
+
+    return dir.absolutePath();
 }
 
 void FeederMgr::ConnectPort()
@@ -475,13 +493,11 @@ bool FeederMgr::doAction()
     if (m_actions.isEmpty())
         return false;
 
-	bool bWaiNext = false;
 	bool ret = false;
     for (auto &act : m_actions)
     {
-        if (act.bStart || bWaiNext)
+        if (act.bStart)
         {
-            bWaiNext = (act.type == Dev_NextWait);
             if (act.bWaitFinish)
                 break;
             continue;
@@ -499,7 +515,6 @@ bool FeederMgr::doAction()
 			ret = true;
 			break;
         case Dev_NextWait:
-            bWaiNext = true;
             QTimer::singleShot(act.fWaitTime*1000, this, &FeederMgr::onWait);
             break;
         }
@@ -594,6 +609,7 @@ BottleStruct * FeederMgr::getBottle(int numb) const
 void FeederMgr::actionDone(QList<DeviceAct>::iterator itr)
 {
     DeviceLog::Instance() << itr->ToString();
+    FeederRecover::Instance().FeedActionDone();
     m_actions.erase(itr);
 }
 
@@ -686,6 +702,34 @@ bool FeederMgr::CanAddWork(JobType t, int numTub, bool bProg)const
 	return false;
 }
 
+void FeederMgr::ReuseBottle(int num)
+{
+    if (auto b = getBottle(num))
+    {
+        if (b->getFlag() == B_Used)
+            b->setFlag(B_CanUse);
+
+        for (auto itr = m_feedParams.begin(); itr != m_feedParams.end();++itr)
+        {
+            if (itr->getBottleNumb() == num)
+            {
+                FeederRecover::Instance().Removed(*itr);
+                m_feedParams.erase(itr);
+                break;
+            }
+        }
+    }
+}
+
+void FeederMgr::ReuseTube(int num)
+{
+    if (auto b = getTube(num))
+    {
+        if (b->getFlag() == T_Recyced)
+            b->setFlag(T_WaitPrepare);
+    }
+}
+
 QList<FeederMgr::JobType> FeederMgr::tubeJobs(int numTub)const
 {
 	QList<JobType> ret;
@@ -733,7 +777,7 @@ void FeederMgr::decode(const uint8_t *buff, uint16_t len)
     }
 }
 
-void FeederMgr::genPrepareActions(const WorkItem &item)
+void FeederMgr::genPrepareActions(const WorkItem &item, bool bDo)
 {
     if(!m_actions.isEmpty())
 		return;
@@ -771,17 +815,19 @@ void FeederMgr::genPrepareActions(const WorkItem &item)
     if (auto tb = fb->getTube())
         tb->setFlag(T_Preparing);
  
-    DeviceLog::Instance() << item.toString(true);
+    DeviceLog::Instance() << item.toString();
+    if (bDo)
+        FeederRecover::Instance().FeedJobStart(m_actions.size());
     doAction();
 }
 
-void FeederMgr::genTubToStvoe(const WorkItem &bt)
+void FeederMgr::genTubToStvoe(const WorkItem &bt, bool bDo)
 {
     if (!m_actions.isEmpty())
 		return;
-	auto fb = getfeedParamsByTube(bt.nNumTube);
-	if (!fb)
-		return;
+    auto tb = getTube(bt.nNumTube);
+    if (!tb || tb->getFlag()!=T_WaitFix)
+        return;
 
     addServoMotorAct(Pos_BlanceDoor);
     adddRobotAct(RobotMgr::MoveTube, bt.nNumTube);
@@ -798,18 +844,20 @@ void FeederMgr::genTubToStvoe(const WorkItem &bt)
     adddRobotAct(RobotMgr::OutStove, bt.chStove);
     addStepMotorAct(CtrlType::Motor_Stove, bt.chStove, false);
 
-    DeviceLog::Instance() << bt.toString(true);
+    DeviceLog::Instance() << bt.toString();
+    tb->setFlag(T_Fixing);
+    if (bDo)
+        FeederRecover::Instance().FeedJobStart(m_actions.size());
 	doAction();
-	if (auto tb = fb->getTube())
-		tb->setFlag(T_Fixing);
 }
 
-void FeederMgr::genBackActions(const WorkItem &bt)
+void FeederMgr::genBackActions(const WorkItem &bt, bool bDo)
 {
     if (!m_actions.isEmpty())
 		return;
-	auto fb = getfeedParamsByTube(bt.nNumTube);
-	if (!fb)
+
+    auto tb = getTube(bt.nNumTube);
+	if (!tb || tb->getFlag()!=T_WaitRecycle)
 		return;
 
     addStepMotorAct(CtrlType::Motor_Stove, bt.chStove, true, false);
@@ -820,37 +868,43 @@ void FeederMgr::genBackActions(const WorkItem &bt)
     addServoMotorAct(Pos_Home);
     adddRobotAct(RobotMgr::TubeBack, bt.nNumTube);
 
-    DeviceLog::Instance() << bt.toString(true);
+    DeviceLog::Instance() << bt.toString();
+    tb->setFlag(T_Recycling);
+    if (bDo)
+        FeederRecover::Instance().FeedJobStart(m_actions.size());
 	doAction();
-	if (auto tb = fb->getTube())
-		tb->setFlag(T_Recycling);
 }
 
-void FeederMgr::checkActions()
+void FeederMgr::checkActions(bool bDo)
 {
     if (m_actions.isEmpty() && !m_jobs.isEmpty())
     {
-        auto item = WorkItem::initFrom(m_jobs.takeFirst());
-        if (auto fp = getfeedParamsByTube(item.nNumTube))
+        if(bDo)
         {
-            fp->feederFinish(item.type);
-            QTimer::singleShot(10, this, [=] {emit feedTubeChanged(item.type, item.chStove); });
+            auto item = WorkItem::initFrom(m_jobs.takeFirst());
+            DeviceLog::Instance() << item.toString(false);
+            FeederRecover::Instance().AddJobs(m_jobs);
 
-            if (!m_jobs.isEmpty())
+            if (auto fp = getfeedParamsByTube(item.nNumTube))
             {
-                item = WorkItem::initFrom(m_jobs.first());
-                switch (item.type)
-                {
-                case J_PrepareMate:
-                    genPrepareActions(item); break;
-                case J_StoveFixTube:
-                    genTubToStvoe(item); break;
-                case J_StoveTubeBack:
-                    genBackActions(item); break;
-                default:
-                    break;
-                }
+                fp->feederFinish(item.type);
+                QTimer::singleShot(10, this, [=] {emit feedJobFinished(item.type, item.chStove); });
             }
+        }
+        if (!m_jobs.isEmpty())
+        {
+            auto item = WorkItem::initFrom(m_jobs.first());
+            switch (item.type)
+            {
+            case J_PrepareMate:
+                genPrepareActions(item, bDo); break;
+            case J_StoveFixTube:
+                genTubToStvoe(item, bDo); break;
+            case J_StoveTubeBack:
+                genBackActions(item, bDo); break;
+            }
+            if (bDo)
+                FeederRecover::Instance().FeedJobStart(m_actions.size());
         }
     }
 }
@@ -876,6 +930,7 @@ bool FeederMgr::addWorkItem(const struct WorkItem &item)
 			return false;
 		}
 		m_jobs << item.toInt();
+        FeederRecover::Instance().AddJobs(m_jobs);
 		return true;
 	}
 	return false;
@@ -1133,6 +1188,7 @@ bool FeederMgr::FeedSolidMaterial(const QMap<QString, float> &feeds, int numb, i
         preNumDistrs << QPair<int, float>(store->numb, itr.value());
     }
     m_feedParams << FeederParam(preNumDistrs, (uint16_t)numb, nTube);
+    FeederRecover::Instance().AddFeedParam(m_feedParams.last());
     auto item = WorkItem::initFrom(J_PrepareMate, nTube);
 	addWorkItem(item);
     genPrepareActions(item);
@@ -1340,9 +1396,6 @@ void FeederMgr::updateStore(const QString& nfcid, int idx)
 	if (m)
 		stat = S_CanFeed;
 
-    if (idx + 1 == m_nStoreNum)
-        m_flag &= ~Flag_DoReadStore;
-
     for (auto& itr : m_allStore)
     {
         if (itr->numb==idx)
@@ -1361,8 +1414,50 @@ void FeederMgr::updateStore(const QString& nfcid, int idx)
         }
     }
 	auto tmp = new StoreStruct(idx, m, nfcid);
-	tmp->setStat(stat);
+    tmp->setStat(stat);
+    FeederRecover::Instance().RecoverStore(tmp);
     m_allStore << tmp;
     emit storeChanged(tmp);
     checkMatesCanFeed();
+    if (idx + 1 == m_nStoreNum)
+    {
+        m_flag &= ~Flag_DoReadStore;
+        FeederRecover::Instance().RecoverJobs(m_jobs);
+        FeederRecover::Instance().RecoverFeedParam(m_feedParams);
+        recoverActions();
+    }
+}
+
+void FeederMgr::recoverActions()
+{
+    auto rem = FeederRecover::Instance().GetRemainActions();
+    checkActions(false);
+    if (rem <= m_actions.size() && rem>0)
+    {
+        int nServo = -1;
+        QList<int> dones;
+        for (int i = m_actions.size()-rem; i > 0; ++i)
+        {
+            auto &item = m_actions.at(i);
+            if (Dev_Servo == item.type)
+            {
+                if (nServo >= 0)
+                    dones << i;
+
+                nServo = i;
+                continue;
+            }
+            if (!item.bWaitFinish)
+                continue;
+
+            dones << i;
+        }
+        qSort(dones);
+        while (!dones.isEmpty())
+        {
+            m_actions.removeAt(dones.last());
+            dones.pop_back();
+        }
+    }
+    doAction();
 }

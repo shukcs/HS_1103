@@ -86,6 +86,9 @@ static QString qss2 = "QPushButton {"
 
 void ObjList::setRun(int index)
 {
+    if (m_idxRun == index)
+        return;
+
     for (auto i = 0; i < m_pSCVLayout->count(); i++)
     {
         if (QPushButton *btn = qobject_cast<QPushButton *> (m_pSCVLayout->itemAt(i)->widget()))
@@ -113,7 +116,7 @@ void ObjList::btn_clicked()
 {
      QPushButton *btn = qobject_cast<QPushButton *>(sender());
      auto idx = btn->objectName().toInt();
-     obj_clicked(idx);
+     emit obj_clicked(idx);
      if (m_idxRun >= 0 && idx != m_idxRun)
          QTimer::singleShot(2500, this, [=] {
          if (m_idxRun>=0)

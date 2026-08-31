@@ -41,6 +41,8 @@ public slots:
     void clear_sub_list();
     void obj_clicked(int index);
     void OnStoveTubeChanged(uint16_t type, uint16_t idx);
+protected:
+    void runTitle();
 private:
     QComboBox *nameList;
     QPushButton *refresh;
@@ -50,22 +52,18 @@ private:
     bool state;
     QTimer timer;
     QTimer runTimer;
-    int runTime;   //  程序运行时间
-    int programCnt;   //  程序条目计数
-    int totalCnt;   //  总数量
-    int circulationCnt;  // 循环次数
+    int runTime;        //  程序运行时间
+    int programCnt;     //  程序条目计数
+    int circulationCnt;       // 循环次数
     int totalcirculationCnt;  // 总循环次数
-    int delayTime;  // 延时时间(s)
+    int delayTime;           // 延时时间(s)
     int CirculateStartLine;  // 开始循环的位置
     int CirculateStopLine;   // 结束循环的位置
     ObjList *obj;
     QVBoxLayout *V2layout;
     QList<ListTextContent> m_titles;
-    int total_obj = 0;
-    int m_runIndex = 0; // 当前运行到第几个大类
-    int run_index;      // 每个大类的计数器
-    int sub_num;        // 子类数量
-    int m_curIndex=-1;     //当前显示的标签
+    int m_runIndex = 0;     // 当前运行到第几个大类
+    int m_curIndex = -1;     //当前显示的标签
     bool   m_bReady = true;
 };
 

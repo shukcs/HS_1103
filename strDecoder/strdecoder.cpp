@@ -166,7 +166,7 @@ strDecoder::strDecoder(QObject *parent, const QString &name) : QObject(parent)
     connect(thread, &portThread::ackRecved, this, &strDecoder::onAckRecved);
     connect(m_timer, &QTimer::timeout, this, &strDecoder::timer_out);
     connect(&FeederMgr::Instance(), &FeederMgr::actionRun, this, &strDecoder::onActionRun);
-    connect(&FeederMgr::Instance(), &FeederMgr::feedTubeChanged, this, &strDecoder::stoveTubeChaned);
+    connect(&FeederMgr::Instance(), &FeederMgr::feedJobFinished, this, &strDecoder::stoveTubeChaned);
     connect(this, &strDecoder::stepMotorStatChanged, &FeederMgr::Instance(), &FeederMgr::OnStepMotor);
     connect(this, &strDecoder::servoMotorStatChanged, &FeederMgr::Instance(), &FeederMgr::OnServoMotor);
     m_stepMotorStat[0].SetType(CtrlType::Motor_Pipelet);

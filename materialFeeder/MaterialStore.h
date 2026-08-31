@@ -23,6 +23,9 @@ private slots:
 private:
     void initFeederDecode();
     void initUi();
+    void initRobotStat();
+    void initFeederStat();
+    void initLog();
 private:
     Ui::MaterialStore       *m_ui;
     RobotMgr                *m_robot;

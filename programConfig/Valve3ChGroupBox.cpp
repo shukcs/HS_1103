@@ -3,37 +3,32 @@
 #include "Ui_Valve3ChGroupBox.h"
 #pragma execution_character_set("utf-8")
 
-Valve3ChGroupBox::Valve3ChGroupBox(QWidget *parent) : QGroupBox(parent)
-, m_ui(new Ui::Valve3ChGroupBox)
+FeedLiquidGroupBox::FeedLiquidGroupBox(QWidget *parent) : QGroupBox(parent)
+, m_ui(new Ui::FeedLiquidGroupBox)
 {
     m_ui->setupUi(this);
+    m_ui->pushButton->setEnabled(false);
     connect(m_ui->pushButton, &QPushButton::clicked, this, [=] {
-        emit sig_Add(title() + _getChStr() + _getOutString());
+        emit sig_Add(_getOutString());
     });
+    connect(m_ui->spin, static_cast<void(QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this, &FeedLiquidGroupBox::onValueChanged);
+    connect(m_ui->spin_air, static_cast<void(QSpinBox::*)(int)>(&QSpinBox::valueChanged), this, &FeedLiquidGroupBox::onValueChanged);
+ //   connect(m_ui->spin_feed, static_cast<void(QSpinBox::*)(int)>(&QSpinBox::valueChanged), this, &FeedLiquidGroupBox::onValueChanged);
 }
 
-Valve3ChGroupBox::~Valve3ChGroupBox()
+FeedLiquidGroupBox::~FeedLiquidGroupBox()
 {
     delete m_ui;
 }
 
-QString Valve3ChGroupBox::_getChStr()const
+QString FeedLiquidGroupBox::_getOutString() const
 {
-    switch (m_ui->cmb_ch->currentIndex())
-    {
-    case 0:
-        return  tr(" 通道 1");
-    case 1:
-        return  tr(" 通道 2");
-    case 2:
-        return  tr(" 通道 1 2");
-    default:
-        break;
-    }
-    return QString();
+    return tr("取液 通道 %1 流速(ml/s) %2 排空时间(s) %3 配液时间(s) %4").arg(m_ui->cmb_out->currentIndex()+1)
+        .arg(m_ui->spin->value()).arg(m_ui->spin_air->value())/*.arg(m_ui->spin_feed->value())*/;
 }
 
-QString Valve3ChGroupBox::_getOutString() const
+void FeedLiquidGroupBox::onValueChanged()
 {
-    return tr(" 通向 %1").arg(m_ui->cmb_out->currentIndex());
+    bool b = m_ui->spin->value() > 0 && m_ui->spin_air->value() > 0/* && m_ui->spin_feed->value() > 0*/;
+    m_ui->pushButton->setEnabled(b);
 }

@@ -6,36 +6,42 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>216</width>
+    <width>229</width>
     <height>30</height>
    </rect>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>0</width>
+    <height>30</height>
+   </size>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>16777215</width>
+    <height>38</height>
+   </size>
   </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
   <property name="styleSheet">
-   <string notr="true">QPushButton
-{
-	min-width: 30px;
-    min-height: 30px;
+   <string notr="true">QPushButton#btn_del, #btn_add {
     background:qlineargradient(spread:pad,x1:1,y1:0,x2:1,y2:1,stop:0 rgb(204,204,204) stop:1 rgb(206,206,206));  
 	border-radius: 5px;  
 }
-QPushButton:hover
-{
+QPushButton#btn_del:hover, #btn_add:hover {
     background:qlineargradient(spread:pad,x1:1,y1:0,x2:1,y2:1,stop:0 rgb(255,255,255) stop:1 rgb(192,192,192));  
 }
-QPushButton:pressed
-{
+QPushButton#btn_del:pressed, #btn_add:pressed {
     background:qlineargradient(spread:pad,x1:1,y1:0,x2:1,y2:1,stop:0 rgb(255,255,255) stop:1 rgb(200,200,200));  
 }
 
-QDoubleSpinBox {
+QAbstractSpinBox {
 	background-color: white;
     border: 1px solid #E2E2E2;
-    min-height: 30px;
     border-radius: 5px;
-    padding: 3px;
+    padding: 1px;
     font-size: 14px;
 }</string>
   </property>
@@ -47,7 +53,7 @@ QDoubleSpinBox {
     <number>0</number>
    </property>
    <property name="rightMargin">
-    <number>0</number>
+    <number>3</number>
    </property>
    <property name="bottomMargin">
     <number>0</number>
@@ -62,7 +68,13 @@ QDoubleSpinBox {
      </property>
      <property name="minimumSize">
       <size>
-       <width>120</width>
+       <width>100</width>
+       <height>0</height>
+      </size>
+     </property>
+     <property name="maximumSize">
+      <size>
+       <width>100</width>
        <height>30</height>
       </size>
      </property>
@@ -100,7 +112,7 @@ QDoubleSpinBox {
      </property>
      <property name="sizeHint" stdset="0">
       <size>
-       <width>10</width>
+       <width>0</width>
        <height>0</height>
       </size>
      </property>
@@ -135,8 +147,14 @@ QDoubleSpinBox {
       </property>
       <item>
        <widget class="QPushButton" name="btn_del">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
         <property name="text">
-         <string/>
+         <string notr="true"/>
         </property>
         <property name="icon">
          <iconset resource="../../image.qrc">
@@ -144,9 +162,15 @@ QDoubleSpinBox {
         </property>
         <property name="iconSize">
          <size>
-          <width>24</width>
-          <height>24</height>
+          <width>20</width>
+          <height>20</height>
          </size>
+        </property>
+        <property name="checkable">
+         <bool>false</bool>
+        </property>
+        <property name="checked">
+         <bool>false</bool>
         </property>
        </widget>
       </item>
@@ -183,10 +207,16 @@ QDoubleSpinBox {
       <item>
        <widget class="QPushButton" name="btn_add">
         <property name="sizePolicy">
-         <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>0</height>
+         </size>
         </property>
         <property name="text">
          <string/>

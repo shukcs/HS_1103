@@ -4,9 +4,11 @@
 
 class LogItem {
 public:
-    LogItem(const QString &str);
+    LogItem(const QString &str = QString());
+    LogItem(int64_t tm, const QString &str);
     QString content()const;
 private:
+    friend class DeviceLog;
     int64_t dateTime;
     QString dsc;
 };
@@ -21,11 +23,15 @@ public:
     const QList<LogItem> &AllLogs()const;
     DeviceLog &operator << (const QString &log);
 
+    void Export(const QString &file);
+    void Import(const QString &file);
+
     static DeviceLog &Instance();
 protected:
     DeviceLog(QObject *p = nullptr);
 signals:
-    void itemAdded(const LogItem &);
+    void itemAdded(const QList<LogItem>&);
+    void itemCleared();
 private:
     QList<LogItem> m_logs;
 };

@@ -43,11 +43,19 @@ progConfig::progConfig(QWidget *parent) :
     connect(funName, &QFunLabel::labelPanelAdd,this, &progConfig::listAdd);
     ui->configLayout->addWidget(funName);
 
+    auto fg = new FeederGroupBox();
+    connect(fg, &FeederGroupBox::sig_Add, this, &progConfig::listAdd);
+    ui->configLayout->addWidget(fg);
+
+    auto valve3ch = new FeedLiquidGroupBox();
+    connect(valve3ch, &FeedLiquidGroupBox::sig_Add, this, &progConfig::listAdd);
+    ui->configLayout->addWidget(valve3ch);
+
     SwPanel *sw = new SwPanel;
     connect(sw, &SwPanel::swPanelAdd, this, &progConfig::listAdd);
     ui->configLayout->addWidget(sw);
 
-    auto mt35 = new MotorGroupBox(MotorGroupBox::Motor_35);
+/*    auto mt35 = new MotorGroupBox(MotorGroupBox::Motor_35);
     connect(mt35, &MotorGroupBox::sig_Add, this, &progConfig::listAdd);
     ui->configLayout->addWidget(mt35);
 
@@ -59,6 +67,10 @@ progConfig::progConfig(QWidget *parent) :
     connect(mt86, &MotorGroupBox::sig_Add, this, &progConfig::listAdd);
     ui->configLayout->addWidget(mt86);
 
+    auto mtRobot = new MotorGroupBox(MotorGroupBox::Motor_robot);
+    connect(mtRobot, &MotorGroupBox::sig_Add, this, &progConfig::listAdd);
+    ui->configLayout->addWidget(mtRobot);*/
+
     auto hjgp = new HeatGroupBox;
     connect(hjgp, &HeatGroupBox::sig_Add, this, &progConfig::listAdd);
     ui->configLayout->addWidget(hjgp);
@@ -66,18 +78,6 @@ progConfig::progConfig(QWidget *parent) :
     auto montain = new HeatGroupBox(HeatGroupBox::Dev_montain);
     connect(montain, &HeatGroupBox::sig_Add, this, &progConfig::listAdd);
     ui->configLayout->addWidget(montain);
-
-    auto valve3ch = new Valve3ChGroupBox();
-    connect(valve3ch, &Valve3ChGroupBox::sig_Add, this, &progConfig::listAdd);
-    ui->configLayout->addWidget(valve3ch);
-
-    auto mtRobot = new MotorGroupBox(MotorGroupBox::Motor_robot);
-    connect(mtRobot, &MotorGroupBox::sig_Add, this, &progConfig::listAdd);
-    ui->configLayout->addWidget(mtRobot);
-
-    auto fg = new FeederGroupBox();
-    connect(fg, &FeederGroupBox::sig_Add, this, &progConfig::listAdd);
-    ui->configLayout->addWidget(fg);
 
     QFlowPanel *flowpanel = new QFlowPanel;
     connect(flowpanel,&QFlowPanel::flowPanelAdd,this, &progConfig::listAdd);
@@ -95,18 +95,18 @@ progConfig::progConfig(QWidget *parent) :
     connect(slopetemp,&QSlopeTemp::slopePanelAdd,this, &progConfig::listAdd);
     ui->configLayout->addWidget(slopetemp);
 
-    QPumpCtrl *pumpCtrl = new QPumpCtrl;
+    /*QPumpCtrl *pumpCtrl = new QPumpCtrl;
     connect(pumpCtrl,&QPumpCtrl::pumpPanelAdd,this, &progConfig::listAdd);
-    ui->configLayout->addWidget(pumpCtrl);
+    ui->configLayout->addWidget(pumpCtrl);*/
 
     QValveCtrl *valveCtrl = new QValveCtrl;
     connect(valveCtrl,&QValveCtrl::valvePanelAdd,this, &progConfig::listAdd);
     ui->configLayout->addWidget(valveCtrl);
 
-    QCollectorCtrl *collCtrl = new QCollectorCtrl;
+    /*QCollectorCtrl *collCtrl = new QCollectorCtrl;
     connect(collCtrl, &QCollectorCtrl::collPanelAdd,this, &progConfig::listAdd);
     ui->configLayout->addWidget(collCtrl);
-    collCtrl->setVisible(false);
+    collCtrl->setVisible(false);*/
 
     QSFunction *sfuntion = new QSFunction;
     connect(sfuntion, &QSFunction::functionPanelAdd,this, &progConfig::listAdd);

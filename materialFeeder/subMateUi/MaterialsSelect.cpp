@@ -75,7 +75,8 @@ int MaterialsSelect::GetChannel() const
 
 void MaterialsSelect::SetBottleSelected(bool b)
 {
-    m_ui->stackedWidget->setCurrentWidget(b ? m_ui->p_bottle : m_ui->p_stove);
+    m_ui->w_bottle->setVisible(b);
+    m_ui->w_stove->setVisible(!b);
 }
 
 int MaterialsSelect::GetSelectedBottleNum() const

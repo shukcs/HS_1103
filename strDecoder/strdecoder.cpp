@@ -459,11 +459,8 @@ void strDecoder::strTocmd(const QString &cmd)
 		else if(strlist.at(1) == "停止")
 		{
 			emit startRecord(false);
+			emit autoSavedata();
 		}
-	}
-	else if(cmd.contains("曲线数据保存"))
-	{
-		emit autoSavedata();
 	}
 	else if (cmd.startsWith(tr("固体投料")))
 	{

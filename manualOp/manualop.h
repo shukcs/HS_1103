@@ -1,4 +1,4 @@
-#ifndef MANUALOP_H
+﻿#ifndef MANUALOP_H
 #define MANUALOP_H
 
 #include <QWidget>

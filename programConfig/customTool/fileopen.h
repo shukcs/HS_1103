@@ -1,4 +1,4 @@
-#ifndef FILEOPEN_H
+﻿#ifndef FILEOPEN_H
 #define FILEOPEN_H
 
 #include <QWidget>

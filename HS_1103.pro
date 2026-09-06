@@ -53,6 +53,7 @@ SOURCES += $$PWD/common/DlgSerialSettings.cpp \
     $$PWD/materialFeeder/subMateUi/MaterialsSelect.cpp \
     $$PWD/materialFeeder/subMateUi/MaterialTableWidget.cpp \
     $$PWD/materialFeeder/subMateUi/SpinCust.cpp \
+    $$PWD/programConfig/AirWayGroupBox.cpp \
     $$PWD/programConfig/hslist.cpp \
     $$PWD/programConfig/programlist.cpp \
     $$PWD/programConfig/qcirculation.cpp \
@@ -62,11 +63,11 @@ SOURCES += $$PWD/common/DlgSerialSettings.cpp \
     $$PWD/programConfig/qtimedelay.cpp \
     $$PWD/programConfig/swpanel.cpp \
     $$PWD/programConfig/qtcdpanel.cpp \
-    $$PWD/programConfig/qsfunction.cpp \
+    $$PWD/programConfig/QSFunction.cpp \
     $$PWD/programConfig/FeederGroupBox.cpp \
     $$PWD/programConfig/HeatGroupBox.cpp \
     $$PWD/programConfig/MotorGroupBox.cpp \
-    $$PWD/programConfig/Valve3ChGroupBox.cpp \
+    $$PWD/programConfig/FeedLiquidGroupBox.cpp \
     $$PWD/programConfig/qpumpctrl.cpp \
     $$PWD/programConfig/progconfig.cpp \
     $$PWD/programConfig/qvalvectrl.cpp \
@@ -108,6 +109,7 @@ HEADERS += $$PWD/common/DlgSerialSettings.h \
     $$PWD/log/DeviceLog.h \	
     $$PWD/manualOp/manualop.h \
     $$PWD/materialFeeder/FeederMgr.h \
+    $$PWD/materialFeeder/FeederStruct.h \
     $$PWD/materialFeeder/MaterialStore.h \
     $$PWD/materialFeeder/RobotMgr.h \
     $$PWD/materialFeeder/subMateUi/DemoWidget.h \
@@ -117,6 +119,7 @@ HEADERS += $$PWD/common/DlgSerialSettings.h \
     $$PWD/materialFeeder/subMateUi/MaterialsSelect.h \
     $$PWD/materialFeeder/subMateUi/MaterialTableWidget.h \
     $$PWD/materialFeeder/subMateUi/SpinCust.h \
+    $$PWD/programConfig/AirWayGroupBox.h \
     $$PWD/programConfig/hslist.h \
     $$PWD/programConfig/programlist.h \
     $$PWD/programConfig/qcirculation.h \
@@ -127,13 +130,13 @@ HEADERS += $$PWD/common/DlgSerialSettings.h \
     $$PWD/programConfig/swpanel.h \
     $$PWD/programConfig/qtcdpanel.h \
     $$PWD/programConfig/qfunlabel.h \
-    $$PWD/programConfig/qsfunction.h \
+    $$PWD/programConfig/QSFunction.h \
     $$PWD/programConfig/progconfig.h \
     $$PWD/programConfig/qpumpctrl.h \
     $$PWD/programConfig/FeederGroupBox.h \
     $$PWD/programConfig/HeatGroupBox.h \
     $$PWD/programConfig/MotorGroupBox.h \
-    $$PWD/programConfig/Valve3ChGroupBox.h \
+    $$PWD/programConfig/FeedLiquidGroupBox.h \
     $$PWD/programConfig/qvalvectrl.h \
     $$PWD/programConfig/qcollectorctrl.h \
     $$PWD/programConfig/customTool/ToolBox.h \
@@ -171,14 +174,16 @@ FORMS += \
     $$PWD/stateBar/statebar.ui \
     $$PWD/customGraph/debuggraph.ui \
     $$PWD/deviceOp/deviceop.ui \
+    $$PWD/programConfig/AirWayGroupBox.ui \
+    $$PWD/programConfig/FeederGroupBox.ui \
+    $$PWD/programConfig/progconfig.ui \
+    $$PWD/programConfig/HeatGroupBox.ui \
+    $$PWD/programConfig/MotorGroupBox.ui \
+    $$PWD/programConfig/FeedLiquidGroupBox.ui \
+    $$PWD/programConfig/QSFunction.ui \
     $$PWD/programConfig/customTool/Form.ui \
     $$PWD/programConfig/customTool/ToolBox.ui \
     $$PWD/programConfig/customTool/ToolPage.ui \
-    $$PWD/programConfig/progconfig.ui \
-    $$PWD/programConfig/FeederGroupBox.ui \
-    $$PWD/programConfig/HeatGroupBox.ui \
-    $$PWD/programConfig/MotorGroupBox.ui \
-    $$PWD/programConfig/Valve3ChGroupBox.ui \
     $$PWD/programConfig/customTool/fileexport.ui \
     $$PWD/programConfig/customTool/filesave.ui \
     $$PWD/programConfig/customTool/fileopen.ui \

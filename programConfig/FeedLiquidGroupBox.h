@@ -13,7 +13,7 @@ public:
     ~FeedLiquidGroupBox();
 protected:
     QString _getOutString()const;
-    void onValueChanged();
+    void onValueChanged(double f);
 signals:
     void sig_Add(const QString &str);
 private:

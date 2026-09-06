@@ -1,5 +1,5 @@
-﻿#ifndef __MotorGroupBox_H__
-#define __MotorGroupBox_H__
+﻿#ifndef __AirWayGroupBox_H__
+#define __AirWayGroupBox_H__
 
 #include <QGroupBox>
 namespace Ui {
@@ -22,4 +22,4 @@ private:
     Ui::AirWayGroupBox*  m_ui;
 };
 
-#endif // __MotorGroupBox_H__
+#endif // __AirWayGroupBox_H__

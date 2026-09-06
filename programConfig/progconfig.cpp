@@ -1,4 +1,4 @@
-#include "progconfig.h"
+﻿#include "progconfig.h"
 #include <QPushButton>
 #include <QScrollBar>
 #include <QVBoxLayout>
@@ -20,15 +20,16 @@
 #include "qponittemp.h"
 #include "qslopetemp.h"
 #include "qtcdpanel.h"
-#include "qsfunction.h"
+#include "QSFunction.h"
 #include "qfunlabel.h"
 #include "qpumpctrl.h"
 #include "qvalvectrl.h"
 #include "qcollectorctrl.h"
 #include "MotorGroupBox.h"
 #include "HeatGroupBox.h"
-#include "Valve3ChGroupBox.h"
+#include "FeedLiquidGroupBox.h"
 #include "FeederGroupBox.h"
+#include "AirWayGroupBox.h"
 
 #include "ui_progconfig.h"
 #pragma execution_character_set("utf-8")
@@ -47,9 +48,13 @@ progConfig::progConfig(QWidget *parent) :
     connect(fg, &FeederGroupBox::sig_Add, this, &progConfig::listAdd);
     ui->configLayout->addWidget(fg);
 
-    auto valve3ch = new FeedLiquidGroupBox();
-    connect(valve3ch, &FeedLiquidGroupBox::sig_Add, this, &progConfig::listAdd);
-    ui->configLayout->addWidget(valve3ch);
+    auto liquid = new FeedLiquidGroupBox();
+    connect(liquid, &FeedLiquidGroupBox::sig_Add, this, &progConfig::listAdd);
+	ui->configLayout->addWidget(liquid);
+
+	auto air = new AirWayGroupBox();
+	connect(air, &AirWayGroupBox::sig_Add, this, &progConfig::listAdd);
+	ui->configLayout->addWidget(air);
 
     SwPanel *sw = new SwPanel;
     connect(sw, &SwPanel::swPanelAdd, this, &progConfig::listAdd);
@@ -82,14 +87,6 @@ progConfig::progConfig(QWidget *parent) :
     QFlowPanel *flowpanel = new QFlowPanel;
     connect(flowpanel,&QFlowPanel::flowPanelAdd,this, &progConfig::listAdd);
     ui->configLayout->addWidget(flowpanel);
-
-    QTimeDelay *timedelay = new QTimeDelay;
-    connect(timedelay,&QTimeDelay::delayPanelAdd,this, &progConfig::listAdd);
-    ui->configLayout->addWidget(timedelay);
-
-    QCirculation *circulation = new QCirculation;
-    connect(circulation, &QCirculation::circulPanelAdd,this, &progConfig::listAdd);
-    ui->configLayout->addWidget(circulation);
 
     QSlopeTemp *slopetemp = new QSlopeTemp;
     connect(slopetemp,&QSlopeTemp::slopePanelAdd,this, &progConfig::listAdd);

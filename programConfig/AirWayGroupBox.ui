@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>521</width>
-    <height>259</height>
+    <height>266</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -62,7 +62,7 @@ QAbstractSpinBox {
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <widget class="QLabel" name="label">
+    <widget class="QLabel" name="lb_clr">
      <property name="text">
       <string>吹扫管道</string>
      </property>
@@ -91,7 +91,7 @@ QAbstractSpinBox {
           <number>3</number>
          </property>
          <item>
-          <widget class="QDoubleSpinBox" name="doubleSpinBox">
+          <widget class="QDoubleSpinBox" name="spin_prsClr">
            <property name="minimumSize">
             <size>
              <width>0</width>
@@ -178,7 +178,7 @@ QAbstractSpinBox {
       </layout>
      </item>
      <item>
-      <widget class="QPushButton" name="pushButton">
+      <widget class="QPushButton" name="btn_clr">
        <property name="minimumSize">
         <size>
          <width>30</width>
@@ -225,7 +225,7 @@ QAbstractSpinBox {
     </spacer>
    </item>
    <item>
-    <widget class="QLabel" name="label2">
+    <widget class="QLabel" name="lb_in">
      <property name="text">
       <string>进气</string>
      </property>
@@ -249,7 +249,7 @@ QAbstractSpinBox {
         <number>3</number>
        </property>
        <item>
-        <widget class="QDoubleSpinBox" name="doubleSpinBox_2">
+        <widget class="QDoubleSpinBox" name="spin_prsIn">
          <property name="minimumSize">
           <size>
            <width>0</width>
@@ -295,7 +295,7 @@ QAbstractSpinBox {
         <number>3</number>
        </property>
        <item>
-        <widget class="QDoubleSpinBox" name="doubleSpinBox_6">
+        <widget class="QDoubleSpinBox" name="spin_speed">
          <property name="minimumSize">
           <size>
            <width>0</width>
@@ -329,7 +329,7 @@ QAbstractSpinBox {
       </layout>
      </item>
      <item row="2" column="3">
-      <widget class="QPushButton" name="pushButton_2">
+      <widget class="QPushButton" name="btn_in">
        <property name="minimumSize">
         <size>
          <width>30</width>

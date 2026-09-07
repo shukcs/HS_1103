@@ -227,11 +227,11 @@ void MaterialsSelect::changeAvalidTube()
     }
     auto str = m_ui->cmb_tube->currentText();
     m_ui->cmb_tube->clear();
-    m_ui->cmb_tube->addItem(tr("自动"));
     for (auto itr : vts)
     {
         m_ui->cmb_tube->addItem(tr("反应管%1").arg(itr->getNumber() + 1));
-    }
+	}
+	m_ui->cmb_tube->addItem(tr("自动"));
     if (!str.isEmpty())
         m_ui->cmb_tube->setCurrentText(str);
 }
@@ -251,11 +251,11 @@ void MaterialsSelect::changeAvalidBottle()
     }
     auto str = m_ui->cmb_bottle->currentText();
     m_ui->cmb_bottle->clear();
-    m_ui->cmb_bottle->addItem(tr("自动"));
     for (auto itr : vbs)
     {
         m_ui->cmb_bottle->addItem(tr("料瓶%1").arg(itr->m_numb + 1));
     }
+    m_ui->cmb_bottle->addItem(tr("自动"));
     if (!str.isEmpty())
         m_ui->cmb_bottle->setCurrentText(str);
 }

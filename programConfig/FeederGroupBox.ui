@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>486</width>
+    <width>489</width>
     <height>188</height>
    </rect>
   </property>
@@ -154,7 +154,7 @@ QSpinBox {
      <item>
       <widget class="QLabel" name="lb_feed">
        <property name="text">
-        <string>装载炉膛</string>
+        <string>装载炉膛：</string>
        </property>
       </widget>
      </item>
@@ -250,7 +250,7 @@ QSpinBox {
      <item>
       <widget class="QLabel" name="lb_back">
        <property name="text">
-        <string>收回反应管</string>
+        <string>收回反应管：</string>
        </property>
       </widget>
      </item>

@@ -352,27 +352,24 @@ void ProgramList::OnStoveTubeChanged(uint16_t type, uint16_t idx)
 {
     if (programCnt < 0 || programCnt >= proList->count() || m_bReady)
         return;
-    auto cmd = proList->item(programCnt)->text();
-    if (cmd.startsWith(tr("固体投料")))
+
+    auto strlist = proList->item(programCnt)->text().split(" ", QString::SkipEmptyParts);  //  以空格符分割
+    if (strlist.size() <= 2)
+        return;
+    switch (type)
     {
-        auto strlist = cmd.split(" ", QString::SkipEmptyParts);  //  以空格符分割
-        if (strlist.size() <= 2)
-            return;
-        switch (type)
-        {
-        case FeederMgr::J_PrepareMate:
-            if (strlist.at(1) == tr("配料"))
-                m_bReady = true;
-            break;
-        case FeederMgr::J_StoveFixTube:
-            if (strlist.at(1) == tr("装载炉膛") && strlist.at(2).toInt()-1 == idx)
-                m_bReady = true;
-            break;
-        case FeederMgr::J_StoveTubeBack:
-            if (strlist.at(1) == tr("收回反应管") && strlist.at(2).toInt()-1 == idx)
-                m_bReady = true;
-            break;
-        }
+    case FeederMgr::J_PrepareMate:
+        if (strlist.first()==tr("固体配料:") && strlist.at(1) == tr("称取"))
+            m_bReady = true;
+        break;
+    case FeederMgr::J_StoveFixTube:
+        if (strlist.at(0) == tr("装载炉膛:") && strlist.at(1).toInt()-1 == idx)
+            m_bReady = true;
+        break;
+    case FeederMgr::J_StoveTubeBack:
+        if (strlist.at(0) == tr("收回反应管:") && strlist.at(1).toInt()-1 == idx)
+            m_bReady = true;
+        break;
     }
 }
 

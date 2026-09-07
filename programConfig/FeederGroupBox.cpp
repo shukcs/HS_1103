@@ -20,7 +20,7 @@ FeederGroupBox::~FeederGroupBox()
 
 QString FeederGroupBox::_getFixStr() const
 {
-    return QString(" %1 %2 %3 %4").arg(m_ui->lb_feed->text()).arg(m_ui->cmb_fix->currentIndex()+1)
+    return QString("%1 %2 %3 %4").arg(m_ui->lb_feed->text()).arg(m_ui->cmb_fix->currentIndex()+1)
 		.arg(m_ui->lb_tube->text()).arg(m_ui->cmb_tube->currentIndex() + 1);
 }
 
@@ -104,10 +104,10 @@ void FeederGroupBox::onAdd()
 
 void FeederGroupBox::onTubeBack()
 {
-	emit sig_Add(title() + _getBackStr());
+	emit sig_Add(_getBackStr());
 }
 
 void FeederGroupBox::onFix()
 {
-    emit sig_Add(title() + _getFixStr());
+    emit sig_Add(_getFixStr());
 }

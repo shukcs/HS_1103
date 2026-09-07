@@ -462,14 +462,20 @@ void strDecoder::strTocmd(const QString &cmd)
 			emit autoSavedata();
 		}
 	}
-	else if (cmd.startsWith(tr("固体投料")))
+	else if (cmd.startsWith(tr("固体配料:")))
 	{
 		strlist = cmd.split(" ", QString::SkipEmptyParts);  //  以空格符分割
-		if (strlist.size() > 2)
+		if (strlist.size() > 4)
 		{
-            if (strlist.at(1) == tr("配料"))
-            {
-                auto bottle = strlist.at(3).toInt()-1;
+            if (strlist.at(1) == tr("称取"))
+			{
+				QMap<QString, float> feeds;
+				int i = 2;
+				for (; i + 1 < strlist.size()-5; i += 2)
+				{
+					feeds[strlist.at(i)] = strlist.at(i + 1).toFloat();
+				}
+                auto bottle = strlist.at(i+2).toInt()-1;
                 if (bottle<0)
                 {
                     auto bts = FeederMgr::Instance().ValidBottls();
@@ -480,35 +486,30 @@ void strDecoder::strTocmd(const QString &cmd)
                     }
                     bottle = bts.first()->m_numb;
                 }
-
-                auto nTube = strlist.at(5).toInt() - 1;
-                QMap<QString, float> feeds;
-                for (int i = 6; i + 1 < strlist.size(); i += 2)
-                {
-                    feeds[strlist.at(i)] = strlist.at(i + 1).toFloat();
-                }
+				auto nTube = strlist.at(strlist.size()-1).toInt() - 1;
                 if (!FeederMgr::Instance().FeedSolidMaterial(feeds, bottle, nTube, false))
                     emit stoveTubeChaned(FeederMgr::J_PrepareMate, 0);
             }
-            else if (strlist.at(1) == tr("装载炉膛"))
-			{
-				auto ch = strlist.at(2).toInt()-1;
-				auto tube = strlist.at(4).toInt() - 1;
-				if (!FeederMgr::Instance().FixTube(ch, tube))
-					emit stoveTubeChaned(FeederMgr::J_StoveFixTube, ch);
-			}
-			else if (strlist.at(1) == tr("收回反应管"))
-			{
-                auto ch = strlist.at(2).toInt()-1;
-                if (!FeederMgr::Instance().StoveTubeBack(ch))
-                    emit stoveTubeChaned(FeederMgr::J_StoveTubeBack, ch);
-			}
 			else if (!m_cmdlist.isEmpty())
 			{
 				m_cmdlist.removeFirst();
 			}
 		}
-		return;
+	}
+	else if (cmd.startsWith(tr("装载炉膛:")))
+	{
+		strlist = cmd.split(" ", QString::SkipEmptyParts);  //  以空格符分割
+		auto ch = strlist.at(1).toInt() - 1;
+		auto tube = strlist.at(3).toInt() - 1;
+		if (!FeederMgr::Instance().FixTube(ch, tube))
+			emit stoveTubeChaned(FeederMgr::J_StoveFixTube, ch);
+	}
+	else if (cmd.startsWith(tr("收回反应管:")))
+	{
+		strlist = cmd.split(" ", QString::SkipEmptyParts);  //  以空格符分割
+		auto ch = strlist.at(2).toInt() - 1;
+		if (!FeederMgr::Instance().StoveTubeBack(ch))
+			emit stoveTubeChaned(FeederMgr::J_StoveTubeBack, ch);
 	}
 	if (!m_cmdlist.isEmpty() && cmd == m_cmdlist.first())
 		m_cmdlist.removeFirst();

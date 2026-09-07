@@ -62,9 +62,69 @@ QAbstractSpinBox {
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_6">
+     <property name="leftMargin">
+      <number>0</number>
+     </property>
+     <item>
+      <widget class="QLabel" name="lb_feed">
+       <property name="text">
+        <string>通道：</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="cmb_ch">
+       <item>
+        <property name="text">
+         <string>通道1</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>通道2</string>
+        </property>
+       </item>
+      </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer_4">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeType">
+        <enum>QSizePolicy::Expanding</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>10</width>
+         <height>0</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <spacer name="verticalSpacer_2">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeType">
+      <enum>QSizePolicy::Fixed</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>0</width>
+       <height>3</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item>
     <widget class="QLabel" name="lb_clr">
      <property name="text">
-      <string>吹扫管道</string>
+      <string>吹扫管道：</string>
      </property>
     </widget>
    </item>
@@ -227,7 +287,7 @@ QAbstractSpinBox {
    <item>
     <widget class="QLabel" name="lb_in">
      <property name="text">
-      <string>进气</string>
+      <string>进气：</string>
      </property>
     </widget>
    </item>

@@ -166,7 +166,7 @@ strDecoder::strDecoder(QObject *parent, const QString &name) : QObject(parent)
     connect(thread, &portThread::ackRecved, this, &strDecoder::onAckRecved);
     connect(m_timer, &QTimer::timeout, this, &strDecoder::timer_out);
     connect(&FeederMgr::Instance(), &FeederMgr::actionRun, this, &strDecoder::onActionRun);
-    connect(&FeederMgr::Instance(), &FeederMgr::feedJobFinished, this, &strDecoder::stoveTubeChaned);
+    connect(&FeederMgr::Instance(), &FeederMgr::feedJobFinished, this, &strDecoder::jobChaned);
     connect(this, &strDecoder::stepMotorStatChanged, &FeederMgr::Instance(), &FeederMgr::OnStepMotor);
     connect(this, &strDecoder::servoMotorStatChanged, &FeederMgr::Instance(), &FeederMgr::OnServoMotor);
     m_stepMotorStat[0].SetType(CtrlType::Motor_Pipelet);
@@ -369,7 +369,7 @@ void strDecoder::strTocmd(const QString &cmd)
 		strlist = cmd.split(" ");  //  以空格符分割
 		QString str1 = strlist.at(1);
 		QString str2 = strlist.at(3);
-		presCtrl_Range(str1.toInt(),str2.toDouble());
+		presCtrl_Range(str1.toInt(), str2.toDouble());
 	}
    else if(cmd.contains("反应炉"))
    {
@@ -481,14 +481,14 @@ void strDecoder::strTocmd(const QString &cmd)
                     auto bts = FeederMgr::Instance().ValidBottls();
                     if (bts.isEmpty())
                     {
-                        emit stoveTubeChaned(FeederMgr::J_PrepareMate, 0);
+                        emit jobChaned(FeederMgr::J_PrepareMate, 0);
                         return;
                     }
                     bottle = bts.first()->m_numb;
                 }
 				auto nTube = strlist.at(strlist.size()-1).toInt() - 1;
                 if (!FeederMgr::Instance().FeedSolidMaterial(feeds, bottle, nTube, false))
-                    emit stoveTubeChaned(FeederMgr::J_PrepareMate, 0);
+                    emit jobChaned(FeederMgr::J_PrepareMate, 0);
             }
 			else if (!m_cmdlist.isEmpty())
 			{
@@ -502,14 +502,30 @@ void strDecoder::strTocmd(const QString &cmd)
 		auto ch = strlist.at(1).toInt() - 1;
 		auto tube = strlist.at(3).toInt() - 1;
 		if (!FeederMgr::Instance().FixTube(ch, tube))
-			emit stoveTubeChaned(FeederMgr::J_StoveFixTube, ch);
+			emit jobChaned(FeederMgr::J_StoveFixTube, ch);
 	}
 	else if (cmd.startsWith(tr("收回反应管:")))
 	{
 		strlist = cmd.split(" ", QString::SkipEmptyParts);  //  以空格符分割
 		auto ch = strlist.at(2).toInt() - 1;
 		if (!FeederMgr::Instance().StoveTubeBack(ch))
-			emit stoveTubeChaned(FeederMgr::J_StoveTubeBack, ch);
+			emit jobChaned(FeederMgr::J_StoveTubeBack, ch);
+	}
+	else if (cmd.startsWith(tr("吹扫管道")))
+	{
+		strlist = cmd.split(" ", QString::SkipEmptyParts);  //  以空格符分割
+		if (strlist.size() < 7)
+			return;
+		auto str = strlist.at(1);
+		auto ch = str.remove(tr("通道")).toInt() - 1;
+		auto prs = strlist.at(3).toDouble();
+		auto time = strlist.at(5).toInt(); 
+		swCtrl(ch, true);
+		presCtrl_Range(ch, prs);
+		QTimer::singleShot(time * 1000, this, [=] {
+			swCtrl(ch, false); 
+			emit jobChaned(Job_AirClear, 0);
+		});
 	}
 	if (!m_cmdlist.isEmpty() && cmd == m_cmdlist.first())
 		m_cmdlist.removeFirst();

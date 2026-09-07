@@ -434,7 +434,8 @@ void ProgramList::runTitle()
         else
         {
             auto str = proList->item(programCnt)->text();
-            if (str.startsWith(tr("固体投料")))
+            if (str.startsWith(tr("固体配料")) || str.startsWith(tr("装载炉膛")) || str.startsWith(tr("收回反应管"))
+				|| str.startsWith(tr("吹扫管道")) || str.startsWith(tr("进气")))
                 m_bReady = false;
 
             emit readyTorun(str);

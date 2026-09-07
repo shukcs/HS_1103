@@ -24,13 +24,14 @@ void AirWayGroupBox::initUi()
 
 void AirWayGroupBox::onClear()
 {
-	QString str = tr("%1 吹扫气压 %2 MPa 吹扫时间 %3 s").arg(m_ui->lb_clr->text()).arg(m_ui->spin_prsClr->text()).arg(m_ui->spinBox->text());
+	QString str = tr("%1 %2 吹扫气压 %3 MPa 吹扫时间 %4 s").arg(m_ui->lb_clr->text()).arg(m_ui->cmb_ch->currentText())
+		.arg(m_ui->spin_prsClr->text()).arg(m_ui->spinBox->text());
 	emit sig_Add(str);
 }
 
 void AirWayGroupBox::onAirIn()
 {
-	QString str = tr("%1 进气气压 %2 MPa 流速 %3 ml/s 背压阀 %4").arg(m_ui->lb_in->text()).arg(m_ui->spin_prsIn->text())
-		.arg(m_ui->spin_speed->text()).arg(m_ui->spin_speed->text());
+	QString str = tr("%1 进气气压 %2 %3 MPa 流速 %4 ml/s 背压阀 %4").arg(m_ui->lb_in->text()).arg(m_ui->cmb_ch->currentText())
+		.arg(m_ui->spin_prsIn->text()).arg(m_ui->spin_speed->text()).arg(m_ui->spin_speed->text());
 	emit sig_Add(str);
 }

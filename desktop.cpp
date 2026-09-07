@@ -73,7 +73,7 @@ deskTop::deskTop(QWidget *parent) :
     connect(ui->tool,SIGNAL(logoBtn_clicked()),deviceOperation,SLOT(tempAdjustEnable()));
 
     connect(ui->autoRunStep, &ProgramList::readyTorun, decoder, &strDecoder::strTocmd);
-    connect(decoder, &strDecoder::stoveTubeChaned, ui->autoRunStep, &ProgramList::OnStoveTubeChanged);
+    connect(decoder, &strDecoder::jobChaned, ui->autoRunStep, &ProgramList::OnStoveTubeChanged);
     connect(ui->autoRunStep, &ProgramList::readyTorun_toColl, collectorOperation, &collectorOp::updateCmd);
     connect(ui->autoRunStep, &ProgramList::sendRunTime, this, &deskTop::updateRunTime);
     connect(ui->autoRunStep,SIGNAL(readyTorun(const QString&)),manualOperation,SLOT(strToState(const QString&)));

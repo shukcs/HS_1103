@@ -71,6 +71,10 @@ class strDecoder : public QObject
 {
     Q_OBJECT
 public:
+	enum {
+		Job_AirClear = 10,
+		Job_AirIn,
+	};
 public:
     explicit strDecoder(QObject *parent = nullptr, const QString &name = "COM7");
     ~strDecoder();
@@ -135,7 +139,7 @@ signals:
     void set_flow_sw_state(bool state);
     void stepMotorStatChanged(StepMotorStat*);
     void servoMotorStatChanged(int pos, bool);
-    void stoveTubeChaned(uint16_t type, uint16_t idx);
+    void jobChaned(uint16_t type, uint16_t idx);
 private:
     void onAckRecved(const QByteArray &arr);
 

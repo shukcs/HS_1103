@@ -31,7 +31,7 @@ void AirWayGroupBox::onClear()
 
 void AirWayGroupBox::onAirIn()
 {
-	QString str = tr("%1 进气气压 %2 %3 MPa 流速 %4 ml/s 背压阀 %4").arg(m_ui->lb_in->text()).arg(m_ui->cmb_ch->currentText())
+	QString str = tr("%1 %2 进气气压 %3 MPa 流速 %4 ml/s 背压阀 %4").arg(m_ui->lb_in->text()).arg(m_ui->cmb_ch->currentText())
 		.arg(m_ui->spin_prsIn->text()).arg(m_ui->spin_speed->text()).arg(m_ui->spin_speed->text());
 	emit sig_Add(str);
 }

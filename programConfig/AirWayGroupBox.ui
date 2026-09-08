@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>521</width>
-    <height>266</height>
+    <height>309</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -69,7 +69,7 @@ QAbstractSpinBox {
      <item>
       <widget class="QLabel" name="lb_feed">
        <property name="text">
-        <string>通道：</string>
+        <string>通道:</string>
        </property>
       </widget>
      </item>
@@ -124,7 +124,7 @@ QAbstractSpinBox {
    <item>
     <widget class="QLabel" name="lb_clr">
      <property name="text">
-      <string>吹扫管道：</string>
+      <string>吹扫管道:</string>
      </property>
     </widget>
    </item>
@@ -141,7 +141,7 @@ QAbstractSpinBox {
        <item>
         <widget class="QLabel" name="lb_bracer">
          <property name="text">
-          <string>吹扫气压：</string>
+          <string>吹扫气压:</string>
          </property>
         </widget>
        </item>
@@ -287,7 +287,7 @@ QAbstractSpinBox {
    <item>
     <widget class="QLabel" name="lb_in">
      <property name="text">
-      <string>进气：</string>
+      <string>进气:</string>
      </property>
     </widget>
    </item>
@@ -299,7 +299,7 @@ QAbstractSpinBox {
      <item row="0" column="0">
       <widget class="QLabel" name="lb">
        <property name="text">
-        <string>进气气压：</string>
+        <string>进气气压:</string>
        </property>
       </widget>
      </item>
@@ -345,7 +345,7 @@ QAbstractSpinBox {
      <item row="1" column="0">
       <widget class="QLabel" name="lb_3">
        <property name="text">
-        <string>流速：</string>
+        <string>流速:</string>
        </property>
       </widget>
      </item>
@@ -420,7 +420,7 @@ QAbstractSpinBox {
      <item row="2" column="0">
       <widget class="QLabel" name="lb_bracer_7">
        <property name="text">
-        <string>背压阀：</string>
+        <string>背压阀:</string>
        </property>
       </widget>
      </item>

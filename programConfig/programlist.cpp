@@ -19,6 +19,7 @@
 #include "customTool/ToolBox.h"
 #include "customTool/objlist.h"
 #include "materialFeeder/FeederMgr.h"
+#include "strDecoder/strdecoder.h"
 #pragma execution_character_set("utf-8")
 
 ProgramList::ProgramList(QWidget *parent)
@@ -368,7 +369,13 @@ void ProgramList::OnStoveTubeChanged(uint16_t type, uint16_t idx)
         break;
     case FeederMgr::J_StoveTubeBack:
         if (strlist.at(0) == tr("收回反应管:") && strlist.at(1).toInt()-1 == idx)
-            m_bReady = true;
+			m_bReady = true;
+	case strDecoder::Job_AirClear:
+		if (strlist.at(0) == tr("吹扫管道:"))
+			m_bReady = true;
+	case strDecoder::Job_AirIn:
+		if (strlist.at(0) == tr("进气:"))
+			m_bReady = true;
         break;
     }
 }

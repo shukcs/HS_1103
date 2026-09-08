@@ -527,6 +527,22 @@ void strDecoder::strTocmd(const QString &cmd)
 			emit jobChaned(Job_AirClear, 0);
 		});
 	}
+	else if (cmd.startsWith(tr("进气")))
+	{
+		strlist = cmd.split(" ", QString::SkipEmptyParts);  //  以空格符分割
+		if (strlist.size() < 9)
+			return;
+		auto str = strlist.at(1);
+		auto ch = str.remove(tr("通道")).toInt() - 1;
+		auto prsIn = strlist.at(3).toDouble();
+		auto speed = strlist.at(6).toInt();
+		auto prsOut = strlist.at(9).toInt();
+		swCtrl(ch + 2, true);
+		flowCtrl_Range(ch, speed);
+		presCtrl_Range(ch, prsIn);
+		valve_set_pres(ch, prsOut);
+		emit jobChaned(Job_AirIn, 0);
+	}
 	if (!m_cmdlist.isEmpty() && cmd == m_cmdlist.first())
 		m_cmdlist.removeFirst();
 }

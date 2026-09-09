@@ -521,7 +521,8 @@ void strDecoder::strTocmd(const QString &cmd)
 		auto prs = strlist.at(3).toDouble();
 		auto time = strlist.at(5).toInt(); 
 		swCtrl(ch, true);
-		presCtrl_Range(ch, prs);
+        presCtrl_Range(ch, prs);
+        swCtrl_flow(ch, true);
 		QTimer::singleShot(time * 1000, this, [=] {
 			swCtrl(ch, false); 
 			emit jobChaned(Job_AirClear, 0);
@@ -539,7 +540,8 @@ void strDecoder::strTocmd(const QString &cmd)
 		auto prsOut = strlist.at(9).toInt();
 		swCtrl(ch + 2, true);
 		flowCtrl_Range(ch, speed);
-		presCtrl_Range(ch, prsIn);
+        presCtrl_Range(ch, prsIn);
+        swCtrl_flow(ch, true);
 		valve_set_pres(ch, prsOut);
 		emit jobChaned(Job_AirIn, 0);
 	}

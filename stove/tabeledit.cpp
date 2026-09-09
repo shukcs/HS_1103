@@ -1,6 +1,6 @@
-#include "tabeledit.h"
+﻿#include "tabeledit.h"
 #include <QRegularExpressionValidator>
-#pragma execution_character_set("utf-8")
+//#pragma execution_character_set("utf-8")
 
 tabelEdit::tabelEdit(QWidget *parent,int row,int col) : QLineEdit(parent)
 {

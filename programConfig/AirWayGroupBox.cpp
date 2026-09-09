@@ -19,7 +19,13 @@ AirWayGroupBox::~AirWayGroupBox()
 void AirWayGroupBox::initUi()
 {
 	connect(m_ui->btn_clr, &QPushButton::clicked, this, &AirWayGroupBox::onClear);
-	connect(m_ui->btn_in, &QPushButton::clicked, this, &AirWayGroupBox::onAirIn);
+    connect(m_ui->btn_in, &QPushButton::clicked, this, &AirWayGroupBox::onAirIn);
+    connect(m_ui->spin_prsIn, &QAbstractSpinBox::editingFinished, this, [=] {
+        auto v = m_ui->spin_prsIn->value() - .1;
+        if (v < 0)
+            v = 0;
+        m_ui->spin_valve->setValue(v);
+    });
 }
 
 void AirWayGroupBox::onClear()

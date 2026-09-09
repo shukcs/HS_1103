@@ -1,4 +1,4 @@
-#include "desktop.h"
+﻿#include "desktop.h"
 #include <QApplication>
 #include <QSharedMemory>
 #include "common/mymessagebox.h"

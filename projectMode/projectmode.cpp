@@ -1,4 +1,4 @@
-#include "projectmode.h"
+﻿#include "projectmode.h"
 #include "ui_projectmode.h"
 #pragma execution_character_set("utf-8")
 

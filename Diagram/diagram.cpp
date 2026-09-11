@@ -265,13 +265,20 @@ void diagram::on_pres2set_clicked()
     connect(flow, &flowSet::flow_to_set, this, &diagram::flow_set_slot);
 }
 
+void diagram::on_pres1_min_clicked()
+{
+	flowSet *flow = createFlowSet(tr("压力设置"), 0, tr("减压阀1"), pres_set[2], "MPa");
+	connect(flow, &flowSet::flow_to_set, this, &diagram::flow_set_slot);
+}
+
+void diagram::on_pres2_min_clicked()
+{
+	flowSet *flow = createFlowSet(tr("压力设置"), 1, tr("减压阀2"), pres_set[3], "MPa");
+	connect(flow, &flowSet::flow_to_set, this, &diagram::flow_set_slot);
+}
+
 void diagram::flow_set_slot(QString str)
 {
-//    if(!check_run(str))
-//    {
-//        return;
-//    }
-
     if(str.contains("流量计"))
     {
        QStringList list = str.split(" ");
@@ -298,6 +305,12 @@ void diagram::flow_set_slot(QString str)
        QStringList list = str.split(" ");
        uint8_t id = list.at(1).toInt();
        pres_set[id] = QString(list.at(3)).toDouble();
+    }
+    else if(str.contains("减压阀"))
+    {
+       QStringList list = str.split(" ");
+       uint8_t id = list.at(1).toInt();
+       pres_set[id+2] = QString(list.at(3)).toDouble();
     }
 
     cmdTorun(str);

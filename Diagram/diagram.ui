@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1396</width>
-    <height>1451</height>
+    <width>1300</width>
+    <height>1441</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -26,19 +26,17 @@
    <string>Form</string>
   </property>
   <property name="layoutDirection">
-   <enum>Qt::LayoutDirection::LeftToRight</enum>
+   <enum>Qt::LeftToRight</enum>
   </property>
   <property name="styleSheet">
-   <string notr="true">QWidget#diagram
-{
+   <string notr="true">QWidget#diagram{
     background:transparent;
    	font-family:SimHei;	
 	border-radius:15px;
     border: 1px solid rgb(228, 228, 228); 
 }
 
-QFrame#frame
-{
+QFrame#frame{
     background:transparent;
     background-image: url(:/Diagram/image/diagram.png);
 	border-radius:15px;
@@ -47,14 +45,13 @@ QFrame#frame
     border: 0px solid rgb(228, 228, 228); 
 }
 
-QLabel
-{
+QLabel{
 	background:transparent; 
 	border-radius:12;
     border: none;    
 	color: rgb(255, 255, 255);
    	font-family:Bahnschrift;
- 	font-size:14px;	  
+ 	font-size:12px;	  
     font:bold; 
 }
 
@@ -71,7 +68,7 @@ QPushButton#sw3, #sw4, #sw5, #sw6
 	background-image: url(:/Diagram/image/sw2_off.png);
 }
 
-QPushButton#flow1set, #flow2set, #pump1set, #pump2set, #pres1set, #pres2set, #btn_valve3way1,  #btn_valve3way2
+QPushButton#flow1set, #flow2set, #pump1set, #pump2set, #pres1set, #pres2set, #btn_valve3way1,  #btn_valve3way2, #pres1_min, #pres2_min
 {
     background:transparent; 
 }
@@ -116,10 +113,7 @@ QPushButton#flow1set, #flow2set, #pump1set, #pump2set, #pres1set, #pres2set, #bt
       <string notr="true"/>
      </property>
      <property name="frameShape">
-      <enum>QFrame::Shape::NoFrame</enum>
-     </property>
-     <property name="frameShadow">
-      <enum>QFrame::Shadow::Raised</enum>
+      <enum>QFrame::NoFrame</enum>
      </property>
      <property name="lineWidth">
       <number>0</number>
@@ -127,8 +121,8 @@ QPushButton#flow1set, #flow2set, #pump1set, #pump2set, #pres1set, #pres2set, #bt
      <widget class="QLabel" name="flow1">
       <property name="geometry">
        <rect>
-        <x>757</x>
-        <y>277</y>
+        <x>472</x>
+        <y>296</y>
         <width>71</width>
         <height>21</height>
        </rect>
@@ -137,6 +131,7 @@ QPushButton#flow1set, #flow2set, #pump1set, #pump2set, #pres1set, #pres2set, #bt
        <font>
         <family>Bahnschrift</family>
         <pointsize>-1</pointsize>
+        <weight>75</weight>
         <italic>false</italic>
         <bold>true</bold>
        </font>
@@ -145,14 +140,14 @@ QPushButton#flow1set, #flow2set, #pump1set, #pump2set, #pres1set, #pres2set, #bt
        <string>0ml/min</string>
       </property>
       <property name="alignment">
-       <set>Qt::AlignmentFlag::AlignCenter</set>
+       <set>Qt::AlignCenter</set>
       </property>
      </widget>
      <widget class="QPushButton" name="sw1">
       <property name="geometry">
        <rect>
-        <x>181</x>
-        <y>282</y>
+        <x>108</x>
+        <y>301</y>
         <width>22</width>
         <height>22</height>
        </rect>
@@ -170,7 +165,7 @@ QPushButton#flow1set, #flow2set, #pump1set, #pump2set, #pres1set, #pres2set, #bt
        </size>
       </property>
       <property name="focusPolicy">
-       <enum>Qt::FocusPolicy::NoFocus</enum>
+       <enum>Qt::NoFocus</enum>
       </property>
       <property name="text">
        <string/>
@@ -189,14 +184,14 @@ QPushButton#flow1set, #flow2set, #pump1set, #pump2set, #pres1set, #pres2set, #bt
      <widget class="QPushButton" name="flow1set">
       <property name="geometry">
        <rect>
-        <x>767</x>
-        <y>304</y>
-        <width>48</width>
-        <height>48</height>
+        <x>488</x>
+        <y>320</y>
+        <width>40</width>
+        <height>40</height>
        </rect>
       </property>
       <property name="focusPolicy">
-       <enum>Qt::FocusPolicy::NoFocus</enum>
+       <enum>Qt::NoFocus</enum>
       </property>
       <property name="text">
        <string/>
@@ -205,8 +200,8 @@ QPushButton#flow1set, #flow2set, #pump1set, #pump2set, #pres1set, #pres2set, #bt
      <widget class="QLabel" name="DisTemp1">
       <property name="geometry">
        <rect>
-        <x>904</x>
-        <y>630</y>
+        <x>469</x>
+        <y>577</y>
         <width>71</width>
         <height>20</height>
        </rect>
@@ -215,6 +210,7 @@ QPushButton#flow1set, #flow2set, #pump1set, #pump2set, #pres1set, #pres2set, #bt
        <font>
         <family>Bahnschrift</family>
         <pointsize>-1</pointsize>
+        <weight>75</weight>
         <italic>false</italic>
         <bold>true</bold>
        </font>
@@ -223,14 +219,14 @@ QPushButton#flow1set, #flow2set, #pump1set, #pump2set, #pres1set, #pres2set, #bt
        <string>0℃</string>
       </property>
       <property name="alignment">
-       <set>Qt::AlignmentFlag::AlignCenter</set>
+       <set>Qt::AlignCenter</set>
       </property>
      </widget>
      <widget class="QLabel" name="stove1Temp">
       <property name="geometry">
        <rect>
-        <x>904</x>
-        <y>593</y>
+        <x>618</x>
+        <y>576</y>
         <width>71</width>
         <height>20</height>
        </rect>
@@ -239,6 +235,7 @@ QPushButton#flow1set, #flow2set, #pump1set, #pump2set, #pres1set, #pres2set, #bt
        <font>
         <family>Bahnschrift</family>
         <pointsize>-1</pointsize>
+        <weight>75</weight>
         <italic>false</italic>
         <bold>true</bold>
        </font>
@@ -247,14 +244,14 @@ QPushButton#flow1set, #flow2set, #pump1set, #pump2set, #pres1set, #pres2set, #bt
        <string>0℃</string>
       </property>
       <property name="alignment">
-       <set>Qt::AlignmentFlag::AlignCenter</set>
+       <set>Qt::AlignCenter</set>
       </property>
      </widget>
      <widget class="QLabel" name="liquid1">
       <property name="geometry">
        <rect>
-        <x>373</x>
-        <y>597</y>
+        <x>210</x>
+        <y>578</y>
         <width>71</width>
         <height>20</height>
        </rect>
@@ -263,6 +260,7 @@ QPushButton#flow1set, #flow2set, #pump1set, #pump2set, #pres1set, #pres2set, #bt
        <font>
         <family>Bahnschrift</family>
         <pointsize>-1</pointsize>
+        <weight>75</weight>
         <italic>false</italic>
         <bold>true</bold>
        </font>
@@ -274,14 +272,14 @@ QPushButton#flow1set, #flow2set, #pump1set, #pump2set, #pres1set, #pres2set, #bt
        <string>0%</string>
       </property>
       <property name="alignment">
-       <set>Qt::AlignmentFlag::AlignCenter</set>
+       <set>Qt::AlignCenter</set>
       </property>
      </widget>
      <widget class="QLabel" name="pres2">
       <property name="geometry">
        <rect>
-        <x>536</x>
-        <y>297</y>
+        <x>190</x>
+        <y>945</y>
         <width>71</width>
         <height>20</height>
        </rect>
@@ -290,6 +288,7 @@ QPushButton#flow1set, #flow2set, #pump1set, #pump2set, #pres1set, #pres2set, #bt
        <font>
         <family>Bahnschrift</family>
         <pointsize>-1</pointsize>
+        <weight>75</weight>
         <italic>false</italic>
         <bold>true</bold>
        </font>
@@ -298,14 +297,14 @@ QPushButton#flow1set, #flow2set, #pump1set, #pump2set, #pres1set, #pres2set, #bt
        <string>0MPa</string>
       </property>
       <property name="alignment">
-       <set>Qt::AlignmentFlag::AlignCenter</set>
+       <set>Qt::AlignCenter</set>
       </property>
      </widget>
      <widget class="QLabel" name="pumpflow1">
       <property name="geometry">
        <rect>
-        <x>742</x>
-        <y>48</y>
+        <x>457</x>
+        <y>57</y>
         <width>71</width>
         <height>20</height>
        </rect>
@@ -314,6 +313,7 @@ QPushButton#flow1set, #flow2set, #pump1set, #pump2set, #pres1set, #pres2set, #bt
        <font>
         <family>Bahnschrift</family>
         <pointsize>-1</pointsize>
+        <weight>75</weight>
         <italic>false</italic>
         <bold>true</bold>
        </font>
@@ -322,14 +322,14 @@ QPushButton#flow1set, #flow2set, #pump1set, #pump2set, #pres1set, #pres2set, #bt
        <string>0ml/min</string>
       </property>
       <property name="alignment">
-       <set>Qt::AlignmentFlag::AlignCenter</set>
+       <set>Qt::AlignCenter</set>
       </property>
      </widget>
      <widget class="QLabel" name="pres1">
       <property name="geometry">
        <rect>
-        <x>402</x>
-        <y>244</y>
+        <x>196</x>
+        <y>277</y>
         <width>71</width>
         <height>21</height>
        </rect>
@@ -338,6 +338,7 @@ QPushButton#flow1set, #flow2set, #pump1set, #pump2set, #pres1set, #pres2set, #bt
        <font>
         <family>Bahnschrift</family>
         <pointsize>-1</pointsize>
+        <weight>75</weight>
         <italic>false</italic>
         <bold>true</bold>
        </font>
@@ -346,14 +347,14 @@ QPushButton#flow1set, #flow2set, #pump1set, #pump2set, #pres1set, #pres2set, #bt
        <string>0MPa</string>
       </property>
       <property name="alignment">
-       <set>Qt::AlignmentFlag::AlignCenter</set>
+       <set>Qt::AlignCenter</set>
       </property>
      </widget>
      <widget class="QLabel" name="pres3">
       <property name="geometry">
        <rect>
-        <x>880</x>
-        <y>298</y>
+        <x>339</x>
+        <y>321</y>
         <width>71</width>
         <height>20</height>
        </rect>
@@ -362,6 +363,7 @@ QPushButton#flow1set, #flow2set, #pump1set, #pump2set, #pres1set, #pres2set, #bt
        <font>
         <family>Bahnschrift</family>
         <pointsize>-1</pointsize>
+        <weight>75</weight>
         <italic>false</italic>
         <bold>true</bold>
        </font>
@@ -373,20 +375,20 @@ QPushButton#flow1set, #flow2set, #pump1set, #pump2set, #pres1set, #pres2set, #bt
        <string>0MPa</string>
       </property>
       <property name="alignment">
-       <set>Qt::AlignmentFlag::AlignCenter</set>
+       <set>Qt::AlignCenter</set>
       </property>
      </widget>
      <widget class="QPushButton" name="flow2set">
       <property name="geometry">
        <rect>
-        <x>768</x>
-        <y>1013</y>
-        <width>48</width>
-        <height>48</height>
+        <x>490</x>
+        <y>990</y>
+        <width>40</width>
+        <height>40</height>
        </rect>
       </property>
       <property name="focusPolicy">
-       <enum>Qt::FocusPolicy::NoFocus</enum>
+       <enum>Qt::NoFocus</enum>
       </property>
       <property name="text">
        <string/>
@@ -395,8 +397,8 @@ QPushButton#flow1set, #flow2set, #pump1set, #pump2set, #pres1set, #pres2set, #bt
      <widget class="QLabel" name="flow2">
       <property name="geometry">
        <rect>
-        <x>757</x>
-        <y>985</y>
+        <x>474</x>
+        <y>967</y>
         <width>71</width>
         <height>21</height>
        </rect>
@@ -405,6 +407,7 @@ QPushButton#flow1set, #flow2set, #pump1set, #pump2set, #pres1set, #pres2set, #bt
        <font>
         <family>Bahnschrift</family>
         <pointsize>-1</pointsize>
+        <weight>75</weight>
         <italic>false</italic>
         <bold>true</bold>
        </font>
@@ -413,20 +416,20 @@ QPushButton#flow1set, #flow2set, #pump1set, #pump2set, #pres1set, #pres2set, #bt
        <string>0ml/min</string>
       </property>
       <property name="alignment">
-       <set>Qt::AlignmentFlag::AlignCenter</set>
+       <set>Qt::AlignCenter</set>
       </property>
      </widget>
      <widget class="QPushButton" name="pump1set">
       <property name="geometry">
        <rect>
-        <x>756</x>
-        <y>70</y>
-        <width>45</width>
-        <height>45</height>
+        <x>471</x>
+        <y>79</y>
+        <width>40</width>
+        <height>40</height>
        </rect>
       </property>
       <property name="focusPolicy">
-       <enum>Qt::FocusPolicy::NoFocus</enum>
+       <enum>Qt::NoFocus</enum>
       </property>
       <property name="text">
        <string/>
@@ -435,14 +438,14 @@ QPushButton#flow1set, #flow2set, #pump1set, #pump2set, #pres1set, #pres2set, #bt
      <widget class="QPushButton" name="pres1set">
       <property name="geometry">
        <rect>
-        <x>157</x>
-        <y>505</y>
-        <width>40</width>
+        <x>193</x>
+        <y>486</y>
+        <width>30</width>
         <height>30</height>
        </rect>
       </property>
       <property name="focusPolicy">
-       <enum>Qt::FocusPolicy::NoFocus</enum>
+       <enum>Qt::NoFocus</enum>
       </property>
       <property name="text">
        <string/>
@@ -451,8 +454,8 @@ QPushButton#flow1set, #flow2set, #pump1set, #pump2set, #pres1set, #pres2set, #bt
      <widget class="QLabel" name="pres4">
       <property name="geometry">
        <rect>
-        <x>215</x>
-        <y>475</y>
+        <x>322</x>
+        <y>986</y>
         <width>71</width>
         <height>21</height>
        </rect>
@@ -461,6 +464,7 @@ QPushButton#flow1set, #flow2set, #pump1set, #pump2set, #pres1set, #pres2set, #bt
        <font>
         <family>Bahnschrift</family>
         <pointsize>-1</pointsize>
+        <weight>75</weight>
         <italic>false</italic>
         <bold>true</bold>
        </font>
@@ -469,14 +473,14 @@ QPushButton#flow1set, #flow2set, #pump1set, #pump2set, #pres1set, #pres2set, #bt
        <string>0MPa</string>
       </property>
       <property name="alignment">
-       <set>Qt::AlignmentFlag::AlignCenter</set>
+       <set>Qt::AlignCenter</set>
       </property>
      </widget>
      <widget class="QLabel" name="pres5">
       <property name="geometry">
        <rect>
-        <x>403</x>
-        <y>952</y>
+        <x>593</x>
+        <y>316</y>
         <width>71</width>
         <height>21</height>
        </rect>
@@ -485,6 +489,7 @@ QPushButton#flow1set, #flow2set, #pump1set, #pump2set, #pres1set, #pres2set, #bt
        <font>
         <family>Bahnschrift</family>
         <pointsize>-1</pointsize>
+        <weight>75</weight>
         <italic>false</italic>
         <bold>true</bold>
        </font>
@@ -493,14 +498,14 @@ QPushButton#flow1set, #flow2set, #pump1set, #pump2set, #pres1set, #pres2set, #bt
        <string>0MPa</string>
       </property>
       <property name="alignment">
-       <set>Qt::AlignmentFlag::AlignCenter</set>
+       <set>Qt::AlignCenter</set>
       </property>
      </widget>
      <widget class="QLabel" name="pres6">
       <property name="geometry">
        <rect>
-        <x>534</x>
-        <y>1005</y>
+        <x>593</x>
+        <y>987</y>
         <width>71</width>
         <height>20</height>
        </rect>
@@ -509,6 +514,7 @@ QPushButton#flow1set, #flow2set, #pump1set, #pump2set, #pres1set, #pres2set, #bt
        <font>
         <family>Bahnschrift</family>
         <pointsize>-1</pointsize>
+        <weight>75</weight>
         <italic>false</italic>
         <bold>true</bold>
        </font>
@@ -517,14 +523,14 @@ QPushButton#flow1set, #flow2set, #pump1set, #pump2set, #pres1set, #pres2set, #bt
        <string>0MPa</string>
       </property>
       <property name="alignment">
-       <set>Qt::AlignmentFlag::AlignCenter</set>
+       <set>Qt::AlignCenter</set>
       </property>
      </widget>
      <widget class="QLabel" name="pres7">
       <property name="geometry">
        <rect>
-        <x>879</x>
-        <y>1005</y>
+        <x>168</x>
+        <y>456</y>
         <width>71</width>
         <height>20</height>
        </rect>
@@ -533,6 +539,7 @@ QPushButton#flow1set, #flow2set, #pump1set, #pump2set, #pres1set, #pres2set, #bt
        <font>
         <family>Bahnschrift</family>
         <pointsize>-1</pointsize>
+        <weight>75</weight>
         <italic>false</italic>
         <bold>true</bold>
        </font>
@@ -544,14 +551,14 @@ QPushButton#flow1set, #flow2set, #pump1set, #pump2set, #pres1set, #pres2set, #bt
        <string>0MPa</string>
       </property>
       <property name="alignment">
-       <set>Qt::AlignmentFlag::AlignCenter</set>
+       <set>Qt::AlignCenter</set>
       </property>
      </widget>
      <widget class="QLabel" name="pres8">
       <property name="geometry">
        <rect>
-        <x>216</x>
-        <y>1182</y>
+        <x>130</x>
+        <y>1148</y>
         <width>71</width>
         <height>21</height>
        </rect>
@@ -560,28 +567,32 @@ QPushButton#flow1set, #flow2set, #pump1set, #pump2set, #pres1set, #pres2set, #bt
        <font>
         <family>Bahnschrift</family>
         <pointsize>-1</pointsize>
+        <weight>75</weight>
         <italic>false</italic>
         <bold>true</bold>
        </font>
+      </property>
+      <property name="frameShape">
+       <enum>QFrame::Box</enum>
       </property>
       <property name="text">
        <string>0MPa</string>
       </property>
       <property name="alignment">
-       <set>Qt::AlignmentFlag::AlignCenter</set>
+       <set>Qt::AlignCenter</set>
       </property>
      </widget>
      <widget class="QPushButton" name="pump2set">
       <property name="geometry">
        <rect>
-        <x>757</x>
-        <y>778</y>
-        <width>45</width>
-        <height>45</height>
+        <x>471</x>
+        <y>759</y>
+        <width>40</width>
+        <height>40</height>
        </rect>
       </property>
       <property name="focusPolicy">
-       <enum>Qt::FocusPolicy::NoFocus</enum>
+       <enum>Qt::NoFocus</enum>
       </property>
       <property name="text">
        <string/>
@@ -590,14 +601,14 @@ QPushButton#flow1set, #flow2set, #pump1set, #pump2set, #pres1set, #pres2set, #bt
      <widget class="QPushButton" name="pres2set">
       <property name="geometry">
        <rect>
-        <x>157</x>
-        <y>1213</y>
-        <width>40</width>
+        <x>152</x>
+        <y>1175</y>
+        <width>30</width>
         <height>30</height>
        </rect>
       </property>
       <property name="focusPolicy">
-       <enum>Qt::FocusPolicy::NoFocus</enum>
+       <enum>Qt::NoFocus</enum>
       </property>
       <property name="text">
        <string/>
@@ -606,8 +617,8 @@ QPushButton#flow1set, #flow2set, #pump1set, #pump2set, #pres1set, #pres2set, #bt
      <widget class="QLabel" name="liquid2">
       <property name="geometry">
        <rect>
-        <x>373</x>
-        <y>1303</y>
+        <x>210</x>
+        <y>1266</y>
         <width>71</width>
         <height>21</height>
        </rect>
@@ -616,6 +627,7 @@ QPushButton#flow1set, #flow2set, #pump1set, #pump2set, #pres1set, #pres2set, #bt
        <font>
         <family>Bahnschrift</family>
         <pointsize>-1</pointsize>
+        <weight>75</weight>
         <italic>false</italic>
         <bold>true</bold>
        </font>
@@ -627,14 +639,14 @@ QPushButton#flow1set, #flow2set, #pump1set, #pump2set, #pres1set, #pres2set, #bt
        <string>0%</string>
       </property>
       <property name="alignment">
-       <set>Qt::AlignmentFlag::AlignCenter</set>
+       <set>Qt::AlignCenter</set>
       </property>
      </widget>
      <widget class="QLabel" name="pumpflow2">
       <property name="geometry">
        <rect>
-        <x>744</x>
-        <y>754</y>
+        <x>458</x>
+        <y>736</y>
         <width>71</width>
         <height>21</height>
        </rect>
@@ -643,6 +655,7 @@ QPushButton#flow1set, #flow2set, #pump1set, #pump2set, #pres1set, #pres2set, #bt
        <font>
         <family>Bahnschrift</family>
         <pointsize>-1</pointsize>
+        <weight>75</weight>
         <italic>false</italic>
         <bold>true</bold>
        </font>
@@ -651,14 +664,14 @@ QPushButton#flow1set, #flow2set, #pump1set, #pump2set, #pres1set, #pres2set, #bt
        <string>0ml/min</string>
       </property>
       <property name="alignment">
-       <set>Qt::AlignmentFlag::AlignCenter</set>
+       <set>Qt::AlignCenter</set>
       </property>
      </widget>
      <widget class="QLabel" name="DisTemp2">
       <property name="geometry">
        <rect>
-        <x>903</x>
-        <y>1339</y>
+        <x>469</x>
+        <y>1267</y>
         <width>71</width>
         <height>16</height>
        </rect>
@@ -667,6 +680,7 @@ QPushButton#flow1set, #flow2set, #pump1set, #pump2set, #pres1set, #pres2set, #bt
        <font>
         <family>Bahnschrift</family>
         <pointsize>-1</pointsize>
+        <weight>75</weight>
         <italic>false</italic>
         <bold>true</bold>
        </font>
@@ -675,14 +689,14 @@ QPushButton#flow1set, #flow2set, #pump1set, #pump2set, #pres1set, #pres2set, #bt
        <string>0℃</string>
       </property>
       <property name="alignment">
-       <set>Qt::AlignmentFlag::AlignCenter</set>
+       <set>Qt::AlignCenter</set>
       </property>
      </widget>
      <widget class="QLabel" name="stove2Temp">
       <property name="geometry">
        <rect>
-        <x>905</x>
-        <y>1301</y>
+        <x>618</x>
+        <y>1264</y>
         <width>71</width>
         <height>21</height>
        </rect>
@@ -691,6 +705,7 @@ QPushButton#flow1set, #flow2set, #pump1set, #pump2set, #pres1set, #pres2set, #bt
        <font>
         <family>Bahnschrift</family>
         <pointsize>-1</pointsize>
+        <weight>75</weight>
         <italic>false</italic>
         <bold>true</bold>
        </font>
@@ -699,134 +714,23 @@ QPushButton#flow1set, #flow2set, #pump1set, #pump2set, #pres1set, #pres2set, #bt
        <string>0℃</string>
       </property>
       <property name="alignment">
-       <set>Qt::AlignmentFlag::AlignCenter</set>
-      </property>
-     </widget>
-     <widget class="QPushButton" name="sw3">
-      <property name="geometry">
-       <rect>
-        <x>1210</x>
-        <y>330</y>
-        <width>44</width>
-        <height>44</height>
-       </rect>
-      </property>
-      <property name="minimumSize">
-       <size>
-        <width>0</width>
-        <height>0</height>
-       </size>
-      </property>
-      <property name="maximumSize">
-       <size>
-        <width>16777215</width>
-        <height>16777215</height>
-       </size>
-      </property>
-      <property name="focusPolicy">
-       <enum>Qt::FocusPolicy::NoFocus</enum>
-      </property>
-      <property name="text">
-       <string/>
-      </property>
-     </widget>
-     <widget class="QPushButton" name="sw4">
-      <property name="geometry">
-       <rect>
-        <x>1200</x>
-        <y>990</y>
-        <width>44</width>
-        <height>44</height>
-       </rect>
-      </property>
-      <property name="minimumSize">
-       <size>
-        <width>0</width>
-        <height>0</height>
-       </size>
-      </property>
-      <property name="maximumSize">
-       <size>
-        <width>16777215</width>
-        <height>16777215</height>
-       </size>
-      </property>
-      <property name="focusPolicy">
-       <enum>Qt::FocusPolicy::NoFocus</enum>
-      </property>
-      <property name="text">
-       <string/>
-      </property>
-     </widget>
-     <widget class="QPushButton" name="sw6">
-      <property name="geometry">
-       <rect>
-        <x>1210</x>
-        <y>790</y>
-        <width>44</width>
-        <height>44</height>
-       </rect>
-      </property>
-      <property name="minimumSize">
-       <size>
-        <width>0</width>
-        <height>0</height>
-       </size>
-      </property>
-      <property name="maximumSize">
-       <size>
-        <width>16777215</width>
-        <height>16777215</height>
-       </size>
-      </property>
-      <property name="focusPolicy">
-       <enum>Qt::FocusPolicy::NoFocus</enum>
-      </property>
-      <property name="text">
-       <string/>
-      </property>
-     </widget>
-     <widget class="QPushButton" name="sw5">
-      <property name="geometry">
-       <rect>
-        <x>1210</x>
-        <y>610</y>
-        <width>44</width>
-        <height>44</height>
-       </rect>
-      </property>
-      <property name="minimumSize">
-       <size>
-        <width>0</width>
-        <height>0</height>
-       </size>
-      </property>
-      <property name="maximumSize">
-       <size>
-        <width>16777215</width>
-        <height>16777215</height>
-       </size>
-      </property>
-      <property name="focusPolicy">
-       <enum>Qt::FocusPolicy::NoFocus</enum>
-      </property>
-      <property name="text">
-       <string/>
+       <set>Qt::AlignCenter</set>
       </property>
      </widget>
      <widget class="QLabel" name="canTemp">
       <property name="geometry">
        <rect>
-        <x>903</x>
-        <y>553</y>
+        <x>618</x>
+        <y>534</y>
         <width>71</width>
-        <height>20</height>
+        <height>21</height>
        </rect>
       </property>
       <property name="font">
        <font>
         <family>Bahnschrift</family>
         <pointsize>-1</pointsize>
+        <weight>75</weight>
         <italic>false</italic>
         <bold>true</bold>
        </font>
@@ -835,14 +739,14 @@ QPushButton#flow1set, #flow2set, #pump1set, #pump2set, #pres1set, #pres2set, #bt
        <string>0℃</string>
       </property>
       <property name="alignment">
-       <set>Qt::AlignmentFlag::AlignCenter</set>
+       <set>Qt::AlignCenter</set>
       </property>
      </widget>
      <widget class="QLabel" name="preHeatTemp">
       <property name="geometry">
        <rect>
-        <x>902</x>
-        <y>469</y>
+        <x>618</x>
+        <y>453</y>
         <width>71</width>
         <height>20</height>
        </rect>
@@ -851,6 +755,7 @@ QPushButton#flow1set, #flow2set, #pump1set, #pump2set, #pres1set, #pres2set, #bt
        <font>
         <family>Bahnschrift</family>
         <pointsize>-1</pointsize>
+        <weight>75</weight>
         <italic>false</italic>
         <bold>true</bold>
        </font>
@@ -859,14 +764,14 @@ QPushButton#flow1set, #flow2set, #pump1set, #pump2set, #pres1set, #pres2set, #bt
        <string>0℃</string>
       </property>
       <property name="alignment">
-       <set>Qt::AlignmentFlag::AlignCenter</set>
+       <set>Qt::AlignCenter</set>
       </property>
      </widget>
      <widget class="QLabel" name="canTemp2">
       <property name="geometry">
        <rect>
-        <x>904</x>
-        <y>1260</y>
+        <x>618</x>
+        <y>1224</y>
         <width>71</width>
         <height>20</height>
        </rect>
@@ -875,6 +780,7 @@ QPushButton#flow1set, #flow2set, #pump1set, #pump2set, #pres1set, #pres2set, #bt
        <font>
         <family>Bahnschrift</family>
         <pointsize>-1</pointsize>
+        <weight>75</weight>
         <italic>false</italic>
         <bold>true</bold>
        </font>
@@ -883,14 +789,14 @@ QPushButton#flow1set, #flow2set, #pump1set, #pump2set, #pres1set, #pres2set, #bt
        <string>0℃</string>
       </property>
       <property name="alignment">
-       <set>Qt::AlignmentFlag::AlignCenter</set>
+       <set>Qt::AlignCenter</set>
       </property>
      </widget>
      <widget class="QLabel" name="preHeatTemp2">
       <property name="geometry">
        <rect>
-        <x>904</x>
-        <y>1177</y>
+        <x>618</x>
+        <y>1141</y>
         <width>71</width>
         <height>20</height>
        </rect>
@@ -899,6 +805,7 @@ QPushButton#flow1set, #flow2set, #pump1set, #pump2set, #pres1set, #pres2set, #bt
        <font>
         <family>Bahnschrift</family>
         <pointsize>-1</pointsize>
+        <weight>75</weight>
         <italic>false</italic>
         <bold>true</bold>
        </font>
@@ -907,14 +814,14 @@ QPushButton#flow1set, #flow2set, #pump1set, #pump2set, #pres1set, #pres2set, #bt
        <string>0℃</string>
       </property>
       <property name="alignment">
-       <set>Qt::AlignmentFlag::AlignCenter</set>
+       <set>Qt::AlignCenter</set>
       </property>
      </widget>
      <widget class="QPushButton" name="sw2">
       <property name="geometry">
        <rect>
-        <x>181</x>
-        <y>990</y>
+        <x>102</x>
+        <y>972</y>
         <width>22</width>
         <height>22</height>
        </rect>
@@ -932,7 +839,7 @@ QPushButton#flow1set, #flow2set, #pump1set, #pump2set, #pres1set, #pres2set, #bt
        </size>
       </property>
       <property name="focusPolicy">
-       <enum>Qt::FocusPolicy::NoFocus</enum>
+       <enum>Qt::NoFocus</enum>
       </property>
       <property name="text">
        <string/>
@@ -951,14 +858,14 @@ QPushButton#flow1set, #flow2set, #pump1set, #pump2set, #pres1set, #pres2set, #bt
      <widget class="QPushButton" name="btn_valve3way1">
       <property name="geometry">
        <rect>
-        <x>847</x>
-        <y>73</y>
+        <x>561</x>
+        <y>81</y>
         <width>30</width>
         <height>30</height>
        </rect>
       </property>
       <property name="focusPolicy">
-       <enum>Qt::FocusPolicy::NoFocus</enum>
+       <enum>Qt::NoFocus</enum>
       </property>
       <property name="text">
        <string/>
@@ -967,14 +874,14 @@ QPushButton#flow1set, #flow2set, #pump1set, #pump2set, #pres1set, #pres2set, #bt
      <widget class="QPushButton" name="btn_valve3way2">
       <property name="geometry">
        <rect>
-        <x>846</x>
-        <y>781</y>
+        <x>562</x>
+        <y>761</y>
         <width>30</width>
         <height>30</height>
        </rect>
       </property>
       <property name="focusPolicy">
-       <enum>Qt::FocusPolicy::NoFocus</enum>
+       <enum>Qt::NoFocus</enum>
       </property>
       <property name="text">
        <string/>
@@ -983,8 +890,8 @@ QPushButton#flow1set, #flow2set, #pump1set, #pump2set, #pres1set, #pres2set, #bt
      <widget class="QPushButton" name="sw1_2">
       <property name="geometry">
        <rect>
-        <x>180</x>
-        <y>366</y>
+        <x>108</x>
+        <y>387</y>
         <width>22</width>
         <height>22</height>
        </rect>
@@ -1002,7 +909,7 @@ QPushButton#flow1set, #flow2set, #pump1set, #pump2set, #pres1set, #pres2set, #bt
        </size>
       </property>
       <property name="focusPolicy">
-       <enum>Qt::FocusPolicy::NoFocus</enum>
+       <enum>Qt::NoFocus</enum>
       </property>
       <property name="text">
        <string/>
@@ -1021,8 +928,8 @@ QPushButton#flow1set, #flow2set, #pump1set, #pump2set, #pres1set, #pres2set, #bt
      <widget class="QPushButton" name="sw2_2">
       <property name="geometry">
        <rect>
-        <x>180</x>
-        <y>1075</y>
+        <x>101</x>
+        <y>1057</y>
         <width>22</width>
         <height>22</height>
        </rect>
@@ -1040,7 +947,7 @@ QPushButton#flow1set, #flow2set, #pump1set, #pump2set, #pres1set, #pres2set, #bt
        </size>
       </property>
       <property name="focusPolicy">
-       <enum>Qt::FocusPolicy::NoFocus</enum>
+       <enum>Qt::NoFocus</enum>
       </property>
       <property name="text">
        <string/>
@@ -1059,8 +966,8 @@ QPushButton#flow1set, #flow2set, #pump1set, #pump2set, #pres1set, #pres2set, #bt
      <widget class="QPushButton" name="sw1_3">
       <property name="geometry">
        <rect>
-        <x>650</x>
-        <y>329</y>
+        <x>740</x>
+        <y>400</y>
         <width>22</width>
         <height>22</height>
        </rect>
@@ -1078,7 +985,7 @@ QPushButton#flow1set, #flow2set, #pump1set, #pump2set, #pres1set, #pres2set, #bt
        </size>
       </property>
       <property name="focusPolicy">
-       <enum>Qt::FocusPolicy::NoFocus</enum>
+       <enum>Qt::NoFocus</enum>
       </property>
       <property name="text">
        <string/>
@@ -1097,8 +1004,8 @@ QPushButton#flow1set, #flow2set, #pump1set, #pump2set, #pres1set, #pres2set, #bt
      <widget class="QPushButton" name="sw2_3">
       <property name="geometry">
        <rect>
-        <x>650</x>
-        <y>1036</y>
+        <x>360</x>
+        <y>1350</y>
         <width>22</width>
         <height>22</height>
        </rect>
@@ -1116,7 +1023,7 @@ QPushButton#flow1set, #flow2set, #pump1set, #pump2set, #pres1set, #pres2set, #bt
        </size>
       </property>
       <property name="focusPolicy">
-       <enum>Qt::FocusPolicy::NoFocus</enum>
+       <enum>Qt::NoFocus</enum>
       </property>
       <property name="text">
        <string/>
@@ -1130,6 +1037,38 @@ QPushButton#flow1set, #flow2set, #pump1set, #pump2set, #pres1set, #pres2set, #bt
         <width>22</width>
         <height>22</height>
        </size>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pres2_min">
+      <property name="geometry">
+       <rect>
+        <x>271</x>
+        <y>968</y>
+        <width>30</width>
+        <height>30</height>
+       </rect>
+      </property>
+      <property name="focusPolicy">
+       <enum>Qt::NoFocus</enum>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pres1_min">
+      <property name="geometry">
+       <rect>
+        <x>292</x>
+        <y>296</y>
+        <width>30</width>
+        <height>30</height>
+       </rect>
+      </property>
+      <property name="focusPolicy">
+       <enum>Qt::NoFocus</enum>
+      </property>
+      <property name="text">
+       <string/>
       </property>
      </widget>
     </widget>

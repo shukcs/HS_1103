@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1061</width>
-    <height>953</height>
+    <width>1424</width>
+    <height>775</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -28,55 +28,28 @@
   <property name="styleSheet">
    <string notr="true">background-color: transparent;</string>
   </property>
-  <layout class="QVBoxLayout" name="mainLy">
-   <property name="leftMargin">
-    <number>0</number>
-   </property>
-   <property name="topMargin">
-    <number>0</number>
-   </property>
-   <property name="rightMargin">
-    <number>0</number>
-   </property>
-   <property name="bottomMargin">
-    <number>0</number>
-   </property>
+  <layout class="QVBoxLayout" name="verticalLayout_2">
    <item>
     <widget class="QScrollArea" name="scrollArea">
-     <property name="minimumSize">
-      <size>
-       <width>1061</width>
-       <height>0</height>
-      </size>
-     </property>
      <property name="styleSheet">
       <string notr="true"/>
      </property>
      <property name="frameShape">
-      <enum>QFrame::Shape::NoFrame</enum>
+      <enum>QFrame::NoFrame</enum>
      </property>
      <property name="widgetResizable">
       <bool>true</bool>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignmentFlag::AlignCenter</set>
      </property>
      <widget class="QWidget" name="widget">
       <property name="geometry">
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>1061</width>
+        <width>1381</width>
         <height>1451</height>
        </rect>
       </property>
-      <property name="maximumSize">
-       <size>
-        <width>1061</width>
-        <height>16777215</height>
-       </size>
-      </property>
-      <layout class="QVBoxLayout" name="verticalLayout">
+      <layout class="QHBoxLayout" name="horizontalLayout">
        <property name="leftMargin">
         <number>0</number>
        </property>
@@ -90,6 +63,19 @@
         <number>0</number>
        </property>
        <item>
+        <spacer name="horizontalSpacer_2">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>0</width>
+           <height>0</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
         <widget class="diagram" name="Diagram" native="true">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
@@ -99,17 +85,30 @@
          </property>
          <property name="minimumSize">
           <size>
-           <width>1061</width>
+           <width>796</width>
            <height>1451</height>
           </size>
          </property>
          <property name="maximumSize">
           <size>
-           <width>1061</width>
+           <width>796</width>
            <height>1451</height>
           </size>
          </property>
         </widget>
+       </item>
+       <item>
+        <spacer name="horizontalSpacer">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>0</width>
+           <height>0</height>
+          </size>
+         </property>
+        </spacer>
        </item>
       </layout>
      </widget>

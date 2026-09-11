@@ -44,7 +44,9 @@ private slots:
     void on_pump1set_clicked();
     void on_pump2set_clicked();
     void on_pres1set_clicked();
-    void on_pres2set_clicked();
+	void on_pres2set_clicked();
+	void on_pres1_min_clicked();
+	void on_pres2_min_clicked();
 
     void flow_set_slot(QString str);
 private:
@@ -60,7 +62,7 @@ private:
     bool swState[SW_NUM];
     double flow_set[FLOW_NUM]; // 设定的流量
     double pump_flow[PUMP_NUM]; // 液体泵设定流量
-    double pres_set[PRESS_NUM]; // 设定的压力
+    double pres_set[4]; // 设定的压力
     uint8_t m_posValve3Way[2];  // 3通阀通向
 };
 

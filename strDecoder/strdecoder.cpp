@@ -364,7 +364,7 @@ void strDecoder::strTocmd(const QString &cmd)
 		QString str2 = strlist.at(3);
 		liqudiCtrl_Range(str1.toInt(),str2.toDouble());
 	}
-	else if(cmd.contains("压力量程"))
+	else if(cmd.contains("减压阀"))
 	{
 		strlist = cmd.split(" ");  //  以空格符分割
 		QString str1 = strlist.at(1);

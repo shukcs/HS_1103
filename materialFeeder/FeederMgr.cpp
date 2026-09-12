@@ -101,7 +101,7 @@ FeederMgr::FeederMgr(QObject* p) : QObject(p)
     connect(port, &QSerialPort::baudRateChanged, this, [=] {m_bPortChaned = true; });
     port->open(QSerialPort::ReadWrite);
     QTimer::singleShot(50, this, &FeederMgr::ConnectPort);
-	m_nBottle = settings.value("nBottle", 8).toInt();
+	m_nBottle = settings.value("nBottle", 6).toInt();
     for (int i = 0; i < m_nBottle; ++i)
     {
         m_allBottle << new BottleStruct(i);
@@ -117,16 +117,16 @@ FeederMgr::FeederMgr(QObject* p) : QObject(p)
     settings.endGroup();
     ConnectPort();
     readMaterials();
-     QTimer::singleShot(50, this, [=] {
-         for (int i = 0; i < 6; i++)
-         {
-             AddMaterial("000" + QString::number(123 + i), "固体" + QString::number(i), 57.1 + i);
-         }
-         for (int i = 0; i < 6; i++)
-         {
-             updateStore(i > 0 ? "000" + QString::number(123 + i) : QString(), i);
-         }
-     });
+    /*QTimer::singleShot(50, this, [=] {
+        for (int i = 0; i < 6; i++)
+        {
+            AddMaterial("000" + QString::number(123 + i), "固体" + QString::number(i), 57.1 + i);
+        }
+        for (int i = 0; i < 6; i++)
+        {
+            updateStore(i > 0 ? "000" + QString::number(123 + i) : QString(), i);
+        }
+    });*/
 }
 
 FeederMgr::~FeederMgr()
@@ -769,6 +769,7 @@ void FeederMgr::decode(const uint8_t *buff, uint16_t len)
     default:
         break;
     }
+    m_lastTmRcv = QDateTime::currentMSecsSinceEpoch();
     if (m_comStat != Communicate)
     {
         m_comStat = Communicate;
@@ -1436,7 +1437,7 @@ void FeederMgr::recoverActions()
     {
         int nServo = -1;
         QList<int> dones;
-        for (int i = m_actions.size()-rem; i > 0; ++i)
+        for (int i = m_actions.size()-rem; i > 0; i--)
         {
             auto &item = m_actions.at(i);
             if (Dev_Servo == item.type)
@@ -1459,5 +1460,6 @@ void FeederMgr::recoverActions()
             dones.pop_back();
         }
     }
+    FeederRecover::Instance().FeedJobStart(m_actions.size());
     doAction();
 }

@@ -20,7 +20,7 @@ void flowSet::set_title(QString name)
     ui->label_title->setText(name);
 }
 
-void flowSet::set_flow_name(QString name,uint8_t id)
+void flowSet::set_flow_name(QString name, uint8_t id)
 {
     dev_id = id;
     ui->label_flow_name->setText(name);

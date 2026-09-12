@@ -63,6 +63,7 @@ protected:
     void timerEvent(QTimerEvent* e)override;
 
     RobotStat fromRead(uint16_t s);
+    void setRobotStat(RobotStat);
 protected:
     void ctrl();
     void ctrlProgma();

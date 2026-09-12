@@ -60,7 +60,8 @@ progConfig::progConfig(QWidget *parent) :
     connect(sw, &SwPanel::swPanelAdd, this, &progConfig::listAdd);
     ui->configLayout->addWidget(sw);
 
-/*    auto mt35 = new MotorGroupBox(MotorGroupBox::Motor_35);
+#ifdef _DEBUG
+    auto mt35 = new MotorGroupBox(MotorGroupBox::Motor_35);
     connect(mt35, &MotorGroupBox::sig_Add, this, &progConfig::listAdd);
     ui->configLayout->addWidget(mt35);
 
@@ -74,7 +75,12 @@ progConfig::progConfig(QWidget *parent) :
 
     auto mtRobot = new MotorGroupBox(MotorGroupBox::Motor_robot);
     connect(mtRobot, &MotorGroupBox::sig_Add, this, &progConfig::listAdd);
-    ui->configLayout->addWidget(mtRobot);*/
+    ui->configLayout->addWidget(mtRobot);
+
+    QPumpCtrl *pumpCtrl = new QPumpCtrl;
+    connect(pumpCtrl,&QPumpCtrl::pumpPanelAdd,this, &progConfig::listAdd);
+    ui->configLayout->addWidget(pumpCtrl);
+#endif
 
     auto hjgp = new HeatGroupBox;
     connect(hjgp, &HeatGroupBox::sig_Add, this, &progConfig::listAdd);
@@ -91,10 +97,6 @@ progConfig::progConfig(QWidget *parent) :
     QSlopeTemp *slopetemp = new QSlopeTemp;
     connect(slopetemp,&QSlopeTemp::slopePanelAdd,this, &progConfig::listAdd);
     ui->configLayout->addWidget(slopetemp);
-
-    /*QPumpCtrl *pumpCtrl = new QPumpCtrl;
-    connect(pumpCtrl,&QPumpCtrl::pumpPanelAdd,this, &progConfig::listAdd);
-    ui->configLayout->addWidget(pumpCtrl);*/
 
     QValveCtrl *valveCtrl = new QValveCtrl;
     connect(valveCtrl,&QValveCtrl::valvePanelAdd,this, &progConfig::listAdd);

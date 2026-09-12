@@ -45,10 +45,11 @@ void ModubosProtocol::WriteReg(uint16_t reg, uint16_t val)
 
 void ModubosProtocol::WriteMultiReg(uint16_t reg, const void *bf, uint16_t len)
 {
-    QByteArray ar(len + 4, 0);
+    QByteArray ar(len + 5, 0);
     AddModbusU16((uint8_t*)ar.data(), reg);
-    AddModbusU16((uint8_t*)ar.data(), (reg+1)/2);
-    ar.replace(4, len, (const char*)bf, len);
+    AddModbusU16((uint8_t*)ar.data()+2, (len+1)/2);
+    ar[4] = len;
+    ar.replace(5, len, (const char*)bf, len);
     appendSend(0x10, (uint8_t*)ar.data(), ar.size());
 }
 
@@ -214,24 +215,24 @@ int ModubosProtocol::getAckLen(uint8_t *buff, uint32_t) const
     return ret < 256 ? ret : -1;
 }
 
-void ModubosProtocol::appendSend(uint8_t cmd, uint8_t *buff, uint16_t l)
+void ModubosProtocol::appendSend(uint8_t cmd, uint8_t *buff, uint16_t sz)
 {
-    auto len = l + (TCP == m_type ? 8 : 4);
+    auto len = sz + (TCP == m_type ? 8 : 4);
     QByteArray arr(len, 0);
     if (TCP == m_type)
     {
         AddModbusU16((uint8_t*)arr.data(), m_seq++);
-        AddModbusU32((uint8_t*)arr.data()+2, l+2);
+        AddModbusU32((uint8_t*)arr.data()+2, sz +2);
         *(uint8_t*)(arr.data() + 6) = m_addr;
         *(uint8_t*)(arr.data() + 7) = cmd;
-        memcpy(arr.data() + 8, buff, l);
+        memcpy(arr.data() + 8, buff, sz);
     }
     else
     {
         *(uint8_t*)(arr.data()) = m_addr;
         *(uint8_t*)(arr.data() + 1) = cmd;
-        memcpy(arr.data() + 2, buff, l);
-        AddModbusU16((uint8_t*)arr.data() + 2+1, ModbusCrc(arr.data(), l+2));
+        memcpy(arr.data() + 2, buff, sz);
+        AddModbusU16((uint8_t*)arr.data()+2+sz, ModbusCrc(arr.data(), sz+2));
     }
     if (m_snds.isEmpty())
         write(arr);
@@ -367,9 +368,9 @@ void ModubosProtocol::prcsModbus(const uint8_t *data, uint16_t len)
         if (cmd != data[0])
             return;
 
+        emit modbusRcvd(data, len);
         m_snds.removeFirst();
         if (!m_snds.isEmpty())
             write(m_snds.first());
     }
-    emit modbusRcvd(data, len);
 }

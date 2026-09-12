@@ -28,9 +28,13 @@ diagram::diagram(QWidget *parent) :
     {
         pump_flow[i] = 0;
     }
-    for(int i=0;i<PRESS_NUM;i++)
+    for(int i=0;i<4;i++)
     {
         pres_set[i] = 0;
+    }
+    for (int i = 0; i < 2; i++)
+    {
+        m_percentLiquid[i] = 0;
     }
 
     //ui->pres3->hide();
@@ -255,35 +259,53 @@ void diagram::on_pump2set_clicked()
 void diagram::on_pres1set_clicked()
 {
 
-    flowSet* flow = createFlowSet(tr("压力设置"), 0, tr("背压阀1"), pres_set[0], "MPa");
+    flowSet* flow = createFlowSet(tr("背压阀1压力设置"), 0, tr("背压阀"), pres_set[0], "MPa");
     connect(flow,&flowSet::flow_to_set,this,&diagram::flow_set_slot);
 }
 
 void diagram::on_pres2set_clicked()
 {
-    flowSet *flow = createFlowSet(tr("压力设置"), 1, tr("背压阀2"), pres_set[1], "MPa");
+    flowSet *flow = createFlowSet(tr("背压阀2压力设置"), 1, tr("背压阀"), pres_set[1], "MPa");
     connect(flow, &flowSet::flow_to_set, this, &diagram::flow_set_slot);
 }
 
 void diagram::on_pres1_min_clicked()
 {
-	flowSet *flow = createFlowSet(tr("压力设置"), 0, tr("减压阀1"), pres_set[2], "MPa");
+	flowSet *flow = createFlowSet(tr("减压阀1压力设置"), 0, tr("减压阀"), pres_set[2], "MPa");
 	connect(flow, &flowSet::flow_to_set, this, &diagram::flow_set_slot);
 }
 
 void diagram::on_pres2_min_clicked()
 {
-	flowSet *flow = createFlowSet(tr("压力设置"), 1, tr("减压阀2"), pres_set[3], "MPa");
+	flowSet *flow = createFlowSet(tr("减压阀2压力设置"), 1, tr("减压阀"), pres_set[3], "MPa");
 	connect(flow, &flowSet::flow_to_set, this, &diagram::flow_set_slot);
+}
+
+void diagram::on_btn_rate1_clicked()
+{
+    flowSet *flow = createFlowSet(tr("液位1设置"), 0, tr("液位计量程"), m_percentLiquid[0], "%");
+    connect(flow, &flowSet::flow_to_set, this, &diagram::flow_set_slot);
+}
+
+void diagram::on_btn_rate2_clicked()
+{
+    flowSet *flow = createFlowSet(tr("液位2设置"), 0, tr("液位计量程"), m_percentLiquid[1], "%");
+    connect(flow, &flowSet::flow_to_set, this, &diagram::flow_set_slot);
 }
 
 void diagram::flow_set_slot(QString str)
 {
     if(str.contains("流量计"))
     {
-       QStringList list = str.split(" ");
-       uint8_t id = list.at(1).toInt();
-       flow_set[id] = QString(list.at(3)).toDouble();
+        QStringList list = str.split(" ");
+        uint8_t id = list.at(1).toInt();
+        flow_set[id] = QString(list.at(3)).toDouble();
+    }
+    if (str.contains("液位计量程"))
+    {
+        QStringList list = str.split(" ");
+        uint8_t id = list.at(1).toInt();
+        flow_set[id] = QString(list.at(3)).toDouble();
     }
     else if(str.contains("柱塞泵"))
     {
@@ -298,7 +320,6 @@ void diagram::flow_set_slot(QString str)
        {
            ui->pumpflow2->setText(QString::number(pump_flow[1]) + "ml/min");
        }
-
     }
     else if(str.contains("背压阀"))
     {
@@ -412,14 +433,14 @@ flowSet* diagram::createFlowSet(const QString &title, int id, const QString& nam
     int y = (screen.height() - flow->height()) / 2;
     flow->move(x, y);
 
-    flow->raise();
+    flow->setWindowFlag(Qt::Popup);
     flow->show();
     return flow;
 }
 
 void diagram::setSw(int idx, bool b)
 {
-    static QVector<QPushButton*> sws = { ui->sw1,ui->sw2,ui->sw1_2,ui->sw2_2,ui->sw1_3,ui->sw2_3 };
+    static QVector<QPushButton*> sws = { ui->sw1,ui->sw2,ui->sw1_2,ui->sw2_2};
     if (idx < 0 || idx >= sws.size())
         return;
 

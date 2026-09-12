@@ -62,8 +62,10 @@ void DlgFeedMaterial::initUi()
     connect(m_ui->cmb, static_cast<void(QComboBox::*)(const QString &)>(&QComboBox::currentIndexChanged), this, [=](const QString &str) {
         static QList<QString> sSet = { tr("料瓶可用"),  tr("缺失") };
         auto idx = sSet.indexOf(str);
-        if (idx > 0)
-            emit bottleAvlibleChanged(idx== tr("料瓶可用"));
-        setBottleAvlible(idx = 0);
+        if (idx >= 0)
+        {
+            emit bottleAvlibleChanged(0 == idx);
+            setBottleAvlible(0 == idx);
+        }
     });
 }

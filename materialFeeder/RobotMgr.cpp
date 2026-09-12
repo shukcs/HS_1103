@@ -47,8 +47,7 @@ RobotMgr::RobotMgr(QObject* p) : QObject(p)
     QTimer::singleShot(50, this, [=] { RobotMgr::ConnectSocket(m_ip, m_port); });
     connect(m_modbusTcp, &ModubosProtocol::modbusRcvd, this, &RobotMgr::onRead);
     connect(socket, &QTcpSocket::disconnected, this, [=] {
-        m_comStat = PortClose;
-        emit connectStatChanged(m_comStat);
+        setRobotStat(PortClose);
     });
     m_idTimer = startTimer(200);
 }
@@ -92,10 +91,8 @@ void RobotMgr::ConnectSocket(const QString &ip, uint16_t port)
     if (!socket->waitForConnected(1000))
     {
         if (PortClose != m_comStat)
-        {
-            m_comStat = PortClose;
-            emit connectStatChanged(PortClose);
-        }
+            setRobotStat(PortClose);
+
         return;
     }
 
@@ -107,10 +104,8 @@ void RobotMgr::ConnectSocket(const QString &ip, uint16_t port)
     settings.setValue("port", (int)m_port);
     settings.endGroup();
     if (PortClose == m_comStat)
-    {
-        m_comStat = NoData;
-        emit connectStatChanged(m_comStat);
-    }
+        setRobotStat(NoData);
+    
     m_modbusTcp->WriteReg(Robot_StatAddr, 0);
 }
 
@@ -195,11 +190,9 @@ void RobotMgr::timerEvent(QTimerEvent* e)
         else
             readStat();
 
-        if (Communicate<=m_comStat && QDateTime::currentMSecsSinceEpoch()-m_lastTmRcv>ConnetTimeOut)
-        {
-            m_comStat = NoData;
-            emit connectStatChanged(NoData);
-        }
+        if (Communicate <= m_comStat && QDateTime::currentMSecsSinceEpoch() - m_lastTmRcv > ConnetTimeOut)
+            setRobotStat(NoData);
+
         return;
     }
     QObject::timerEvent(e);
@@ -222,14 +215,21 @@ RobotMgr::RobotStat RobotMgr::fromRead(uint16_t st)
     return rdt;
 }
 
+void RobotMgr::setRobotStat(RobotStat st)
+{
+    if (m_comStat != st)
+    {
+        m_comStat = st;
+        emit connectStatChanged(st);
+    }
+}
+
 void RobotMgr::onRead(const uint8_t *buf, uint16_t len)
 {
     m_lastTmRcv = QDateTime::currentMSecsSinceEpoch();
     if (m_comStat < Communicate)
-    {
-        m_comStat = Communicate;
-        emit connectStatChanged(Communicate);
-    }
+        setRobotStat(Communicate);
+
     switch (buf[0])
     {
     case 3:
@@ -246,9 +246,9 @@ void RobotMgr::onRead(const uint8_t *buf, uint16_t len)
             m_curAct = None;
             break;
         case Robot_StatAddr:
-            if (Progma_None != m_progmaFlag)
-                m_progmaFlag = Progma_None;
-            else if (RobotSArmed == m_comStat)
+            if (Progma_Pause == m_progmaFlag)
+                setRobotStat(ProgmaPause);
+            else if (Progma_None==m_progmaFlag && RobotSArmed==m_comStat)
                 m_comStat = ProgmaStart;
             readStat();
             break;
@@ -334,11 +334,12 @@ void RobotMgr::prcsStat(const uint8_t *buf, uint16_t)
             if(rdt != m_comStat)
                 DeviceLog::Instance() << tr("»úÐµ±Û³ÌÐòÔËÐÐ");
         }
-        else if (2 == st)
+        else if (m_progmaFlag!=Progma_None && 3==st)
         {
-            rdt = ProgmaPause;
+            rdt = Progma_Pause==m_progmaFlag ? ProgmaPause : ProgmaStart;
+            m_progmaFlag = Progma_None;
             if (rdt != m_comStat)
-                DeviceLog::Instance() << tr("»úÐµ±Û³ÌÐòÔÝÍ£");
+                DeviceLog::Instance() << (ProgmaPause==rdt ? tr("»úÐµ±Û³ÌÐòÔÝÍ£") : tr("»úÐµ±Û³ÌÐò¼ÌÐø"));
         }
         break;
     default:
@@ -347,8 +348,7 @@ void RobotMgr::prcsStat(const uint8_t *buf, uint16_t)
     }
     if (rdt != m_comStat)
     {
-        m_comStat = rdt;
-        emit connectStatChanged(rdt);
+        setRobotStat(rdt);
         if (rdt != ProgmaStart)
             m_bSetSpeed = false;
         if (m_bStart && (rdt != ProgmaStart || !m_bSetSpeed))

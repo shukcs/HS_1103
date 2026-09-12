@@ -46,7 +46,9 @@ private slots:
     void on_pres1set_clicked();
 	void on_pres2set_clicked();
 	void on_pres1_min_clicked();
-	void on_pres2_min_clicked();
+    void on_pres2_min_clicked();
+    void on_btn_rate1_clicked();
+    void on_btn_rate2_clicked();
 
     void flow_set_slot(QString str);
 private:
@@ -58,12 +60,13 @@ private:
     Ui::diagram *ui;
     bool auto_Run = false;
     bool update_flg = true;
-    bool flow_sw[FLOW_NUM]; // 流量计阀控
+    bool flow_sw[FLOW_NUM];     /// 流量计阀控
     bool swState[SW_NUM];
-    double flow_set[FLOW_NUM]; // 设定的流量
-    double pump_flow[PUMP_NUM]; // 液体泵设定流量
-    double pres_set[4]; // 设定的压力
-    uint8_t m_posValve3Way[2];  // 3通阀通向
+    double flow_set[FLOW_NUM];  /// 设定的流量
+    double pump_flow[PUMP_NUM]; /// 液体泵设定流量
+    double pres_set[4];         /// 设定的压力
+    double m_percentLiquid[2];  ///液位
+    uint8_t m_posValve3Way[2];  /// 3通阀通向
 };
 
 #endif // DIAGRAM_H

@@ -55,10 +55,9 @@ QLabel{
     font:bold; 
 }
 
-QPushButton#sw1, #sw2, #sw1_2, #sw2_2, #sw1_3, #sw2_3
-{
+QPushButton#sw1, #sw2, #sw1_2, #sw2_2, #btn_rate1, #btn_rate2 {
     background:transparent; 
-    border:none;   
+    border:none;
 }
 
 QPushButton#sw3, #sw4, #sw5, #sw6
@@ -963,11 +962,11 @@ QPushButton#flow1set, #flow2set, #pump1set, #pump2set, #pres1set, #pres2set, #bt
        </size>
       </property>
      </widget>
-     <widget class="QPushButton" name="sw1_3">
+     <widget class="QPushButton" name="btn_rate1">
       <property name="geometry">
        <rect>
-        <x>740</x>
-        <y>400</y>
+        <x>330</x>
+        <y>632</y>
         <width>22</width>
         <height>22</height>
        </rect>
@@ -989,10 +988,6 @@ QPushButton#flow1set, #flow2set, #pump1set, #pump2set, #pres1set, #pres2set, #bt
       </property>
       <property name="text">
        <string/>
-      </property>
-      <property name="icon">
-       <iconset resource="../image.qrc">
-        <normaloff>:/Diagram/image/sw1_off.png</normaloff>:/Diagram/image/sw1_off.png</iconset>
       </property>
       <property name="iconSize">
        <size>
@@ -1001,11 +996,11 @@ QPushButton#flow1set, #flow2set, #pump1set, #pump2set, #pres1set, #pres2set, #bt
        </size>
       </property>
      </widget>
-     <widget class="QPushButton" name="sw2_3">
+     <widget class="QPushButton" name="btn_rate2">
       <property name="geometry">
        <rect>
-        <x>360</x>
-        <y>1350</y>
+        <x>329</x>
+        <y>1320</y>
         <width>22</width>
         <height>22</height>
        </rect>
@@ -1027,10 +1022,6 @@ QPushButton#flow1set, #flow2set, #pump1set, #pump2set, #pres1set, #pres2set, #bt
       </property>
       <property name="text">
        <string/>
-      </property>
-      <property name="icon">
-       <iconset resource="../image.qrc">
-        <normaloff>:/Diagram/image/sw1_off.png</normaloff>:/Diagram/image/sw1_off.png</iconset>
       </property>
       <property name="iconSize">
        <size>

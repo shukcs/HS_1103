@@ -5,7 +5,7 @@
 #include <QTimer>
 #include "portthread.h"
 #include "stove/stove.h"
-#include "programConfig/HeatGroupBox.h"
+#include "programConfig/progItem/HeatGroupBox.h"
 #include "materialFeeder/FeederMgr.h"
 #include "common/ModubosProtocol.h"
 #pragma execution_character_set("utf-8")
@@ -1186,11 +1186,11 @@ void strDecoder::prcsMotor(const QByteArray &msg)
     }
 }
 
-void strDecoder::onActionRun(const DeviceAct *act)
+void strDecoder::onActionRun(const ActionItem *act)
 {
-    if (Dev_Servo == act->type)
+    if (Act_Servo == act->getType())
         ctrlServoMotor(act->servoPos);
-    else if (Dev_StepMotor == act->type)
+    else if (Act_StepMotor == act->getType())
         ctrlStepMotor((CtrlType::StepMotorType)act->stepType, act->stepCh==0?1:2, act->stepDirCont ? 1 : 0);
 }
 

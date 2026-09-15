@@ -432,8 +432,6 @@ flowSet* diagram::createFlowSet(const QString &title, int id, const QString& nam
     int x = (screen.width() - flow->width()) / 2;
     int y = (screen.height() - flow->height()) / 2;
     flow->move(x, y);
-
-    flow->setWindowFlag(Qt::Popup);
     flow->show();
     return flow;
 }

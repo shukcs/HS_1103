@@ -49,14 +49,6 @@ enum {
     Flag_ReadStore = Flag_CanReadStore | Flag_StoreNumRead | Flag_DoReadStore,
 };
 
-enum DeviceType {
-    Dev_Robot,
-    Dev_Feeder,
-    Dev_Servo,
-    Dev_StepMotor,
-    Dev_NextWait,
-};
-
 typedef struct {
     uint16_t day : 5;  // 0~31
     uint16_t month : 4;  // 1~12
@@ -114,42 +106,6 @@ private:
     uint16_t m_numb;
     uint16_t m_flag;
     int16_t  m_chStove = -1;
-};
-
-class DeviceAct {
-public:
-    DeviceType	type : 8;     ///DeviceType
-    bool bStart : 1;        ///false: true, 已经开始
-    bool bWaitFinish : 1;   ///false: 可以同步进行下一个
-    union {
-        struct {
-            uint16_t robotStep;	///RobotMgr::RobotStep
-            uint8_t robotIndex;		///料瓶0~~N, 内衬0~~M, 反应管......
-        };
-        struct { ///
-            uint16_t cmdFeeder;
-            uint8_t cmdAck;
-            uint8_t idStore;
-            float wFeed;
-        };
-        struct {
-            uint8_t servoPos;
-        };
-        struct {
-            uint8_t stepType;   ///
-            uint8_t stepCh : 4;   ///0 or 1
-            bool stepDirCont : 1; ///true: 打开炉膛 /反应管上升
-        };
-        struct {
-            float fWaitTime;    ///
-        };
-    };
-    DeviceAct(DeviceType type = Dev_Robot, bool bWait = true);
-    DeviceAct(float tmWait);
-    void SetFeedCmd(uint16_t cmd, int ack = -1);
-    QString ToString(bool bStart = true)const;
-private:
-    QString stepMotorActToString()const;
 };
 
 class FeederParam
@@ -236,5 +192,4 @@ private:
 Q_DECLARE_METATYPE(const StoreStruct*);
 Q_DECLARE_METATYPE(BottleStruct*);
 Q_DECLARE_METATYPE(TubeStruct*);
-Q_DECLARE_METATYPE(const DeviceAct*);
 #endif // !__FEEDERSTRUCT_H__

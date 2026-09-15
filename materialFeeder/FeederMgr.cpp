@@ -26,11 +26,11 @@ union DataU
 };
 
 struct WorkItem {
-    uint8_t type;
-    uint8_t nNumTube;
-    uint8_t index;   ///归还位 type=FeederMgr::J_StoveTubeBack有效
-    uint8_t chStove; ///炉膛位
-	static WorkItem initFrom(FeederMgr::JobType t, uint8_t n, uint8_t idx = 0);
+    FeederMgr::JobType  type;
+    uint8_t             nNumTube;
+    uint8_t             chStove; ///炉膛位
+    int8_t              seq;   ///归还位 type=FeederMgr::J_StoveTubeBack有效
+	static WorkItem initFrom(FeederMgr::JobType t, uint8_t n, uint8_t idx = 0, int8_t seq=-1);
 	static WorkItem initFrom(int n);
 	int toInt()const;
     QString toString(bool bStart=true)const; ///bStart true: 开始的文字; false: 结束的文字
@@ -42,9 +42,9 @@ WorkItem WorkItem::initFrom(int n)
 	return ret;
 }
 
-WorkItem WorkItem::initFrom(FeederMgr::JobType t, uint8_t n, uint8_t idx /*= 0*/)
+WorkItem WorkItem::initFrom(FeederMgr::JobType t, uint8_t n, uint8_t idx, int8_t s)
 {
-	WorkItem ret = { (uint8_t)t, n, idx, 0};
+	WorkItem ret = { t, n, idx, s};
 	return ret;
 }
 
@@ -60,11 +60,11 @@ QString WorkItem::toString(bool b) const
     switch ((FeederMgr::JobType)type)
     {
     case FeederMgr::J_PrepareMate:
-        return QApplication::translate("WorkItem", "备料 反应管%1%2备料").arg(nNumTube + 1).arg(str);
+        return QApplication::translate("WorkItem", "备料: 反应管%1%2备料").arg(nNumTube + 1).arg(str);
     case FeederMgr::J_StoveFixTube:
-        return QApplication::translate("WorkItem", "装填 反应管%1%2装填炉膛%3").arg(nNumTube + 1).arg(str).arg(chStove + 1);
+        return QApplication::translate("WorkItem", "装填: 反应管%1%2装填炉膛%3").arg(nNumTube + 1).arg(str).arg(chStove + 1);
     case FeederMgr::J_StoveTubeBack:
-        return QApplication::translate("WorkItem", "回收 反应管%1%2回收到回收位%3").arg(nNumTube + 1).arg(str).arg(index + 1);
+        return QApplication::translate("WorkItem", "回收: 反应管%1%2回收到回收位%3").arg(nNumTube + 1).arg(str).arg(chStove + 1);
     default:
         break;
     }
@@ -117,7 +117,7 @@ FeederMgr::FeederMgr(QObject* p) : QObject(p)
     settings.endGroup();
     ConnectPort();
     readMaterials();
-    /*QTimer::singleShot(50, this, [=] {
+    QTimer::singleShot(50, this, [=] {
         for (int i = 0; i < 6; i++)
         {
             AddMaterial("000" + QString::number(123 + i), "固体" + QString::number(i), 57.1 + i);
@@ -126,7 +126,7 @@ FeederMgr::FeederMgr(QObject* p) : QObject(p)
         {
             updateStore(i > 0 ? "000" + QString::number(123 + i) : QString(), i);
         }
-    });*/
+    });
 }
 
 FeederMgr::~FeederMgr()
@@ -272,7 +272,7 @@ void FeederMgr::OnRobotDone(int typeRobot)
     auto itr = m_actions.begin();
     for (; itr != m_actions.end(); ++itr)
     {
-        if (Dev_Robot == itr->type && itr->robotStep==typeRobot)
+        if (Act_Robot == itr->getType() && itr->robotStep==typeRobot)
         {
             bool bChange = RobotMgr::MoveStore == typeRobot || RobotMgr::StoreBack == typeRobot;
             if (auto c = bChange ? getStore(itr->robotIndex) : nullptr)
@@ -282,7 +282,7 @@ void FeederMgr::OnRobotDone(int typeRobot)
             bDoNext = true;
             break;
         }
-        if (itr->bWaitFinish)
+        if (itr->isWaitFinish())
             return;
     }
 
@@ -299,13 +299,13 @@ void FeederMgr::OnServoMotor(int pos, bool bReached)
     auto itr = m_actions.begin();
     for (; itr != m_actions.end(); ++itr)
     {
-        if (Dev_Servo==itr->type && itr->servoPos==pos)
+        if (Act_Servo==itr->getType() && itr->servoPos==pos)
         {
             actionDone(itr);
             bDoNext = true;
             break;
         }
-        if (itr->bWaitFinish)
+        if (itr->isWaitFinish())
             return;
     }
     if (bDoNext)
@@ -321,7 +321,7 @@ void FeederMgr::OnStepMotor(StepMotorStat* st)
     auto itr = m_actions.begin();
     for (; itr != m_actions.end(); ++itr)
     {
-        if (Dev_StepMotor != itr->type || itr->stepType != st->GetType() || itr->stepCh != st->GetChannel())
+        if (Act_StepMotor != itr->getType() || itr->stepType != st->GetType() || itr->stepCh != st->GetChannel())
             continue;
 
         bool bReached = itr->stepDirCont ? st->IsLimitH() : st->IsLimitL();
@@ -331,7 +331,7 @@ void FeederMgr::OnStepMotor(StepMotorStat* st)
             bDoNext = true;
             break;
         }
-        if (itr->bWaitFinish)
+        if (itr->isWaitFinish())
             return;
     }
     if (bDoNext)
@@ -366,7 +366,7 @@ bool FeederMgr::prcsRead(uint16_t addr, const uint8_t *buff, uint16_t len)
 	return false;
 }
 
-bool FeederMgr::prcsStat(uint16_t addr, const uint8_t *buff, uint16_t len)
+bool FeederMgr::prcsStat(uint16_t addr, const uint8_t *buff, uint16_t)
 {
 	bool ret = false;
     switch (addr)
@@ -467,7 +467,7 @@ bool FeederMgr::prcsFeederStat(uint16_t stat)
     bool bDoNext = false;
     for (auto itr = m_actions.begin(); itr != m_actions.end(); ++itr)
     {
-        if (Dev_Feeder == itr->type && itr->cmdAck == stat)
+        if (Act_Feeder == itr->getType() && itr->cmdAck == stat)
         {
 			if (auto c = itr->cmdFeeder == 104 ? getStore(itr->idStore) : nullptr)
             {
@@ -478,7 +478,7 @@ bool FeederMgr::prcsFeederStat(uint16_t stat)
             bDoNext = true;
             break;
         }
-        if (itr->bWaitFinish)
+        if (itr->isWaitFinish())
             return false;
     }
     if (bDoNext)
@@ -496,31 +496,31 @@ bool FeederMgr::doAction()
 	bool ret = false;
     for (auto &act : m_actions)
     {
-        if (act.bStart)
+        if (act.isStart())
         {
-            if (act.bWaitFinish)
+            if (act.isWaitFinish())
                 break;
             continue;
         }
 
-        switch (act.type)
+        switch (act.getType())
         {
-        case Dev_Robot:
-        case Dev_Servo:
-        case Dev_StepMotor:
+        case Act_Robot:
+        case Act_Servo:
+        case Act_StepMotor:
             emit actionRun(&act);
             break;
-        case Dev_Feeder:
+        case Act_Feeder:
 			writeCmd(act);
 			ret = true;
 			break;
-        case Dev_NextWait:
+        case Act_NextWait:
             QTimer::singleShot(act.fWaitTime*1000, this, &FeederMgr::onWait);
             break;
         }
-        act.bStart = true;
+        act.start();
         DeviceLog::Instance() << act.ToString();
-        if (act.bWaitFinish)
+        if (act.isWaitFinish())
             break;
     }
 	return ret;
@@ -606,7 +606,7 @@ BottleStruct * FeederMgr::getBottle(int numb) const
     return nullptr;
 }
 
-void FeederMgr::actionDone(QList<DeviceAct>::iterator itr)
+void FeederMgr::actionDone(QList<ActionItem>::iterator itr)
 {
     DeviceLog::Instance() << itr->ToString();
     FeederRecover::Instance().FeedActionDone();
@@ -619,13 +619,13 @@ void FeederMgr::onWait()
     auto itr = m_actions.begin();
     for (; itr != m_actions.end(); ++itr)
     {
-        if (Dev_NextWait == itr->type)
+        if (Act_NextWait == itr->getType())
         {
             actionDone(itr);
             bDoNext = true;
             break;
         }
-        if (itr->bWaitFinish)
+        if (itr->isWaitFinish())
             return;
     }
     if (bDoNext)
@@ -634,7 +634,7 @@ void FeederMgr::onWait()
 
 void FeederMgr::addFeederAct(uint16_t cmd, bool bWait, int32_t ack, uint8_t numStore, float wFeed)
 {
-    DeviceAct act(Dev_Feeder, bWait);
+    ActionItem act(Act_Feeder, bWait);
     act.SetFeedCmd(cmd, ack);
     if (104 == cmd)
     {
@@ -649,14 +649,14 @@ void FeederMgr::addServoMotorAct(RobotPostion pos, bool bWait /*= true*/)
     if (pos < 0)
         return;
 
-    DeviceAct actServo(Dev_Servo, bWait);
+    ActionItem actServo(Act_Servo, bWait);
     actServo.servoPos = pos;
     m_actions << actServo;
 }
 
 void FeederMgr::addStepMotorAct(uint8_t type, uint8_t ch, bool bCont, bool bWait /*= true*/)
 {
-    DeviceAct actStep(Dev_StepMotor, bWait);
+    ActionItem actStep(Act_StepMotor, bWait);
     actStep.stepCh = ch;
     actStep.stepType = type;
     actStep.stepDirCont = bCont;
@@ -666,7 +666,7 @@ void FeederMgr::addStepMotorAct(uint8_t type, uint8_t ch, bool bCont, bool bWait
 
 void FeederMgr::adddRobotAct(uint16_t type, uint8_t index /*= 0*/, bool bWait /*= true*/)
 {
-    DeviceAct actRobot(Dev_Robot, bWait);
+    ActionItem actRobot(Act_Robot, bWait);
     actRobot.robotStep = type;
     actRobot.robotIndex = index;
     m_actions << actRobot;
@@ -833,7 +833,7 @@ void FeederMgr::genTubToStvoe(const WorkItem &bt, bool bDo)
     addServoMotorAct(Pos_BlanceDoor);
     adddRobotAct(RobotMgr::MoveTube, bt.nNumTube);
     addStepMotorAct(CtrlType::Motor_Stove, bt.chStove, true, false);
-    m_actions << DeviceAct(1.5);//等1.5S
+    m_actions << ActionItem(1.5);//等1.5S
     addStepMotorAct(CtrlType::Motor_Tube, bt.chStove, false, false);
 
     auto pos = getStovePos(bt.chStove);
@@ -1295,9 +1295,9 @@ void FeederMgr::writeMaterial(const MaterialStruct *m, uint16_t index)
     }
 }
 
-void FeederMgr::writeCmd(const DeviceAct &act)
+void FeederMgr::writeCmd(const ActionItem &act)
 {
-    if (Dev_Feeder != act.type)
+    if (Act_Feeder != act.getType())
         return;
 
     uint8_t buff[16] = { 0 };
@@ -1310,8 +1310,6 @@ void FeederMgr::writeCmd(const DeviceAct &act)
         memcpy(buff + 2, arr.data(), sz > 8 ? 8 : sz);
         ModubosProtocol::AddModbusFloat(buff + 10, act.wFeed);
         len = 16;
-        buff[5] = 8;
-        buff[6] = 16;
         c->setStat(S_Feeding);
         m_feedStore = c;
         emit feedingChanged(act.wFeed, true);
@@ -1443,7 +1441,7 @@ void FeederMgr::recoverActions()
         for (int i = m_actions.size()-rem; i > 0; i--)
         {
             auto &item = m_actions.at(i);
-            if (Dev_Servo == item.type)
+            if (Act_Servo == item.getType())
             {
                 if (nServo >= 0)
                     dones << i;
@@ -1451,7 +1449,7 @@ void FeederMgr::recoverActions()
                 nServo = i;
                 continue;
             }
-            if (!item.bWaitFinish)
+            if (!item.isWaitFinish())
                 continue;
 
             dones << i;

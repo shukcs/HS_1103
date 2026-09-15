@@ -66,7 +66,7 @@ private:
     bool m_bReached = false;
 };
 
-class DeviceAct;
+class ActionItem;
 class strDecoder : public QObject
 {
     Q_OBJECT
@@ -129,7 +129,7 @@ private:
     void ctrlServoMotor(uint8_t pos); ///rpm=转速*10；
 
     void appendToQue(const uint8_t* cmd, uint32_t len);
-	void onActionRun(const DeviceAct *act);
+	void onActionRun(const ActionItem *act);
 signals:
     void setConnectionState(bool state);
     void startRecord(bool state);

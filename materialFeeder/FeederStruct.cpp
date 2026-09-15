@@ -6,7 +6,7 @@
 #include "FeederMgr.h"
 #include "RobotMgr.h"
 #include "strDecoder/strdecoder.h"
-#pragma execution_character_set("utf-8")
+
 /*
 * MaterialStruct
 */
@@ -182,67 +182,6 @@ void TubeStruct::setStoveCh(int8_t ch)
 }
 
 /*
-* DeviceAct
-*/
-DeviceAct::DeviceAct(DeviceType t, bool bWait) : type(t), bStart(false), bWaitFinish(bWait)
-{
-}
-
-DeviceAct::DeviceAct(float tmWait) : type(Dev_NextWait), fWaitTime(tmWait), bStart(false), bWaitFinish(true)
-{
-}
-
-void DeviceAct::SetFeedCmd(uint16_t cmd, int ack /*= -1*/)
-{
-    if (type == Dev_Feeder)
-    {
-        cmdFeeder = cmd;
-        cmdAck = ack < 0 ? cmd + 1 : ack;
-    }
-}
-
-QString DeviceAct::ToString(bool b) const
-{
-    auto str = b ? QApplication::translate("DeviceAct", "开始") : QApplication::translate("DeviceAct", "完成");
-    switch (type)
-    {
-    case Dev_Robot:
-        return QApplication::translate("DeviceAct", "机械臂") + RobotMgr::actionDescribe((RobotMgr::RobotAction)robotStep, robotIndex) + str;
-    case Dev_Feeder:
-        if (!b)
-            break;
-        if (auto c = cmdFeeder == 104 ? FeederMgr::Instance().GetStore(idStore) : nullptr)
-            return  QApplication::translate("DeviceAct", "进料器") + FeederMgr::CmdDescrib(cmdFeeder) + (c->pMate ? c->pMate->name : QString());
-        return  QApplication::translate("DeviceAct", "进料器") + FeederMgr::CmdDescrib(cmdFeeder);
-    case Dev_Servo:
-        return QApplication::translate("DeviceAct", "伺服电机执行")+ FeederMgr::ServoPosDescrib((FeederMgr::RobotPostion)servoPos)+str;
-    case Dev_StepMotor:
-        return stepMotorActToString() + str;
-    case Dev_NextWait:
-        if (!b)
-            break;
-        return QApplication::translate("DeviceAct", "等待%1秒").arg(fWaitTime);
-    default:
-        break;
-    }
-    return QString();
-}
-
-QString DeviceAct::stepMotorActToString() const
-{
-    switch ((CtrlType::StepMotorType)stepType)
-    {
-    case CtrlType::Motor_Tube:   ///反应管上下电机
-        return stepDirCont ? QApplication::translate("DeviceAct", "反应管上升") : QApplication::translate("DeviceAct", "反应管下降");
-    case CtrlType::Motor_Stove:  ///炉膛开合电机
-        return stepDirCont ? QApplication::translate("DeviceAct", "炉膛打开") : QApplication::translate("DeviceAct", "炉膛闭合");
-    default:
-        break;
-    }
-    return QString();
-}
-
-/*
 *FeederRecover::RecoverItem
 */
 FeederRecover::RecoverItem::RecoverItem(uint16_t len, RvcType type, uint32_t id, uint32_t offset)
@@ -356,7 +295,7 @@ void FeederRecover::AddTube(const TubeStruct &tb)
     }
     else if (tb.getFlag() > T_WaitPrepare)
     {
-        m_items << RecoverItem(8, R_Tube, tb.getNumber(), m_size);
+        m_items << RecoverItem(9, R_Tube, tb.getNumber(), m_size);
         if (!setSize(m_size + m_items.last()._len))
             writeData(&tb, m_items.last());
     }
@@ -370,8 +309,8 @@ void FeederRecover::RecoverTube(TubeStruct *bt)
     auto itr = getItem(R_Tube, bt->getNumber());
     if (itr != m_items.end())
     {
-        auto tmp = *(uint16_t*)(m_buff + itr->_offset + 6);
-        bt->setFlag((TubeStat)tmp, true);
+        bt->setFlag((TubeStat)*(uint16_t*)(m_buff + itr->_offset + 6), true);
+        bt->setStoveCh(*((int8_t*)m_buff + itr->_offset + 7));
     }
 }
 
@@ -617,10 +556,11 @@ uint16_t FeederRecover::writeData(const BottleStruct *bt, const RecoverItem &r)
 
 uint16_t FeederRecover::writeData(const TubeStruct *bt, const RecoverItem &r)
 {
-    if (bt && m_buff && m_size >= r._len + r._offset && r._len >= 8)
+    if (bt && m_buff && m_size >= r._len + r._offset && r._len >= 9)
     {
         auto offset = r._offset + writeBase(r);
         *(uint16_t*)(m_buff + offset) = bt->getFlag();
+        *((int8_t*)m_buff + offset+1) = bt->getStoveCh();
         return r._len;
     }
     return 0;

@@ -368,7 +368,7 @@ void ProgramList::OnStoveTubeChanged(uint16_t type, uint16_t idx)
             m_bReady = true;
         break;
     case FeederMgr::J_StoveTubeBack:
-        if (strlist.at(0) == tr("收回反应管:") && strlist.at(1).toInt()-1 == idx)
+        if (strlist.at(0) == tr("回收反应管:") && strlist.at(1).toInt()-1 == idx)
 			m_bReady = true;
 	case strDecoder::Job_AirClear:
 		if (strlist.at(0) == tr("吹扫管道:"))

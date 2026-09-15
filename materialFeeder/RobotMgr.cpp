@@ -65,9 +65,9 @@ bool RobotMgr::IsConnenct()const
     return socket && socket->isOpen();
 }
 
-void RobotMgr::DoAction(const DeviceAct *act)
+void RobotMgr::DoAction(const ActionItem *act)
 {
-    if (Dev_Robot == act->type)
+    if (Act_Robot == act->getType())
     {
         m_curAct = (RobotAction)act->robotStep;
         m_curIdx = act->robotIndex;

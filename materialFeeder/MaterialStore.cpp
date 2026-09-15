@@ -8,6 +8,7 @@
 #include "subMateUi/DlgMaterialModify.h"
 #include "subMateUi/DlgFeedMaterial.h"
 #include "subMateUi/DlgTubeBack.h"
+#include "subMateUi/DlgTubeFix.h"
 #include "common/DlgSerialSettings.h"
 #include "common/DlgSocketSettings.h"
 #include "log/DeviceLog.h"
@@ -275,7 +276,9 @@ void MaterialStore::initUi()
         }
         if (tb->getFlag() == T_Prepared)
         {
-
+            DlgTubeFix dlg(this);
+            dlg.Init(tb);
+            dlg.exec();
         }
 
         if (T_None!=tb->getFlag() && T_WaitPrepare!=tb->getFlag())

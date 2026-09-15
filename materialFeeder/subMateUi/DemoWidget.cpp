@@ -83,7 +83,7 @@ void DemoWidget::drawStore(QPainter *p)
     QRect rc(paintRect().topLeft() + QPoint(120, 0), pix.size());
     if (m_feeding)
     {
-        p->drawText(QRect(rc.topLeft() + QPoint(5, 47), QSize(41, 14)), Qt::AlignCenter, QString::number(m_feeding->numb));
+        p->drawText(QRect(rc.topLeft() + QPoint(5, 47), QSize(41, 14)), Qt::AlignCenter, QString::number(m_feeding->numb+1));
         p->drawText(QRect(rc.topLeft() + QPoint(5, 61), QSize(41, 14)), Qt::AlignCenter, tr("Í¶ÁÏ"));
         p->drawText(QRect(rc.topLeft() + QPoint(5, 75), QSize(41, 14)), Qt::AlignCenter, QString("%1¿Ë").arg(m_wFeed));
     }

@@ -122,7 +122,7 @@ QAbstractSpinBox {
       <string/>
      </property>
      <property name="icon">
-      <iconset resource="../image.qrc">
+      <iconset resource="../../image.qrc">
        <normaloff>:/programConfig/image/add.png</normaloff>:/programConfig/image/add.png</iconset>
      </property>
      <property name="iconSize">
@@ -270,7 +270,7 @@ QAbstractSpinBox {
   </layout>
  </widget>
  <resources>
-  <include location="../image.qrc"/>
+  <include location="../../image.qrc"/>
  </resources>
  <connections/>
 </ui>

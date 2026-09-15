@@ -2,6 +2,7 @@
 #define __FeederDecoder_H__
 #include <QMap>
 #include "FeederStruct.h"
+#include "common/ActionItem.h"
 
 class QSerialPort;
 class StepMotorStat;
@@ -11,12 +12,12 @@ class FeederMgr :  public QObject
 {
     Q_OBJECT
 public:
-    enum PortStat {
+    enum PortStat : int8_t {
         PortClose,
         NoData,
         Communicate,
     };
-    enum RobotPostion {
+    enum RobotPostion : int8_t {
         Pos_None = -1,
         Pos_Tube = 1,
         Pos_Store,
@@ -26,7 +27,7 @@ public:
         Pos_Stove2 = Pos_None,
         Pos_Home = 0,
     };
-    enum JobType {
+    enum JobType : int8_t {
         J_PrepareMate,    ///反应管备料
         J_StoveFixTube,   ///反应管入炉膛
         J_StoveTubeBack,  ///回收炉膛反应管
@@ -98,7 +99,7 @@ private:
     void readMaterials(int idx = 0);
     void readStore(int idx = 0);
     void writeMaterial(const MaterialStruct *m, uint16_t idx);
-    void writeCmd(const DeviceAct &act);
+    void writeCmd(const ActionItem &act);
     void writeFunc(uint16_t cmd, uint16_t val=1);
     void readFeedStat();
     void readFeedWeight();
@@ -116,7 +117,7 @@ private:
     const FeederParam *getfeedParamsByTube(int numb) const;
     StoreStruct* getPropStore(float weight, const QString& name, const QMap<int, float> &preDistrs)const;
     BottleStruct *getBottle(int numb) const;
-    void actionDone(QList<DeviceAct>::iterator itr);
+    void actionDone(QList<ActionItem>::iterator itr);
 
     void addFeederAct(uint16_t cmd, bool bWait = true, int32_t act = -1, uint8_t numStore=0xff, float wFeed=0.0);
     void addServoMotorAct(RobotPostion pos, bool bWait = true);
@@ -131,7 +132,7 @@ signals:
     void storeChanged(const StoreStruct *);
     void bottleChanged(const BottleStruct*);
     void tubeChanged(const TubeStruct*);
-    void actionRun(const DeviceAct*);
+    void actionRun(const ActionItem*);
 	void feedJobFinished(uint16_t type, uint16_t ch); ///type: JobType类型
     void canUsedBottleChanged();
     void canUsedTubeChanged();
@@ -163,7 +164,7 @@ private:
     QStringList             m_canFeedMatesNames;
     QList<FeederParam>		        m_feedParams;
     QList<int>                      m_jobs;
-    QList<DeviceAct>                m_actions;     ///工作列表
+    QList<ActionItem>               m_actions;     ///工作列表
     QString                         m_portName;
 };
 

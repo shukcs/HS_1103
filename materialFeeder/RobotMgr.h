@@ -4,7 +4,7 @@
 #include <QObject>
 
 class QSerialPort;
-class DeviceAct;
+class ActionItem;
 class ModubosProtocol;
 class RobotMgr : public QObject
 {
@@ -58,7 +58,7 @@ public:
 
     static QString actionDescribe(RobotAction t, uint16_t a1=1);
 public slots:
-    void DoAction(const DeviceAct *act);//step RobotAction, idx
+    void DoAction(const ActionItem *act);//step RobotAction, idx
 protected:
     void timerEvent(QTimerEvent* e)override;
 

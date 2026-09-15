@@ -6,7 +6,9 @@ flowSet::flowSet(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::flowSet)
 {
-    this->setWindowFlag(Qt::FramelessWindowHint);
+    setWindowFlag(Qt::FramelessWindowHint);
+    setWindowFlag(Qt::Popup);
+    setAttribute(Qt::WA_DeleteOnClose);
     ui->setupUi(this);
 }
 

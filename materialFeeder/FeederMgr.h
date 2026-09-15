@@ -148,7 +148,8 @@ private:
     ModubosProtocol         *m_modbus;
     StoreStruct             *m_feedStore = nullptr;
     bool                    m_bPortChaned = false;
-    int                     m_idRead=-1;
+    int                     m_idTimerRead=-1;
+    bool                    m_bReadWeight = false;
     int64_t                 m_lastTmRcv;
     PortStat                m_comStat = PortClose;
     uint16_t                m_flag = 0;

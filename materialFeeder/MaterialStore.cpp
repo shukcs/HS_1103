@@ -273,6 +273,10 @@ void MaterialStore::initUi()
             }
             return;
         }
+        if (tb->getFlag() == T_Prepared)
+        {
+
+        }
 
         if (T_None!=tb->getFlag() && T_WaitPrepare!=tb->getFlag())
             return;

@@ -480,6 +480,7 @@ void FeederRecover::AddJobs(const QList<int> &jobs)
     if (itr != m_items.end())
     {
         int diff = len - itr->_len;
+        itr->_id = jobs.size();
         if (diff > 0)
         {
             itr->_len = len;

@@ -496,7 +496,7 @@ void strDecoder::strTocmd(const QString &cmd)
 			}
 		}
 	}
-	else if (cmd.startsWith(tr("装载炉膛:")))
+	else if (cmd.startsWith(tr("装载炉膛")))
 	{
 		strlist = cmd.split(" ", QString::SkipEmptyParts);  //  以空格符分割
 		auto ch = strlist.at(1).toInt() - 1;
@@ -504,7 +504,7 @@ void strDecoder::strTocmd(const QString &cmd)
 		if (!FeederMgr::Instance().FixTube(ch, tube))
 			emit jobChaned(FeederMgr::J_StoveFixTube, ch);
 	}
-	else if (cmd.startsWith(tr("收回反应管:")))
+	else if (cmd.startsWith(tr("收回反应管")))
 	{
 		strlist = cmd.split(" ", QString::SkipEmptyParts);  //  以空格符分割
 		auto ch = strlist.at(2).toInt() - 1;

@@ -84,7 +84,7 @@ FeederMgr::FeederMgr(QObject* p) : QObject(p)
             emit connectStatChanged(PortClose);
     });
     connect(m_modbus, &ModubosProtocol::modbusRcvd, this, &FeederMgr::decode);
-    m_idRead = startTimer(500);
+    m_idTimerRead = startTimer(500);
     m_flag = Flag_DoReadMaterial|Flag_DoReadStore;
 
     QSettings settings(DefaultConfigFile(), QSettings::IniFormat);
@@ -107,7 +107,7 @@ FeederMgr::FeederMgr(QObject* p) : QObject(p)
         m_allBottle << new BottleStruct(i);
         FeederRecover::Instance().RecoverBottle(m_allBottle.last());
     }
-    m_nTube = settings.value("nTube", 8).toInt();
+    m_nTube = settings.value("nTube", 7).toInt();
     for (int i = 0; i < m_nTube; ++i)
     {
         m_allTube << new TubeStruct(i);
@@ -939,7 +939,7 @@ bool FeederMgr::addWorkItem(const struct WorkItem &item)
 
 void FeederMgr::timerEvent(QTimerEvent* e)
 {
-    if (e->timerId()==m_idRead)
+    if (e->timerId()==m_idTimerRead)
     {
         if (m_comStat==Communicate && QDateTime::currentMSecsSinceEpoch() - m_lastTmRcv > ConnetTimeOut)
         {
@@ -953,7 +953,7 @@ void FeederMgr::timerEvent(QTimerEvent* e)
                 readMaterials();
             else if (Flag_DoReadStore & m_flag)
                 readStore();
-            else if (m_feedStore)
+            else if (m_feedStore && m_bReadWeight)
                 readFeedWeight();
             else
                 readFeedStat();
@@ -1327,11 +1327,14 @@ void FeederMgr::writeFunc(uint16_t cmd, uint16_t val)
 void FeederMgr::readFeedStat()
 {
     m_modbus->ReadRegOthor(105);
+    if (m_feedStore)
+        m_bReadWeight = true;
 }
 
 void FeederMgr::readFeedWeight()
 {
     m_modbus->ReadRegOthor(108);
+    m_bReadWeight = false;
 }
 
 int FeederMgr::indexOfMaterial(const QString& id)

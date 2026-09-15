@@ -33,7 +33,7 @@ TubeBackItem::TubeBackItem(int16_t seq) : ActionAbstrctItem(Group_StoveTubeBack,
 {
 }
 
-QString TubeBackItem::ToString(bool bStart /*= true*/) const
+QString TubeBackItem::ToString(bool) const
 {
     return QString();
 }

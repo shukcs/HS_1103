@@ -57,7 +57,7 @@ SOURCES += $$PWD/common/ActionItem.cpp \
     $$PWD/materialFeeder/subMateUi/MaterialTableWidget.cpp \
     $$PWD/materialFeeder/subMateUi/SpinCust.cpp \
     $$PWD/programConfig/hslist.cpp \
-    $$PWD/programConfig/ActionItem.cpp \
+    $$PWD/programConfig/ProgmaMgr.cpp \
     $$PWD/programConfig/programlist.cpp \
     $$PWD/programConfig/progconfig.cpp \
     $$PWD/programConfig/customTool/ToolBox.cpp \
@@ -127,6 +127,7 @@ HEADERS += $$PWD/common/ActionItem.h \
     $$PWD/materialFeeder/subMateUi/MaterialTableWidget.h \
     $$PWD/materialFeeder/subMateUi/SpinCust.h \
     $$PWD/programConfig/hslist.h \
+    $$PWD/programConfig/ProgmaMgr.h \
     $$PWD/programConfig/programlist.h \
     $$PWD/programConfig/progconfig.h \
     $$PWD/programConfig/progItem/AirWayGroupBox.h \

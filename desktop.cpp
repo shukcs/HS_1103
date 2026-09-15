@@ -1,4 +1,4 @@
-#include "desktop.h"
+﻿#include "desktop.h"
 #include "materialFeeder/MaterialStore.h"
 #include "materialFeeder/FeederMgr.h"
 #include "manualOp/manualop.h"
@@ -21,7 +21,7 @@ deskTop::deskTop(QWidget *parent) :
     setWindowTitle("双通道高压固定床反应器ADFD-2000");
     setWindowFlag(Qt::FramelessWindowHint);
 
-    decoder = new strDecoder(this, ui->state->port.name);   //  字符串转命令
+    decoder = new strDecoder(this, ui->state->port.name);   ///字符串转命令
 
     ui->configBtn->setIcon(QIcon(":/image/set.png"));
     ui->configBtn->setIconSize(QSize(25, 25));

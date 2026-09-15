@@ -315,12 +315,6 @@
     <ClCompile Include="release\moc_tooltitle.cpp">
       <Filter>Genarated Files</Filter>
     </ClCompile>
-    <ClCompile Include="debug\moc_Valve3ChGroupBox.cpp">
-      <Filter>Genarated Files</Filter>
-    </ClCompile>
-    <ClCompile Include="release\moc_Valve3ChGroupBox.cpp">
-      <Filter>Genarated Files</Filter>
-    </ClCompile>
     <ClCompile Include="release\qrc_image.cpp">
       <Filter>Genarated Files</Filter>
     </ClCompile>
@@ -384,9 +378,6 @@
     <ClCompile Include="..\HS_1103\programConfig\customTool\objlist.cpp">
       <Filter>programConfig\customTool</Filter>
     </ClCompile>
-    <ClCompile Include="..\HS_1103\programConfig\FeederGroupBox.cpp">
-      <Filter>programConfig</Filter>
-    </ClCompile>
     <ClCompile Include="..\HS_1103\materialFeeder\subMateUi\SpinCust.cpp">
       <Filter>materialFeeder\subMateUi</Filter>
     </ClCompile>
@@ -396,52 +387,13 @@
     <ClCompile Include="..\HS_1103\materialFeeder\RobotMgr.cpp">
       <Filter>materialFeeder</Filter>
     </ClCompile>
-    <ClCompile Include="..\HS_1103\programConfig\HeatGroupBox.cpp">
-      <Filter>programConfig</Filter>
-    </ClCompile>
     <ClCompile Include="..\HS_1103\programConfig\hslist.cpp">
-      <Filter>programConfig</Filter>
-    </ClCompile>
-    <ClCompile Include="..\HS_1103\programConfig\MotorGroupBox.cpp">
       <Filter>programConfig</Filter>
     </ClCompile>
     <ClCompile Include="..\HS_1103\programConfig\progconfig.cpp">
       <Filter>programConfig</Filter>
     </ClCompile>
     <ClCompile Include="..\HS_1103\programConfig\programlist.cpp">
-      <Filter>programConfig</Filter>
-    </ClCompile>
-    <ClCompile Include="..\HS_1103\programConfig\qcirculation.cpp">
-      <Filter>programConfig</Filter>
-    </ClCompile>
-    <ClCompile Include="..\HS_1103\programConfig\qcollectorctrl.cpp">
-      <Filter>programConfig</Filter>
-    </ClCompile>
-    <ClCompile Include="..\HS_1103\programConfig\qflowpanel.cpp">
-      <Filter>programConfig</Filter>
-    </ClCompile>
-    <ClCompile Include="..\HS_1103\programConfig\qfunlabel.cpp">
-      <Filter>programConfig</Filter>
-    </ClCompile>
-    <ClCompile Include="..\HS_1103\programConfig\qponittemp.cpp">
-      <Filter>programConfig</Filter>
-    </ClCompile>
-    <ClCompile Include="..\HS_1103\programConfig\qpumpctrl.cpp">
-      <Filter>programConfig</Filter>
-    </ClCompile>
-    <ClCompile Include="..\HS_1103\programConfig\qsfunction.cpp">
-      <Filter>programConfig</Filter>
-    </ClCompile>
-    <ClCompile Include="..\HS_1103\programConfig\qtimedelay.cpp">
-      <Filter>programConfig</Filter>
-    </ClCompile>
-    <ClCompile Include="..\HS_1103\programConfig\qtcdpanel.cpp">
-      <Filter>programConfig</Filter>
-    </ClCompile>
-    <ClCompile Include="..\HS_1103\programConfig\qvalvectrl.cpp">
-      <Filter>programConfig</Filter>
-    </ClCompile>
-    <ClCompile Include="..\HS_1103\programConfig\Valve3ChGroupBox.cpp">
       <Filter>programConfig</Filter>
     </ClCompile>
     <ClCompile Include="..\HS_1103\customGraph\customgraph.cpp">
@@ -461,9 +413,6 @@
     </ClCompile>
     <ClCompile Include="..\HS_1103\customGraph\customTool\graphsave.cpp">
       <Filter>customGraph\customTool</Filter>
-    </ClCompile>
-    <ClCompile Include="..\HS_1103\programConfig\swpanel.cpp">
-      <Filter>programConfig</Filter>
     </ClCompile>
     <ClCompile Include="..\HS_1103\common\MaskWidget.cpp">
       <Filter>common</Filter>
@@ -500,9 +449,6 @@
     </ClCompile>
     <ClCompile Include="..\HS_1103\Diagram\flowset.cpp">
       <Filter>Diagram</Filter>
-    </ClCompile>
-    <ClCompile Include="..\HS_1103\programConfig\qslopetemp.cpp">
-      <Filter>programConfig</Filter>
     </ClCompile>
     <ClCompile Include="..\HS_1103\projectMode\projectmode.cpp">
       <Filter>projectmode</Filter>
@@ -549,11 +495,83 @@
     <ClCompile Include="release\moc_DeviceLog.cpp">
       <Filter>Genarated Files</Filter>
     </ClCompile>
+    <ClCompile Include="release\moc_AirWayGroupBox.cpp">
+      <Filter>Genarated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="debug\moc_AirWayGroupBox.cpp">
+      <Filter>Genarated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="release\moc_FeedLiquidGroupBox.cpp">
+      <Filter>Genarated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="debug\moc_FeedLiquidGroupBox.cpp">
+      <Filter>Genarated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\HS_1103\materialFeeder\FeederActionItem.cpp">
+      <Filter>materialFeeder</Filter>
+    </ClCompile>
+    <ClCompile Include="..\HS_1103\materialFeeder\subMateUi\DlgTubeFix.cpp">
+      <Filter>materialFeeder\subMateUi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\HS_1103\common\ActionItem.cpp">
+      <Filter>common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\HS_1103\programConfig\progItem\AirWayGroupBox.cpp">
+      <Filter>programConfig\progItem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\HS_1103\programConfig\progItem\FeederGroupBox.cpp">
+      <Filter>programConfig\progItem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\HS_1103\programConfig\progItem\FeedLiquidGroupBox.cpp">
+      <Filter>programConfig\progItem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\HS_1103\programConfig\progItem\HeatGroupBox.cpp">
+      <Filter>programConfig\progItem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\HS_1103\programConfig\progItem\MotorGroupBox.cpp">
+      <Filter>programConfig\progItem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\HS_1103\programConfig\progItem\qcirculation.cpp">
+      <Filter>programConfig\progItem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\HS_1103\programConfig\progItem\qcollectorctrl.cpp">
+      <Filter>programConfig\progItem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\HS_1103\programConfig\progItem\qflowpanel.cpp">
+      <Filter>programConfig\progItem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\HS_1103\programConfig\progItem\qfunlabel.cpp">
+      <Filter>programConfig\progItem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\HS_1103\programConfig\progItem\qponittemp.cpp">
+      <Filter>programConfig\progItem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\HS_1103\programConfig\progItem\qpumpctrl.cpp">
+      <Filter>programConfig\progItem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\HS_1103\programConfig\progItem\QSFunction.cpp">
+      <Filter>programConfig\progItem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\HS_1103\programConfig\progItem\qslopetemp.cpp">
+      <Filter>programConfig\progItem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\HS_1103\programConfig\progItem\qtcdpanel.cpp">
+      <Filter>programConfig\progItem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\HS_1103\programConfig\progItem\qtimedelay.cpp">
+      <Filter>programConfig\progItem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\HS_1103\programConfig\progItem\qvalvectrl.cpp">
+      <Filter>programConfig\progItem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\HS_1103\programConfig\progItem\swpanel.cpp">
+      <Filter>programConfig\progItem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\HS_1103\programConfig\ProgmaMgr.cpp">
+      <Filter>programConfig</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="ui_Valve3ChGroupBox.h">
-      <Filter>Genarated Files</Filter>
-    </ClInclude>
     <ClInclude Include="ui_collectorop.h">
       <Filter>Genarated Files</Filter>
     </ClInclude>
@@ -671,6 +689,33 @@
     <ClInclude Include="ui_DlgSocketSettings.h">
       <Filter>Genarated Files</Filter>
     </ClInclude>
+    <ClInclude Include="ui_AirWayGroupBox.h">
+      <Filter>Genarated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ui_DlgTubeFix.h">
+      <Filter>Genarated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ui_FeedLiquidGroupBox.h">
+      <Filter>Genarated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ui_QSFunction.h">
+      <Filter>Genarated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\HS_1103\materialFeeder\FeederActionItem.h">
+      <Filter>materialFeeder</Filter>
+    </ClInclude>
+    <ClInclude Include="..\HS_1103\materialFeeder\FeederStruct.h">
+      <Filter>materialFeeder</Filter>
+    </ClInclude>
+    <ClInclude Include="..\HS_1103\materialFeeder\subMateUi\DlgTubeFix.h">
+      <Filter>materialFeeder\subMateUi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\HS_1103\common\ActionItem.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\HS_1103\programConfig\ProgmaMgr.h">
+      <Filter>programConfig</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\HS_1103\desktop.h" />
@@ -743,12 +788,6 @@
     <CustomBuild Include="..\HS_1103\programConfig\customTool\objlist.h">
       <Filter>programConfig\customTool</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\HS_1103\programConfig\FeederGroupBox.h">
-      <Filter>programConfig</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\HS_1103\programConfig\FeederGroupBox.ui">
-      <Filter>programConfig</Filter>
-    </CustomBuild>
     <CustomBuild Include="..\HS_1103\materialFeeder\subMateUi\SpinCust.h">
       <Filter>materialFeeder\subMateUi</Filter>
     </CustomBuild>
@@ -764,19 +803,7 @@
     <CustomBuild Include="..\HS_1103\materialFeeder\MaterialStore.h">
       <Filter>materialFeeder</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\HS_1103\programConfig\HeatGroupBox.h">
-      <Filter>programConfig</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\HS_1103\programConfig\HeatGroupBox.ui">
-      <Filter>programConfig</Filter>
-    </CustomBuild>
     <CustomBuild Include="..\HS_1103\programConfig\hslist.h">
-      <Filter>programConfig</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\HS_1103\programConfig\MotorGroupBox.h">
-      <Filter>programConfig</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\HS_1103\programConfig\MotorGroupBox.ui">
       <Filter>programConfig</Filter>
     </CustomBuild>
     <CustomBuild Include="..\HS_1103\programConfig\progconfig.h">
@@ -786,42 +813,6 @@
       <Filter>programConfig</Filter>
     </CustomBuild>
     <CustomBuild Include="..\HS_1103\programConfig\programlist.h">
-      <Filter>programConfig</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\HS_1103\programConfig\qcirculation.h">
-      <Filter>programConfig</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\HS_1103\programConfig\qcollectorctrl.h">
-      <Filter>programConfig</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\HS_1103\programConfig\qflowpanel.h">
-      <Filter>programConfig</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\HS_1103\programConfig\qfunlabel.h">
-      <Filter>programConfig</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\HS_1103\programConfig\qponittemp.h">
-      <Filter>programConfig</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\HS_1103\programConfig\qpumpctrl.h">
-      <Filter>programConfig</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\HS_1103\programConfig\qsfunction.h">
-      <Filter>programConfig</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\HS_1103\programConfig\qtimedelay.h">
-      <Filter>programConfig</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\HS_1103\programConfig\qtcdpanel.h">
-      <Filter>programConfig</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\HS_1103\programConfig\qvalvectrl.h">
-      <Filter>programConfig</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\HS_1103\programConfig\Valve3ChGroupBox.h">
-      <Filter>programConfig</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\HS_1103\programConfig\Valve3ChGroupBox.ui">
       <Filter>programConfig</Filter>
     </CustomBuild>
     <CustomBuild Include="..\HS_1103\customGraph\customgraph.h">
@@ -856,9 +847,6 @@
     </CustomBuild>
     <CustomBuild Include="..\HS_1103\customGraph\customTool\graphsave.ui">
       <Filter>customGraph\customTool</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\HS_1103\programConfig\swpanel.h">
-      <Filter>programConfig</Filter>
     </CustomBuild>
     <CustomBuild Include="..\HS_1103\materialFeeder\RobotMgr.h">
       <Filter>materialFeeder</Filter>
@@ -914,9 +902,6 @@
     <CustomBuild Include="..\HS_1103\Diagram\flowset.ui">
       <Filter>Diagram</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\HS_1103\programConfig\qslopetemp.h">
-      <Filter>programConfig</Filter>
-    </CustomBuild>
     <CustomBuild Include="..\HS_1103\projectMode\projectmode.h">
       <Filter>projectmode</Filter>
     </CustomBuild>
@@ -952,6 +937,78 @@
     </CustomBuild>
     <CustomBuild Include="..\HS_1103\log\DeviceLog.h">
       <Filter>log</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\HS_1103\materialFeeder\subMateUi\DlgTubeFix.ui">
+      <Filter>materialFeeder\subMateUi</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\HS_1103\programConfig\progItem\AirWayGroupBox.h">
+      <Filter>programConfig\progItem</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\HS_1103\programConfig\progItem\AirWayGroupBox.ui">
+      <Filter>programConfig\progItem</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\HS_1103\programConfig\progItem\FeederGroupBox.h">
+      <Filter>programConfig\progItem</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\HS_1103\programConfig\progItem\FeederGroupBox.ui">
+      <Filter>programConfig\progItem</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\HS_1103\programConfig\progItem\FeedLiquidGroupBox.h">
+      <Filter>programConfig\progItem</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\HS_1103\programConfig\progItem\FeedLiquidGroupBox.ui">
+      <Filter>programConfig\progItem</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\HS_1103\programConfig\progItem\HeatGroupBox.h">
+      <Filter>programConfig\progItem</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\HS_1103\programConfig\progItem\HeatGroupBox.ui">
+      <Filter>programConfig\progItem</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\HS_1103\programConfig\progItem\MotorGroupBox.h">
+      <Filter>programConfig\progItem</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\HS_1103\programConfig\progItem\MotorGroupBox.ui">
+      <Filter>programConfig\progItem</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\HS_1103\programConfig\progItem\qcirculation.h">
+      <Filter>programConfig\progItem</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\HS_1103\programConfig\progItem\qcollectorctrl.h">
+      <Filter>programConfig\progItem</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\HS_1103\programConfig\progItem\qflowpanel.h">
+      <Filter>programConfig\progItem</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\HS_1103\programConfig\progItem\qfunlabel.h">
+      <Filter>programConfig\progItem</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\HS_1103\programConfig\progItem\qponittemp.h">
+      <Filter>programConfig\progItem</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\HS_1103\programConfig\progItem\qpumpctrl.h">
+      <Filter>programConfig\progItem</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\HS_1103\programConfig\progItem\QSFunction.h">
+      <Filter>programConfig\progItem</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\HS_1103\programConfig\progItem\QSFunction.ui">
+      <Filter>programConfig\progItem</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\HS_1103\programConfig\progItem\qslopetemp.h">
+      <Filter>programConfig\progItem</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\HS_1103\programConfig\progItem\qtcdpanel.h">
+      <Filter>programConfig\progItem</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\HS_1103\programConfig\progItem\qtimedelay.h">
+      <Filter>programConfig\progItem</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\HS_1103\programConfig\progItem\qvalvectrl.h">
+      <Filter>programConfig\progItem</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\HS_1103\programConfig\progItem\swpanel.h">
+      <Filter>programConfig\progItem</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
@@ -1263,9 +1320,12 @@
     <Filter Include="log">
       <UniqueIdentifier>{1a41c9ea-f54e-4d9f-b0bf-c6b8a0987105}</UniqueIdentifier>
     </Filter>
+    <Filter Include="programConfig\progItem">
+      <UniqueIdentifier>{cb3a233f-fd01-43a6-9e7e-8050a372a390}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="D:\work\1104\build\HS_1103_resource.rc">
+    <ResourceCompile Include="E:\project\work\buildHS_1103\HS_1103_resource.rc">
       <Filter>res</Filter>
     </ResourceCompile>
   </ItemGroup>

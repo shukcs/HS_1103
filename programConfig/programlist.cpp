@@ -25,7 +25,6 @@
 ProgramList::ProgramList(QWidget *parent)
     : QWidget(parent)
 {
-    state = false;
     runTime = 0;
     programCnt = -1;
     circulationCnt = 0;
@@ -165,11 +164,8 @@ ProgramList::~ProgramList()
 
 void ProgramList::state_change()
 {
-    refresh->setEnabled(state); // 刷新按钮恢复点击
-    nameList->setEnabled(state); // 名称列表恢复点击
-    if(state)   // 如果已经启动了
+    if(m_bRun)   // 如果已经启动了
     {
-       state = false;
        programCnt = 0;
        circulationCnt = 0;
        m_runIndex = 0;
@@ -190,7 +186,6 @@ void ProgramList::state_change()
            msg.exec();
            return ;
        }
-       state = true;
        programCnt = -1;
        m_runIndex = 0;
        run->setIcon(QIcon(":/programConfig/image/stop.png"));
@@ -201,12 +196,15 @@ void ProgramList::state_change()
        pause->setText("暂停");
     }
 
-    emit autoRun(state);
+    refresh->setEnabled(m_bRun); // 刷新按钮恢复点击
+    nameList->setEnabled(m_bRun); // 名称列表恢复点击
+    m_bRun = !m_bRun;
+    emit autoRun(m_bRun);
 }
 
 bool ProgramList::getState()
 {
-    return state;
+    return m_bRun;
 }
 
 void ProgramList::refreshBtn_clicked()

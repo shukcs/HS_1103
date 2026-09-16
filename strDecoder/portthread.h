@@ -139,7 +139,7 @@ private:
     bool            connection_state;
     QString         com_name;
     QByteArray      m_buff;
-    bool buff_state[2];
+    bool            buff_state[2];
     uint16_t        m_tempHeatAndKeep[4];
     TriEleValveStat m_triEleValveStat[2];
 };

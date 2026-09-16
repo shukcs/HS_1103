@@ -49,7 +49,6 @@ private:
     QPushButton *run;
     QPushButton *pause;
     QListWidget *proList;
-    bool state;
     QTimer timer;
     QTimer runTimer;
     int runTime;        //  程序运行时间
@@ -64,7 +63,8 @@ private:
     QList<ListTextContent> m_titles;
     int m_runIndex = 0;     // 当前运行到第几个大类
     int m_curIndex = -1;     //当前显示的标签
-    bool   m_bReady = true;
+    bool    m_bRun = false;
+    bool    m_bReady = true;
 };
 
 #endif // PROGRAMLIST_H

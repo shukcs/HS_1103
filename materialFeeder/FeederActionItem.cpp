@@ -53,7 +53,8 @@ void FixTubeItem::Save(QDataStream *dstr, bool bSaveStat /*= false*/)
 /*
 *TubeBackItem
 */
-TubeBackItem::TubeBackItem(int16_t seq) : ActionAbstrctItem(Group_StoveTubeBack, seq)
+TubeBackItem::TubeBackItem(uint16_t ch, uint16_t pos, int16_t seq) : ActionAbstrctItem(Group_StoveTubeBack, seq)
+, m_ch(ch), m_poRcy(pos)
 {
 }
 
@@ -67,6 +68,6 @@ void TubeBackItem::Save(QDataStream *dstr, bool bSaveStat /*= false*/)
 	if (dstr)
 	{
 		ActionAbstrctItem::Save(dstr, bSaveStat);
-		*dstr << m_numTube << m_posBack;
+		*dstr << m_ch << m_poRcy;
 	}
 }

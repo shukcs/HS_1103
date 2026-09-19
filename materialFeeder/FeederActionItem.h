@@ -30,11 +30,11 @@ public:
 class TubeBackItem : public ActionAbstrctItem
 {
 public:
-    TubeBackItem(int16_t seq = -1);
+    TubeBackItem(uint16_t ch=0, uint16_t pos=0, int16_t seq = -1);
     QString ToString(bool bStart = true)const override;
 	void Save(QDataStream *dstr, bool bSaveStat = false)override;
 public:
-    uint16_t m_numTube;
-    uint16_t m_posBack;
+    uint16_t m_ch;
+    uint16_t m_poRcy;
 };
 #endif // __FeederDecoder

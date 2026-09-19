@@ -16,7 +16,7 @@ enum ActionType : int8_t {
     Act_LoopEnd,
     Act_CuverRecBeg,///采集记录
     Act_CuverRecEnd,
-
+	FL_Label,
     Group_PrepareSolidMate,
     Group_StoveFixTube,
     Group_StoveTubeBack,
@@ -39,12 +39,25 @@ public:
     bool isFinished()const;
     bool isStart()const;
     void start();
+	virtual void Save(QDataStream *dstr, bool bSaveStat=false);
 private:
-    int16_t    m_seq;
-    ActionType	m_type;       ///ActionType
-    bool m_bStart : 1;        ///false: true, 已经开始
+	ActionType	m_type;       ///ActionType
+	int16_t    m_seq;
     bool m_bWaitFinish : 1;   ///false: 可以同步进行下一个
+    bool m_bStart : 1;        ///false: true, 已经开始
     bool m_bFinish : 1;
+};
+
+class LabelItem : public ActionAbstrctItem
+{
+public:
+	LabelItem(const QString &label=QString());
+
+	const QString &Name()const;
+	void Save(QDataStream *dstr, bool bSaveStat = false)override;
+	QString ToString(bool bStart = true)const override;
+private:
+	QString m_label;
 };
 
 class ActionItem : public ActionAbstrctItem 
@@ -78,6 +91,7 @@ public:
     virtual ~ActionItem();
     void SetFeedCmd(uint16_t cmd, int ack = -1);
     QString ToString(bool bStart = true)const override;
+	void Save(QDataStream *dstr, bool bSaveStat=false)override;
 private:
     QString stepMotorActToString()const;
 };

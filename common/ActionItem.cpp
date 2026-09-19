@@ -42,6 +42,43 @@ void ActionAbstrctItem::start()
     m_bStart = true;
 }
 
+void ActionAbstrctItem::Save(QDataStream *dstr, bool bSaveStat)
+{
+	if (dstr)
+	{
+		*dstr << m_type << m_seq << m_bWaitFinish << bSaveStat;
+		if (bSaveStat)
+			*dstr << m_bStart << m_bFinish;
+	}
+}
+
+/*
+* ActionItem
+*/
+LabelItem::LabelItem(const QString &label) : ActionAbstrctItem(FL_Label)
+, m_label(label)
+{
+}
+
+const QString & LabelItem::Name() const
+{
+	return m_label;
+}
+
+void LabelItem::Save(QDataStream *dstr, bool bSaveStat /*= false*/)
+{
+	if (dstr)
+	{
+		ActionAbstrctItem::Save(dstr, bSaveStat);
+		*dstr << m_label;
+	}
+}
+
+QString LabelItem::ToString(bool) const
+{
+	return QString("---%1---").arg(m_label);
+}
+
 /*
 * ActionItem
 */
@@ -92,6 +129,10 @@ QString ActionItem::ToString(bool b) const
         break;
     }
     return QString();
+}
+
+void ActionItem::Save(QDataStream *, bool/*=false*/)
+{
 }
 
 QString ActionItem::stepMotorActToString() const

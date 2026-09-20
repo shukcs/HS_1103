@@ -40,7 +40,7 @@ void ObjList::initComponent()
     QScroller::grabGesture(m_pChatListScrollArea->viewport(), QScroller::LeftMouseButtonGesture);
 }
 
-void ObjList::add_Btn(QString name,int index)
+void ObjList::add_Btn(const QString &name,int index)
 {
       QPushButton* pushButton = new QPushButton(widget);
       pushButton->setText(name);

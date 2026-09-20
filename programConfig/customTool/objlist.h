@@ -13,7 +13,7 @@ public:
     ~ObjList();
     void initComponent();
 
-    void add_Btn(QString name,int index);
+    void add_Btn(const QString &name,int index);
     void list_clear();
 
     void setRun(int index);

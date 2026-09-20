@@ -4,11 +4,12 @@
 #include <QWidget>
 #include <QTimer>
 
+class ActionAbstrctItem;
 class ListTextContent
 {
 public:
    QString name;
-   QList<QString> list;
+   QList<ActionAbstrctItem*> list;
 };
 
 class QComboBox;
@@ -43,6 +44,7 @@ public slots:
     void OnStoveTubeChanged(uint16_t type, uint16_t idx);
 protected:
     void runTitle();
+	void initList();
 private:
     QComboBox *nameList;
     QPushButton *refresh;

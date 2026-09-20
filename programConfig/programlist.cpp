@@ -112,7 +112,6 @@ ProgramList::ProgramList(QWidget *parent)
 
     nameList = new QComboBox;
     nameList->setView(new QListView);  //  必须加入，否则部分样式不生效
-    connect(nameList,static_cast<void (QComboBox::*)(const QString &)>(&QComboBox::currentIndexChanged),this, &ProgramList::nameFile_changed);
     nameList->setFixedSize(120,26);
     nameList->setStyleSheet("QComboBox {border: 1px solid rgb(226,226,226);"
                                  "border-radius: 5px;"
@@ -157,6 +156,7 @@ ProgramList::ProgramList(QWidget *parent)
         this->setStyleSheet(styleSheet);
         Stylefile.close();
     }
+	initList();
 }
 
 ProgramList::~ProgramList()
@@ -210,24 +210,7 @@ bool ProgramList::getState()
 
 void ProgramList::refreshBtn_clicked()
 {
-    QString path = QCoreApplication::applicationDirPath()+"/config";
-    QDir dir(path);
-
-    if(!dir.exists())   //  检查目录是否存在
-       return ;
-
-    nameList->clear();
-    auto fileInfo = dir.entryInfoList({ "*.txt" });
-    if(fileInfo.size() <= 0)
-    {
-        proList->clear();  // 清除子列表
-        obj->list_clear(); // 清除主列表
-    }
-    for (auto &itr : fileInfo)
-    {
-        nameList->addItem(itr.baseName());
-    }
-    ProgmaMgr::Instance().Reload(path);
+    ProgmaMgr::Instance().Reload(QCoreApplication::applicationDirPath() + "/config");
 }
 
 void ProgramList::runBtn_clicked()
@@ -270,54 +253,45 @@ void ProgramList::timer_slot()
 
 void ProgramList::nameFile_changed(const QString& str)
 {
-    QString path = QCoreApplication::applicationDirPath()+"/config/"+str+".txt";
-
-    QFile readFile(path);
-    if (!readFile.open(QIODevice::ReadOnly | QIODevice::Text))
-        return ;
-    proList->clear();  // 清除子列表
-    obj->list_clear(); // 清除主列表
-    m_titles.clear(); // 清除之前的
-    int total_obj = 0; // 大类总数量
-    int totalCnt = 0;  // 子类总数量
-    QTextStream stream(&readFile);    //  读取文件
-    QString line;
-    int flag = 0;
-    while (!stream.atEnd())
-    {
-        ListTextContent list;
-        list.list.clear();
-        if(flag == 0)
-           line = stream.readLine();   //  逐行读取
-        else
-           flag = 0;
-
-        if(line.contains("---")) // 包含主类别项目
-        {
-            list.name = line;
-            while(!stream.atEnd()) // 继续查询子类
-            {
-                line = stream.readLine();
-                if(line.contains("---")) // 包含类别项目
-                {
-                   flag = 1;
-                   break;
-                }
-
-                list.list << line; // 记录子类别
-                totalCnt++;
-            }
-            m_titles.append(list);
-            obj->add_Btn(m_titles.at(total_obj).name, total_obj);
-            total_obj++;
-        }
+	const ProgmaMgr::ActionsGroup *acts = nullptr;
+	for (auto &itr : ProgmaMgr::Instance().AllLoadGroup())
+	{
+		if (itr.first == str)
+		{
+			acts = &itr.second;
+			break;
+		}
+	}
+	if (acts)
+	{
+		proList->clear();  // 清除子列表
+		obj->list_clear(); // 清除主列表
+		m_titles.clear(); // 清除之前的
+		int total_obj = 0; // 大类总数量
+		ListTextContent *list = nullptr;
+		for (auto itr : *acts)
+		{
+			if (itr->getType() == FL_Label)
+			{
+				delete list;
+				list = new ListTextContent;
+				list->name = itr->ToString();
+				obj->add_Btn(list->name, total_obj);
+				total_obj++;
+			}
+			else if (list)
+			{
+				list->list << itr;
+			}
+		}
+		if (list)
+		{
+			m_titles << *list;
+			delete list;
+		}
         if (total_obj > 0)
             obj_clicked(0);
-
-        if(line.isEmpty())
-            break;
     }
-    readFile.close();
 }
 
 void ProgramList::runTimer_slot()
@@ -343,10 +317,16 @@ void ProgramList::clear_sub_list()
 void ProgramList::obj_clicked(int index)
 {
     proList->clear();
-    proList->addItems(m_titles.at(index).list);
-    m_curIndex = index;
-    if (m_curIndex == m_runIndex)
-        proList->setCurrentRow(programCnt);
+	if (0 <= index && index < m_titles.size())
+	{
+		for (auto itr : m_titles.at(index).list)
+		{
+			proList->addItem(itr->ToString());
+		}
+		m_curIndex = index;
+		if (m_curIndex == m_runIndex)
+			proList->setCurrentRow(programCnt);
+	}
 }
 
 void ProgramList::OnStoveTubeChanged(uint16_t type, uint16_t idx)
@@ -449,4 +429,17 @@ void ProgramList::runTitle()
             timer.start(1000);
         }
     }
+}
+
+void ProgramList::initList()
+{
+	connect(nameList, static_cast<void (QComboBox::*)(const QString &)>(&QComboBox::currentIndexChanged), this, &ProgramList::nameFile_changed);
+	auto mgr = &ProgmaMgr::Instance();
+	connect(mgr, &ProgmaMgr::loadsRefrashed, this,  [=] {
+		nameList->clear();
+		for (auto &itr : ProgmaMgr::Instance().AllLoadGroup())
+		{
+			nameList->addItem(itr.first);
+		}
+	});
 }

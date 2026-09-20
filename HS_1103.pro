@@ -25,7 +25,8 @@ INCLUDEPATH += $$PWD
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 LIBS+=-lopengl32
 
-SOURCES += $$PWD/common/ActionItem.cpp \
+SOURCES += $$PWD/common/ActionFactory.cpp \
+    $$PWD/common/ActionItem.cpp \
 	$$PWD/common/DlgSerialSettings.cpp \
 	$$PWD/common/DlgSocketSettings.cpp \
 	$$PWD/common/MaskWidget.cpp \
@@ -95,7 +96,8 @@ SOURCES += $$PWD/common/ActionItem.cpp \
     $$PWD/desktop.cpp \
     $$PWD/main.cpp
 
-HEADERS += $$PWD/common/ActionItem.h \
+HEADERS += $$PWD/common/ActionFactory.h \
+    $$PWD/common/ActionItem.h \
     $$PWD/common/DlgSerialSettings.h \
     $$PWD/common/DlgSocketSettings.h \
     $$PWD/common/MaskWidget.h \

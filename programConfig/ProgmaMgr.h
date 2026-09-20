@@ -6,27 +6,43 @@
 class ActionAbstrctItem;
 class ProgmaMgr : public QObject
 {
-    //Q_OBJECT
+    Q_OBJECT
+public:
 	typedef QList<ActionAbstrctItem *> ActionsGroup;
 	typedef QPair<QString, ActionsGroup> LoadItem;
-	typedef QPair<int, float> FeedItem;
+	typedef QPair<QString, float> FeedItem;
 public:
-    ProgmaMgr(QObject *p);
     ~ProgmaMgr();
 
 	const QList<LoadItem> &AllLoadGroup()const;
-	void Reload();
+    const ActionsGroup &EditActionsGroup()const;
+	void Reload(const QString &path);
+    void Load(const QString &file);
 	bool Save(const QString &file);
 	void AddLabel(const QString &label);
 	void AddSolidPrepare(uint16_t numBottle, uint16_t numTube, const QList<FeedItem> &weightFeeds);
 	void AddFixTube(uint16_t ch, uint16_t numTube);
+    void AddTubeRecycle(uint16_t ch, uint16_t pos);
     void AddLiquidClear(uint16_t ch);
+    void AddAction(ActionAbstrctItem *act);
+
+    void RemoveAt(int idx);
+    void MoveUpAt(int idx);
+    void MoveDownAt(int idx);
+
+    static ProgmaMgr &Instance();
 protected:
-	ActionAbstrctItem *create(uint8_t type);
+    ProgmaMgr(QObject *p);
+    void load(QDataStream *ds, ActionsGroup &f);
+    void clearLoads();
+    void addItem(ActionAbstrctItem *item);
 signals:
-    //void actionItemAdded(ActionItem *);
-    //void loadsRefrashed();
-    //void curActionsGroupChanged(int);
+    void actionItemAdded(ActionAbstrctItem *);
+    void loadsRefrashed();
+    void curActionsGroupChanged();
+    void itemRemovd(int idx);
+    void itemMoveUp(int idx);
+    void itemMoveDown(int idx);
 protected:
     int m_curGroup = -1;
     ActionsGroup m_edits;

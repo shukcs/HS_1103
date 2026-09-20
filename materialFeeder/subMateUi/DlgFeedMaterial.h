@@ -24,7 +24,7 @@ public:
     ~DlgFeedMaterial();
 
     void Init(const FeederParam *pr, BottleStruct *bt);
-    bool GetFeedParam(QMap<QString, float>* mates)const;
+    bool GetFeedParam(QList<QPair<QString, float>>* mates)const;
     int GetTubeNumb()const;
     int GetChannel()const;
 private:

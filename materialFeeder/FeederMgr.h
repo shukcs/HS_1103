@@ -52,7 +52,7 @@ public:
     QList<BottleStruct*> ValidBottls()const;
     TubeStruct *ValidTube(int index)const;
 
-    bool FeedSolidMaterial(const QMap<QString, float> &feeds, int numb, int nTub=-1, bool bFix=true, int ch=0);
+    bool FeedSolidMaterial(QList<QPair<QString, float>> &mates, int numb, int nTub=-1, bool bFix=true, int ch=0);
     bool FixTube(uint16_t nTb, uint16_t ch);
     bool StoveTubeBack(int ch, int nBack=-1);
     void CancleFeed(BottleStruct* bt);

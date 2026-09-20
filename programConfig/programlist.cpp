@@ -20,6 +20,7 @@
 #include "customTool/objlist.h"
 #include "materialFeeder/FeederMgr.h"
 #include "strDecoder/strdecoder.h"
+#include "ProgmaMgr.h"
 #pragma execution_character_set("utf-8")
 
 ProgramList::ProgramList(QWidget *parent)
@@ -226,6 +227,7 @@ void ProgramList::refreshBtn_clicked()
     {
         nameList->addItem(itr.baseName());
     }
+    ProgmaMgr::Instance().Reload(path);
 }
 
 void ProgramList::runBtn_clicked()

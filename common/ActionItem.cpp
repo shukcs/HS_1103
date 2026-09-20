@@ -1,8 +1,10 @@
 ﻿#include "ActionItem.h"
 #include <QApplication>
+#include <QDataStream>
 #include "materialFeeder/RobotMgr.h"
 #include "materialFeeder/FeederMgr.h"
 #include "strDecoder/strDecoder.h"
+#include "common/ActionFactory.h"
 #pragma execution_character_set("utf-8")
 
 /*
@@ -20,6 +22,11 @@ ActionAbstrctItem::~ActionAbstrctItem()
 ActionType ActionAbstrctItem::getType() const
 {
     return m_type;
+}
+
+uint16_t ActionAbstrctItem::GetSeq() const
+{
+    return m_seq;
 }
 
 bool ActionAbstrctItem::isWaitFinish() const
@@ -46,10 +53,18 @@ void ActionAbstrctItem::Save(QDataStream *dstr, bool bSaveStat)
 {
 	if (dstr)
 	{
-		*dstr << m_type << m_seq << m_bWaitFinish << bSaveStat;
+		*dstr << (uint8_t)m_type << m_seq << m_bWaitFinish << bSaveStat;
 		if (bSaveStat)
 			*dstr << m_bStart << m_bFinish;
 	}
+}
+
+void ActionAbstrctItem::Load(QDataStream *dstr)
+{
+    uint8_t bSaved;
+    *dstr >> m_seq >> m_bWaitFinish >> bSaved;
+    if (bSaved)
+        *dstr >> m_bStart >> m_bFinish;
 }
 
 /*
@@ -76,7 +91,16 @@ void LabelItem::Save(QDataStream *dstr, bool bSaveStat /*= false*/)
 
 QString LabelItem::ToString(bool) const
 {
-	return QString("---%1---").arg(m_label);
+	return QString("--- %1 ---").arg(m_label);
+}
+
+void LabelItem::Load(QDataStream *dstr)
+{
+    if (dstr)
+    {
+        ActionAbstrctItem::Load(dstr);
+        *dstr >> m_label;
+    }
 }
 
 /*
@@ -148,3 +172,5 @@ QString ActionItem::stepMotorActToString() const
     }
     return QString();
 }
+
+DECLARE_ACTIONFACITEM_ITEM(LabelItem, FL_Label)

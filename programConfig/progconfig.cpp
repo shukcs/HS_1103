@@ -30,6 +30,7 @@
 #include "progItem/FeedLiquidGroupBox.h"
 #include "progItem/FeederGroupBox.h"
 #include "progItem/AirWayGroupBox.h"
+#include "ProgmaMgr.h"
 
 #include "ui_progconfig.h"
 #pragma execution_character_set("utf-8")
@@ -41,74 +42,57 @@ progConfig::progConfig(QWidget *parent) :
     ui->setupUi(this);
 
     QFunLabel *funName = new QFunLabel;
-    connect(funName, &QFunLabel::labelPanelAdd,this, &progConfig::listAdd);
     ui->configLayout->addWidget(funName);
 
     auto fg = new FeederGroupBox();
-    connect(fg, &FeederGroupBox::sig_Add, this, &progConfig::listAdd);
     ui->configLayout->addWidget(fg);
 
     auto liquid = new FeedLiquidGroupBox();
-    connect(liquid, &FeedLiquidGroupBox::sig_Add, this, &progConfig::listAdd);
 	ui->configLayout->addWidget(liquid);
 
 	auto air = new AirWayGroupBox();
-	connect(air, &AirWayGroupBox::sig_Add, this, &progConfig::listAdd);
 	ui->configLayout->addWidget(air);
 
     SwPanel *sw = new SwPanel;
-    connect(sw, &SwPanel::swPanelAdd, this, &progConfig::listAdd);
     ui->configLayout->addWidget(sw);
 
 #ifdef _DEBUG
     auto mt35 = new MotorGroupBox(MotorGroupBox::Motor_35);
-    connect(mt35, &MotorGroupBox::sig_Add, this, &progConfig::listAdd);
     ui->configLayout->addWidget(mt35);
 
     auto mt57 = new MotorGroupBox(MotorGroupBox::Motor_57);
-    connect(mt57, &MotorGroupBox::sig_Add, this, &progConfig::listAdd);
     ui->configLayout->addWidget(mt57);
 
     auto mt86 = new MotorGroupBox(MotorGroupBox::Motor_86);
-    connect(mt86, &MotorGroupBox::sig_Add, this, &progConfig::listAdd);
     ui->configLayout->addWidget(mt86);
 
     auto mtRobot = new MotorGroupBox(MotorGroupBox::Motor_robot);
-    connect(mtRobot, &MotorGroupBox::sig_Add, this, &progConfig::listAdd);
     ui->configLayout->addWidget(mtRobot);
 
     QPumpCtrl *pumpCtrl = new QPumpCtrl;
-    connect(pumpCtrl,&QPumpCtrl::pumpPanelAdd,this, &progConfig::listAdd);
     ui->configLayout->addWidget(pumpCtrl);
 #endif
 
     auto hjgp = new HeatGroupBox;
-    connect(hjgp, &HeatGroupBox::sig_Add, this, &progConfig::listAdd);
     ui->configLayout->addWidget(hjgp);
     
     auto montain = new HeatGroupBox(HeatGroupBox::Dev_montain);
-    connect(montain, &HeatGroupBox::sig_Add, this, &progConfig::listAdd);
     ui->configLayout->addWidget(montain);
 
     QFlowPanel *flowpanel = new QFlowPanel;
-    connect(flowpanel,&QFlowPanel::flowPanelAdd,this, &progConfig::listAdd);
     ui->configLayout->addWidget(flowpanel);
 
     QSlopeTemp *slopetemp = new QSlopeTemp;
-    connect(slopetemp,&QSlopeTemp::slopePanelAdd,this, &progConfig::listAdd);
     ui->configLayout->addWidget(slopetemp);
 
     QValveCtrl *valveCtrl = new QValveCtrl;
-    connect(valveCtrl,&QValveCtrl::valvePanelAdd,this, &progConfig::listAdd);
     ui->configLayout->addWidget(valveCtrl);
 
     /*QCollectorCtrl *collCtrl = new QCollectorCtrl;
-    connect(collCtrl, &QCollectorCtrl::collPanelAdd,this, &progConfig::listAdd);
     ui->configLayout->addWidget(collCtrl);
     collCtrl->setVisible(false);*/
 
     QSFunction *sfuntion = new QSFunction;
-    connect(sfuntion, &QSFunction::functionPanelAdd,this, &progConfig::listAdd);
     ui->configLayout->addWidget(sfuntion);
 
     ui->btn_open->setIcon(QIcon(":/programConfig/image/open.png"));
@@ -141,11 +125,6 @@ progConfig::~progConfig()
     delete ui;
 }
 
-void progConfig::listAdd(const QString &str)
-{
-    ui->listWidget->addItem(str);
-}
-
 void progConfig::on_btn_open_clicked()
 {
 #ifndef Q_OS_WIN
@@ -166,34 +145,11 @@ void progConfig::on_btn_open_clicked()
     QString path = QCoreApplication::applicationDirPath()+"/config";
     QDir dir(path);
     if(!dir.exists())   //  检查目录是否存在
-    {
        dir.mkdir(path);
-    }
-    QString str = QFileDialog::getOpenFileName(this,"open",path,"(*.txt)");  // 打开文件
-    if(str == "")
-    {
-       return;    //  “取消” 退出
-    }
-    QFile readFile(str);
-    if (!readFile.open(QIODevice::ReadOnly | QIODevice::Text))
-        return ;
 
-    ui->listWidget->clear();  //  清空当前列表
-
-    QTextStream stream(&readFile);    //  读取文件
-    QString line;
-    while (!stream.atEnd())
-    {
-        line = stream.readLine();   //  逐行读取
-        if(line.isEmpty())
-        {
-           readFile.close();
-           return ;
-        }
-        ui->listWidget->addItem(line);
-    }
-    readFile.close();
-
+    QString str2 = QFileDialog::getOpenFileName(this, "open", path, "*.prg");  // 打开文件
+    if (!str2.isEmpty())
+        ProgmaMgr::Instance().Load(str2);
 #endif
 }
 
@@ -241,6 +197,9 @@ void progConfig::on_btn_save_clicked()
         file.close();
     }
 
+    QString str2 = QFileDialog::getSaveFileName(this, "save", path, "(*.prg)");
+    if (!str2.isEmpty())
+        ProgmaMgr::Instance().Save(str2);
 #endif
 }
 

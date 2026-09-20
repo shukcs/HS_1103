@@ -11,7 +11,8 @@ public:
 
     void dropEvent(QDropEvent *event);
     void performDrag(void);
-
+private:
+    void initContent();
 signals:
 
 public slots:

@@ -2,6 +2,7 @@
 #include "common/mymessageBox.h"
 #include "strDecoder/strdecoder.h"
 #include "materialFeeder/FeederMgr.h"
+#include "programConfig/ProgmaMgr.h"
 
 #include "Ui_FeederGroupBox.h"
 #pragma execution_character_set("utf-8")
@@ -16,35 +17,6 @@ FeederGroupBox::FeederGroupBox(QWidget *parent) : QGroupBox(parent)
 FeederGroupBox::~FeederGroupBox()
 {
     delete m_ui;
-}
-
-QString FeederGroupBox::_getFixStr() const
-{
-    return QString("%1 %2 %3 %4").arg(m_ui->lb_feed->text()).arg(m_ui->cmb_fix->currentIndex()+1)
-		.arg(m_ui->lb_tube->text()).arg(m_ui->cmb_tube->currentIndex() + 1);
-}
-
-QString FeederGroupBox::_getBackStr()const
-{
-	return QString(" %1 %2").arg(m_ui->lb_back->text()).arg(m_ui->comboBox->currentIndex()+1);
-}
-
-QString FeederGroupBox::_getFeedMateStr()const
-{
-	QMap<QString, float> feeds;
-	m_ui->widget->GetFeedMaterials(&feeds);
-    auto tmp = m_ui->widget->GetSelectedBottleNum();
-    QString strBottle = tmp < 0 ? tr("自动") : QString::number(tmp + 1);
-    tmp = m_ui->widget->GetTubeNumber();
-    auto strTube = tmp < 0 ? tr("自动") : QString::number(tmp + 1);
-	QString ret = tr("固体配料: 称取");
-	for (auto itr=feeds.begin(); itr != feeds.end(); ++itr)
-	{
-		ret += " " + itr.key();
-		ret += " " + QString::number(itr.value())+tr("克");
-	}
-    ret += tr(" 入料瓶 %1 ,再倒入 反应管 %2").arg(strBottle).arg(strTube);
-	return ret;
 }
 
 void FeederGroupBox::initUi()
@@ -99,15 +71,22 @@ void FeederGroupBox::addTube(const TubeStruct* tube)
 
 void FeederGroupBox::onAdd()
 {
-    emit sig_Add(_getFeedMateStr());
+    QList<QPair<QString, float>> feeds;
+    m_ui->widget->GetFeedMaterials(&feeds);
+    auto tmpB = m_ui->widget->GetSelectedBottleNum();
+    auto tmpT = m_ui->widget->GetTubeNumber();
+    ProgmaMgr::Instance().AddSolidPrepare(tmpB, tmpT, feeds);
 }
 
 void FeederGroupBox::onTubeBack()
 {
-	emit sig_Add(_getBackStr());
+    auto ch = m_ui->comboBox->currentIndex();
+    ProgmaMgr::Instance().AddTubeRecycle(ch, 1);
 }
 
 void FeederGroupBox::onFix()
 {
-    emit sig_Add(_getFixStr());
+    auto ch = m_ui->cmb_fix->currentIndex();
+    auto nTube = m_ui->cmb_tube->currentIndex();
+    ProgmaMgr::Instance().AddFixTube(ch, nTube);
 }

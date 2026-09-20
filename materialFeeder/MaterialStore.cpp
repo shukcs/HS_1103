@@ -249,7 +249,7 @@ void MaterialStore::initUi()
             }
             else
             {
-                QMap<QString, float> mates;
+                QList<QPair<QString, float>> mates;
                 if (dlg.GetFeedParam(&mates) && !mates.isEmpty())
                 {
                     auto idx = dlg.GetChannel();

@@ -4,6 +4,7 @@
 #include <stdbool.h>
 #include <QString>
 
+class QDataStream;
 enum ActionType : int8_t {
     Act_Robot,
     Act_Feeder,
@@ -34,18 +35,20 @@ public:
     ActionAbstrctItem(ActionType type, bool bWait=true, int16_t seq=-1);
     virtual ~ActionAbstrctItem();
     ActionType getType()const;
+    uint16_t GetSeq()const;
     virtual QString ToString(bool bStart = true)const = 0;
     bool isWaitFinish()const;
     bool isFinished()const;
     bool isStart()const;
     void start();
-	virtual void Save(QDataStream *dstr, bool bSaveStat=false);
+    virtual void Save(QDataStream *dstr, bool bSaveStat = false);
+    virtual void Load(QDataStream *dstr);
 private:
+    uint16_t    m_seq;
 	ActionType	m_type;       ///ActionType
-	int16_t    m_seq;
-    bool m_bWaitFinish : 1;   ///false: 可以同步进行下一个
-    bool m_bStart : 1;        ///false: true, 已经开始
-    bool m_bFinish : 1;
+    uint8_t m_bWaitFinish;   ///false: 可以同步进行下一个
+    uint8_t m_bStart;        ///false: true, 已经开始
+    uint8_t m_bFinish;
 };
 
 class LabelItem : public ActionAbstrctItem
@@ -56,6 +59,7 @@ public:
 	const QString &Name()const;
 	void Save(QDataStream *dstr, bool bSaveStat = false)override;
 	QString ToString(bool bStart = true)const override;
+    void Load(QDataStream *dstr);
 private:
 	QString m_label;
 };

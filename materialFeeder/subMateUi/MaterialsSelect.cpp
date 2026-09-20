@@ -26,7 +26,7 @@ MaterialsSelect::~MaterialsSelect()
     delete m_ui;
 }
 
-void MaterialsSelect::GetFeedMaterials(QMap<QString, float>* mates)const
+void MaterialsSelect::GetFeedMaterials(QList<QPair<QString, float>>* mates)const
 {
     if (mates)
     {
@@ -36,7 +36,7 @@ void MaterialsSelect::GetFeedMaterials(QMap<QString, float>* mates)const
             auto str = itr.cmb->currentText();
             if (str.isEmpty())
                 continue;
-            mts[str] = itr.spin->GetWeight();
+            mts << QPair<QString, float>(str, itr.spin->GetWeight());
         }
     }
 }
@@ -231,7 +231,6 @@ void MaterialsSelect::changeAvalidTube()
     {
         m_ui->cmb_tube->addItem(tr("反应管%1").arg(itr->getNumber() + 1));
 	}
-	m_ui->cmb_tube->addItem(tr("自动"));
     if (!str.isEmpty())
         m_ui->cmb_tube->setCurrentText(str);
 }
@@ -255,7 +254,6 @@ void MaterialsSelect::changeAvalidBottle()
     {
         m_ui->cmb_bottle->addItem(tr("料瓶%1").arg(itr->m_numb + 1));
     }
-    m_ui->cmb_bottle->addItem(tr("自动"));
     if (!str.isEmpty())
         m_ui->cmb_bottle->setCurrentText(str);
 }

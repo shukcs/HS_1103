@@ -469,11 +469,11 @@ void strDecoder::strTocmd(const QString &cmd)
 		{
             if (strlist.at(1) == tr("称取"))
 			{
-				QMap<QString, float> feeds;
+				QList<QPair<QString, float>> feeds;
 				int i = 2;
 				for (; i + 1 < strlist.size()-5; i += 2)
 				{
-					feeds[strlist.at(i)] = strlist.at(i + 1).toFloat();
+                    feeds << QPair<QString, float>(strlist.at(i), strlist.at(i + 1).toFloat());
 				}
                 auto bottle = strlist.at(i+2).toInt()-1;
                 if (bottle<0)

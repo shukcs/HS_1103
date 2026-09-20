@@ -23,7 +23,7 @@ public:
     explicit MaterialsSelect(QWidget *parent = 0);
     ~MaterialsSelect();
 
-    void GetFeedMaterials(QMap<QString, float>* mates)const;
+    void GetFeedMaterials(QList<QPair<QString, float>>* mates)const;
     void SetFeedMaterials(const FeederParam *bt);
     int GetChannel()const;
     void SetBottleSelected(bool b);

@@ -20,8 +20,6 @@ public:
     ~progConfig();
 
 private slots:
-    void listAdd(const QString &str);
-
     void on_btn_open_clicked(void);
     void on_btn_save_clicked(void);
     void on_btn_clear_clicked(void);

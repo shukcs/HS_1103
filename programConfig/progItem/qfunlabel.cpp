@@ -1,5 +1,6 @@
 ﻿#include "qfunlabel.h"
 #include <QRegularExpressionValidator>
+#include "programConfig/ProgmaMgr.h"
 #pragma execution_character_set("utf-8")
 
 
@@ -31,7 +32,5 @@ QFunLabel::QFunLabel(QWidget *parent) : QGroupBox(parent)
 void QFunLabel::addBtn_clicked()
 {
     if(!name->text().isEmpty())
-    {
-       emit labelPanelAdd("--- " + name->text() + " ---");
-    }
+        ProgmaMgr::Instance().AddLabel(name->text());
 }

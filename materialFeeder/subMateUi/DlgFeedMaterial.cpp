@@ -16,7 +16,7 @@ DlgFeedMaterial::~DlgFeedMaterial()
     delete m_ui;
 }
 
-bool DlgFeedMaterial::GetFeedParam(QMap<QString, float>* mates)const
+bool DlgFeedMaterial::GetFeedParam(QList<QPair<QString, float>>* mates)const
 {
     if (m_ui->cmb->currentIndex() == 1)
     {

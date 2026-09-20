@@ -1155,7 +1155,7 @@ QList<BottleStruct*> FeederMgr::ValidBottls() const
     return ret;
 }
 
-bool FeederMgr::FeedSolidMaterial(const QMap<QString, float> &feeds, int numb, int nTube, bool bFix, int ch)
+bool FeederMgr::FeedSolidMaterial(QList<QPair<QString, float>> &feeds, int numb, int nTube, bool bFix, int ch)
 {
     if (feeds.isEmpty() || GetfeedParamsByBottleNum(numb))
         return false; 
@@ -1183,10 +1183,10 @@ bool FeederMgr::FeedSolidMaterial(const QMap<QString, float> &feeds, int numb, i
     QList<QPair<int, float> > preNumDistrs;
     for (auto itr = feeds.begin(); itr != feeds.end(); ++itr)
     {
-        auto store = getPropStore(itr.value(), itr.key(), preDistrs);
+        auto store = getPropStore(itr->second, itr->first, preDistrs);
         if (!store)
             return false;
-        preNumDistrs << QPair<int, float>(store->numb, itr.value());
+        preNumDistrs << QPair<int, float>(store->numb, itr->second);
     }
     m_feedParams << FeederParam(preNumDistrs, (uint16_t)numb, nTube);
     FeederRecover::Instance().AddFeedParam(m_feedParams.last());

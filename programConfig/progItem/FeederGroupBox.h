@@ -16,7 +16,6 @@ protected:
     QString _getFixStr()const; 
     QString _getBackStr()const;
 	QString _getFeedChStr()const;
-	QString _getFeedMateStr()const;
     void initUi();
 
     void addTube(const TubeStruct* tube);

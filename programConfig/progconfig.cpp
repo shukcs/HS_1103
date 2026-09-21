@@ -128,7 +128,6 @@ progConfig::~progConfig()
 void progConfig::on_btn_open_clicked()
 {
 #ifndef Q_OS_WIN
-
     fileOpen *file_open = new fileOpen;
     file_open->listWidget = ui->listWidget;
     QDesktopWidget* desktop = QApplication::desktop();
@@ -139,17 +138,15 @@ void progConfig::on_btn_open_clicked()
 
     file_open->raise();
     file_open->show();
-
 #else
-
     QString path = QCoreApplication::applicationDirPath()+"/config";
     QDir dir(path);
     if(!dir.exists())   //  检查目录是否存在
        dir.mkdir(path);
 
-    QString str2 = QFileDialog::getOpenFileName(this, "open", path, "*.prg");  // 打开文件
-    if (!str2.isEmpty())
-        ProgmaMgr::Instance().Load(str2);
+    QString str = QFileDialog::getOpenFileName(this, "open", path, "*.prg");  // 打开文件
+    if (!str.isEmpty())
+        ProgmaMgr::Instance().Load(str);
 #endif
 }
 
@@ -169,37 +166,14 @@ void progConfig::on_btn_save_clicked()
     file_save->show();
 
 #else
-
     QString path = QCoreApplication::applicationDirPath()+"/config";
     QDir dir(path);
     if(!dir.exists())   //  检查目录是否存在
-    {
        dir.mkdir(path);
-    }
-    QString str = QFileDialog::getSaveFileName(this,"save",path,"(*.txt)");
-    if(!str.isEmpty())
-    {
-        int cnt = ui->listWidget->count();
-        if(cnt == 0)
-        {
-             QMessageBox::information(this,"提示","请添加项目！");
-             return ;
-        }
-        QFile file(str);
-        file.open( QIODevice::WriteOnly  | QIODevice::Text | QIODevice::Truncate);
-        QTextStream out(&file);
-        QString text;
-        for(int i=0;i<cnt;i++)
-        {
-           text = ui->listWidget->item(i)->text() + "\n";
-           out<<tr(text.toStdString().c_str());
-        }
-        file.close();
-    }
 
-    QString str2 = QFileDialog::getSaveFileName(this, "save", path, "(*.prg)");
-    if (!str2.isEmpty())
-        ProgmaMgr::Instance().Save(str2);
+    QString str = QFileDialog::getSaveFileName(this, "save", path, "*.prg");
+    if (!str.isEmpty())
+        ProgmaMgr::Instance().Save(str);
 #endif
 }
 
@@ -209,20 +183,18 @@ void progConfig::on_btn_clear_clicked()
     switch (result)
     {
         case MyMessageBox::Yes:
-             ui->listWidget->clear();
-             break;
+			ProgmaMgr::Instance().Clear();
+			break;
         case MyMessageBox::No:
-
-             break;
+			break;
         default:
-             break;
+			break;
     }
 }
 
 void progConfig::on_btn_append_clicked()
 {
 #ifndef Q_OS_WIN
-
     fileOpen *file_open = new fileOpen;
     file_open->appendFlag = true;
     file_open->setTitle("追加文件");
@@ -235,69 +207,31 @@ void progConfig::on_btn_append_clicked()
 
     file_open->raise();
     file_open->show();
-
 #else
-
     QString path = QCoreApplication::applicationDirPath()+"/config";
     QDir dir(path);
     if(!dir.exists())   //  检查目录是否存在
-    {
        dir.mkdir(path);
-    }
-    QString str = QFileDialog::getOpenFileName(this,"open",path,"(*.txt)");  // 打开文件
-    if(str == "")
-    {
-       return;    //  “取消” 退出
-    }
-    QFile readFile(str);
-    if (!readFile.open(QIODevice::ReadOnly | QIODevice::Text))
-        return ;
-
-    QTextStream stream(&readFile);    //  读取文件
-    QString line;
-    while (!stream.atEnd())
-    {
-        line = stream.readLine();   //  逐行读取
-        if(line.isEmpty())
-        {
-           readFile.close();
-           return ;
-        }
-        ui->listWidget->addItem(line);
-    }
-    readFile.close();
+  
+	QString str = QFileDialog::getOpenFileName(this, "open", path, "*.prg");  // 打开文件
+	if (!str.isEmpty())
+		ProgmaMgr::Instance().Append(str);
 
 #endif
 }
 
 void progConfig::on_move_up_clicked()
 {
-    if(ui->listWidget->currentRow() > 0)
-    {
-        int row = ui->listWidget->currentRow() - 1;
-        QListWidgetItem *item1 = ui->listWidget->takeItem(ui->listWidget->currentRow() - 1);
-        QListWidgetItem *item2 = ui->listWidget->takeItem(ui->listWidget->currentRow());
-
-        ui->listWidget->insertItem(row,item2);
-        ui->listWidget->insertItem(row+1,item1);
-
-        ui->listWidget->setCurrentRow(row);
-    }
+	auto idx = ui->listWidget->currentRow();
+    if(idx > 0)
+		ProgmaMgr::Instance().MoveUpAt(idx);
 }
 
 void progConfig::on_move_down_clicked()
 {
-    if(ui->listWidget->currentRow() >= 0)
-    {
-        int row = ui->listWidget->currentRow();
-        QListWidgetItem *item1 = ui->listWidget->takeItem(ui->listWidget->currentRow() + 1);  // 删除下一行
-        QListWidgetItem *item2 = ui->listWidget->takeItem(ui->listWidget->currentRow());  // 删除当前行
-
-        ui->listWidget->insertItem(row,item1);
-        ui->listWidget->insertItem(row + 1,item2);
-
-        ui->listWidget->setCurrentRow(row + 1);
-    }
+	auto idx = ui->listWidget->currentRow();
+	if (idx > 0)
+		ProgmaMgr::Instance().MoveDownAt(idx);
 }
 
 void progConfig::on_obj_del_clicked()

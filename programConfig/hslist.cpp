@@ -35,7 +35,8 @@ void HsList::initContent()
         if (idx > 0 && idx < count())
         {
             auto item = takeItem(idx);
-            insertItem(idx - 1, item);
+			insertItem(idx - 1, item);
+			setCurrentRow(idx - 1);
         }
     });
     connect(mgr, &ProgmaMgr::itemMoveDown, this, [=](int idx) {
@@ -43,6 +44,7 @@ void HsList::initContent()
         {
             auto item = takeItem(idx);
             insertItem(idx + 1, item);
+			setCurrentRow(idx + 1);
         }
     });
     connect(mgr, &ProgmaMgr::curActionsGroupChanged, this, [=]() {

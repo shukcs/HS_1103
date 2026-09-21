@@ -63,7 +63,7 @@ FixTubeItem::FixTubeItem(uint16_t ch, uint16_t numTube, int16_t seq) : ActionAbs
 {
 }
 
-QString FixTubeItem::ToString(bool bStart /*= true*/) const
+QString FixTubeItem::ToString(bool) const
 {
     return QApplication::translate("FixTubeItem", "装载: 反应管%1装载至炉膛%2").arg(m_numTube+1).arg(m_ch+1);
 }

@@ -75,6 +75,19 @@ bool ProgmaMgr::Save(const QString &file)
 	return false;
 }
 
+void ProgmaMgr::Append(const QString &file)
+{
+	QFile f(file);
+	if (f.open(QIODevice::ReadOnly))
+	{
+		QDataStream st(&f);
+		load(&st, m_edits);
+		if (!m_edits.isEmpty())
+			s_seq = m_edits.last()->GetSeq() + 1;
+	}
+	emit curActionsGroupChanged();
+}
+
 void ProgmaMgr::AddLabel(const QString &label)
 {
 	addItem(new LabelItem(label));
@@ -112,6 +125,14 @@ void ProgmaMgr::MoveDownAt(int idx)
         m_edits.insert(idx + 1, act);
         emit itemMoveDown(idx);
     }
+}
+
+void ProgmaMgr::Clear()
+{
+	qDeleteAll(m_edits);
+	m_edits.clear();
+
+	emit curActionsGroupChanged();
 }
 
 ProgmaMgr &ProgmaMgr::Instance()

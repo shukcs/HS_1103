@@ -76,42 +76,6 @@ void ActionAbstrctItem::Load(QDataStream *dstr)
 /*
 * ActionItem
 */
-LabelItem::LabelItem(const QString &label) : ActionAbstrctItem(FL_Label)
-, m_label(label)
-{
-}
-
-const QString & LabelItem::Name() const
-{
-	return m_label;
-}
-
-void LabelItem::Save(QDataStream *dstr, bool bSaveStat /*= false*/)
-{
-	if (dstr)
-	{
-		ActionAbstrctItem::Save(dstr, bSaveStat);
-		*dstr << m_label;
-	}
-}
-
-QString LabelItem::ToString(bool) const
-{
-	return QString("--- %1 ---").arg(m_label);
-}
-
-void LabelItem::Load(QDataStream *dstr)
-{
-    if (dstr)
-    {
-        ActionAbstrctItem::Load(dstr);
-        *dstr >> m_label;
-    }
-}
-
-/*
-* ActionItem
-*/
 ActionItem::ActionItem(ActionType t, bool bWait):ActionAbstrctItem(t, bWait)
 {
 }
@@ -165,6 +129,10 @@ void ActionItem::Save(QDataStream *, bool/*=false*/)
 {
 }
 
+void ActionItem::Distribute()
+{
+}
+
 QString ActionItem::stepMotorActToString() const
 {
     switch ((CtrlType::StepMotorType)stepType)
@@ -178,5 +146,3 @@ QString ActionItem::stepMotorActToString() const
     }
     return QString();
 }
-
-DECLARE_ACTIONFACITEM_ITEM(LabelItem, FL_Label)

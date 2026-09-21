@@ -5,7 +5,49 @@
 #include "common/ActionFactory.h"
 #pragma execution_character_set("utf-8")
 
+/*
+* ActionItem
+*/
+LabelItem::LabelItem(const QString &label) : ActionAbstrctItem(FL_Label)
+, m_label(label)
+{
+}
 
+const QString & LabelItem::Name() const
+{
+	return m_label;
+}
+
+void LabelItem::Save(QDataStream *dstr, bool bSaveStat /*= false*/)
+{
+	if (dstr)
+	{
+		ActionAbstrctItem::Save(dstr, bSaveStat);
+		*dstr << m_label;
+	}
+}
+
+QString LabelItem::ToString(bool) const
+{
+	return QString("--- %1 ---").arg(m_label);
+}
+
+void LabelItem::Load(QDataStream *dstr)
+{
+	if (dstr)
+	{
+		ActionAbstrctItem::Load(dstr);
+		*dstr >> m_label;
+	}
+}
+
+void LabelItem::Distribute()
+{
+}
+
+/*
+*AirClrAction
+*/
 AirClrAction::AirClrAction(uint16_t ch, float prs, uint16_t sec, int16_t seq) : ActionAbstrctItem(Group_AirClear, true, seq)
 , m_ch(ch), m_tm(sec), m_pressure(prs)
 {
@@ -34,8 +76,15 @@ void AirClrAction::Load(QDataStream *dstr)
     ActionAbstrctItem::Load(dstr);
     *dstr >> m_ch >> m_tm >> m_pressure;
 }
-DECLARE_ACTIONFACITEM_ITEM(AirClrAction, Group_AirClear)
 
+void AirClrAction::Distribute()
+{
+
+}
+
+/*
+*AirInAction
+*/
 AirInAction::AirInAction(uint16_t ch, float prsIn, float mlPmin, float prsKp, int16_t seq)
 : ActionAbstrctItem(Group_AirIn, true, seq), m_ch(ch), m_prsIn(prsIn), m_prsKp(prsKp), m_mlPmin(mlPmin)
 {
@@ -63,8 +112,14 @@ void AirInAction::Load(QDataStream *dstr)
     ActionAbstrctItem::Load(dstr);
     *dstr >> m_ch >> m_prsIn >> m_prsKp >> m_mlPmin;
 }
-DECLARE_ACTIONFACITEM_ITEM(AirInAction, Group_AirIn)
 
+void AirInAction::Distribute()
+{
+}
+
+/*
+*AirEndAction
+*/
 AirEndAction::AirEndAction(uint16_t ch, int16_t seq) : ActionAbstrctItem(Group_AirEnd, true, seq), m_ch(ch)
 {
 }
@@ -93,8 +148,14 @@ void AirEndAction::Load(QDataStream *dstr)
     *dstr >> m_ch;
 
 }
-DECLARE_ACTIONFACITEM_ITEM(AirEndAction, Group_AirEnd)
 
+void AirEndAction::Distribute()
+{
+}
+
+/*
+*LiquidInAction
+*/
 LiquidInAction::LiquidInAction(uint16_t ch, float mlPmin, uint16_t sec, int16_t seq /*= -1*/)
 : ActionAbstrctItem(Group_LiquiIn, true, seq), m_ch(ch), m_tmAirOut(sec), m_mlPmin(mlPmin)
 {
@@ -122,9 +183,14 @@ void LiquidInAction::Load(QDataStream *dstr)
     ActionAbstrctItem::Load(dstr);
     *dstr >> m_ch >> m_tmAirOut >> m_mlPmin;
 }
-DECLARE_ACTIONFACITEM_ITEM(LiquidInAction, Group_LiquiIn)
 
+void LiquidInAction::Distribute()
+{
+}
 
+/*
+*LiquidEndAction
+*/
 LiquidEndAction::LiquidEndAction(uint16_t ch /*= 0*/, int16_t seq /*= -1*/)
 : ActionAbstrctItem(Group_LiquiEnd, true, seq), m_ch(ch)
 {
@@ -152,4 +218,13 @@ void LiquidEndAction::Load(QDataStream *dstr)
     ActionAbstrctItem::Load(dstr);
     *dstr >> m_ch;
 }
+
+void LiquidEndAction::Distribute()
+{
+}
+
+DECLARE_ACTIONFACITEM_ITEM(LabelItem, FL_Label)
+DECLARE_ACTIONFACITEM_ITEM(AirClrAction, Group_AirClear)
+DECLARE_ACTIONFACITEM_ITEM(AirInAction, Group_AirIn)
+DECLARE_ACTIONFACITEM_ITEM(LiquidInAction, Group_LiquiIn)
 DECLARE_ACTIONFACITEM_ITEM(LiquidEndAction, Group_LiquiEnd)

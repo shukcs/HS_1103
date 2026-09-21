@@ -73,7 +73,7 @@ ProgramList::ProgramList(QWidget *parent)
     run->setFixedHeight(30);
  //   run->setFixedSize(200,40);
     run->setIcon(QIcon(":/programConfig/image/run.png"));
-    connect(run,SIGNAL(clicked()),this,SLOT(runBtn_clicked()));
+	connect(run, &QPushButton::clicked, this, &ProgramList::runBtn_clicked);
     Toplayout->addWidget(run);
 
     pause = new QPushButton;
@@ -273,6 +273,8 @@ void ProgramList::nameFile_changed(const QString& str)
 		{
 			if (itr->getType() == FL_Label)
 			{
+				if (list && !list->list.isEmpty())
+					m_titles << *list;
 				delete list;
 				list = new ListTextContent;
 				list->name = itr->ToString();

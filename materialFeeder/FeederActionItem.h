@@ -11,6 +11,7 @@ public:
     QString ToString(bool bStart = true)const override;
 	void Save(QDataStream *dstr, bool bSaveStat = false)override;
     void Load(QDataStream *dstr)override;
+	void Distribute()override;
 public:
     uint16_t m_numBottle;
     uint16_t m_numTube;
@@ -23,6 +24,7 @@ public:
     FixTubeItem(uint16_t ch=0, uint16_t numTub=0, int16_t seq=-1);
 	QString ToString(bool bStart = true)const override;
 	void Save(QDataStream *dstr, bool bSaveStat = false)override;
+	void Distribute()override;
 public:
     uint16_t m_ch;
     uint16_t m_numTube;
@@ -34,6 +36,7 @@ public:
     TubeBackItem(uint16_t ch=0, uint16_t pos=0, int16_t seq = -1);
     QString ToString(bool bStart = true)const override;
 	void Save(QDataStream *dstr, bool bSaveStat = false)override;
+	void Distribute()override;
 public:
     uint16_t m_ch;
     uint16_t m_posRcy;

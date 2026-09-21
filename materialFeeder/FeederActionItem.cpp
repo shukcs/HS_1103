@@ -2,6 +2,7 @@
 #include <QDataStream>
 #include <QApplication>
 #include "common/ActionFactory.h"
+#include "FeederMgr.h"
 #pragma execution_character_set("utf-8")
 /*
 *SolidPrepareItem
@@ -55,6 +56,11 @@ void SolidPrepareItem::Load(QDataStream *dstr)
     }
 }
 
+void SolidPrepareItem::Distribute()
+{
+	FeederMgr::Instance().FeedSolidMaterial(m_weightFeeds, m_numBottle, m_numTube, GetSeq());
+}
+
 /*
 *FixTubeItem
 */
@@ -63,7 +69,7 @@ FixTubeItem::FixTubeItem(uint16_t ch, uint16_t numTube, int16_t seq) : ActionAbs
 {
 }
 
-QString FixTubeItem::ToString(bool bStart /*= true*/) const
+QString FixTubeItem::ToString(bool) const
 {
     return QApplication::translate("FixTubeItem", "装载: 反应管%1装载至炉膛%2").arg(m_numTube+1).arg(m_ch+1);
 }
@@ -75,6 +81,11 @@ void FixTubeItem::Save(QDataStream *dstr, bool bSaveStat /*= false*/)
 		ActionAbstrctItem::Save(dstr, bSaveStat);
 		*dstr << m_ch << m_numTube;
 	}
+}
+
+void FixTubeItem::Distribute()
+{
+	FeederMgr::Instance().FixTube(m_numTube, m_ch, GetSeq());
 }
 
 /*
@@ -99,6 +110,10 @@ void TubeBackItem::Save(QDataStream *dstr, bool bSaveStat /*= false*/)
 	}
 }
 
+void TubeBackItem::Distribute()
+{
+	FeederMgr::Instance().StoveTubeBack(m_ch, m_posRcy, GetSeq());
+}
 
 DECLARE_ACTIONFACITEM_ITEM(SolidPrepareItem, Group_PrepareSolidMate)
 DECLARE_ACTIONFACITEM_ITEM(FixTubeItem, Group_StoveFixTube)

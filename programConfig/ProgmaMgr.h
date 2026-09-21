@@ -18,12 +18,14 @@ public:
 	void Reload(const QString &path);
     void Load(const QString &file);
 	bool Save(const QString &file);
+	void Append(const QString &file);
 	void AddLabel(const QString &label);
     void AddAction(ActionAbstrctItem *act);
 
     void RemoveAt(int idx);
     void MoveUpAt(int idx);
     void MoveDownAt(int idx);
+	void Clear();
 
     static ProgmaMgr &Instance();
 protected:

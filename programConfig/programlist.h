@@ -26,7 +26,6 @@ public:
 
     void state_change(void);
     bool getState(void);
-
 signals:
     void readyTorun(const QString& str);
     void readyTorun_toColl(const QString& str);

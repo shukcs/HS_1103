@@ -43,6 +43,7 @@ public:
     void AddToEdit();
     virtual void Save(QDataStream *dstr, bool bSaveStat = false);
     virtual void Load(QDataStream *dstr);
+	virtual void Distribute() = 0;///分发
 private:
     friend class ProgmaMgr;
     int16_t    m_seq;
@@ -50,19 +51,6 @@ private:
     uint8_t m_bWaitFinish;   ///false: 可以同步进行下一个
     uint8_t m_bStart;        ///false: true, 已经开始
     uint8_t m_bFinish;
-};
-
-class LabelItem : public ActionAbstrctItem
-{
-public:
-	LabelItem(const QString &label=QString());
-
-	const QString &Name()const;
-	void Save(QDataStream *dstr, bool bSaveStat = false)override;
-	QString ToString(bool bStart = true)const override;
-    void Load(QDataStream *dstr);
-private:
-	QString m_label;
 };
 
 class ActionItem : public ActionAbstrctItem 
@@ -97,6 +85,7 @@ public:
     void SetFeedCmd(uint16_t cmd, int ack = -1);
     QString ToString(bool bStart = true)const override;
 	void Save(QDataStream *dstr, bool bSaveStat=false)override;
+	void Distribute()override;
 private:
     QString stepMotorActToString()const;
 };

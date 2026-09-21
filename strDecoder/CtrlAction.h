@@ -2,6 +2,20 @@
 #define __CtrlAction_H__
 #include "common/ActionItem.h"
 
+class LabelItem : public ActionAbstrctItem
+{
+public:
+	LabelItem(const QString &label = QString());
+
+	const QString &Name()const;
+	void Save(QDataStream *dstr, bool bSaveStat = false)override;
+	QString ToString(bool bStart = true)const override;
+	void Load(QDataStream *dstr)override;
+	void Distribute()override;
+private:
+	QString m_label;
+};
+
 class AirClrAction : public ActionAbstrctItem
 {
 public:
@@ -10,6 +24,7 @@ public:
     QString ToString(bool bStart = true)const override;
     void Save(QDataStream *dstr, bool bSaveStat=false);
     void Load(QDataStream *dstr);
+	void Distribute()override;
 private:
     uint16_t    m_ch;
     uint16_t    m_tm;
@@ -23,7 +38,8 @@ public:
 
     QString ToString(bool bStart = true)const override;
     void Save(QDataStream *dstr, bool bSaveStat = false);
-    void Load(QDataStream *dstr);
+	void Load(QDataStream *dstr);
+	void Distribute()override;
 private:
     uint16_t    m_ch;
     float       m_prsIn;///ÈëÆø·§Ñ¹Á¦
@@ -38,7 +54,8 @@ public:
     QString ToString(bool bStart = true)const override;
 
     void Save(QDataStream *dstr, bool bSaveStat = false);
-    void Load(QDataStream *dstr);
+	void Load(QDataStream *dstr);
+	void Distribute()override;
 private:
     uint16_t    m_ch;
 };
@@ -50,7 +67,8 @@ public:
     QString ToString(bool bStart = true)const override;
 
     void Save(QDataStream *dstr, bool bSaveStat = false);
-    void Load(QDataStream *dstr);
+	void Load(QDataStream *dstr);
+	void Distribute()override;
 private:
     uint16_t    m_ch;
     uint16_t    m_tmAirOut;
@@ -64,7 +82,8 @@ public:
     QString ToString(bool bStart = true)const override;
 
     void Save(QDataStream *dstr, bool bSaveStat = false);
-    void Load(QDataStream *dstr);
+	void Load(QDataStream *dstr);
+	void Distribute()override;
 private:
     uint16_t    m_ch;
 };

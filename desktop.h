@@ -12,7 +12,7 @@ class manualOp;
 class deviceOp;
 class customGraph;
 class progConfig;
-class strDecoder;
+class DevContrlMgr;
 class projectMode;
 class collectorOp;
 class deskTop : public QWidget
@@ -43,7 +43,7 @@ private:
     customGraph *graph;
   //  ProgramConfig *programconfig;
     progConfig *progconfig;
-    strDecoder *decoder;
+    DevContrlMgr *decoder;
     projectMode *projectmode;
     collectorOp *collectorOperation;
 };

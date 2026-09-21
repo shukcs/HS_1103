@@ -5,6 +5,7 @@
 #include "materialFeeder/FeederMgr.h"
 #include "strDecoder/strDecoder.h"
 #include "common/ActionFactory.h"
+#include "programConfig/ProgmaMgr.h"
 #pragma execution_character_set("utf-8")
 
 /*
@@ -47,6 +48,11 @@ bool ActionAbstrctItem::isStart() const
 void ActionAbstrctItem::start()
 {
     m_bStart = true;
+}
+
+void ActionAbstrctItem::AddToEdit()
+{
+    ProgmaMgr::Instance().AddAction(this);
 }
 
 void ActionAbstrctItem::Save(QDataStream *dstr, bool bSaveStat)

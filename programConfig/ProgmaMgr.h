@@ -10,7 +10,6 @@ class ProgmaMgr : public QObject
 public:
 	typedef QList<ActionAbstrctItem *> ActionsGroup;
 	typedef QPair<QString, ActionsGroup> LoadItem;
-	typedef QPair<QString, float> FeedItem;
 public:
     ~ProgmaMgr();
 
@@ -20,10 +19,6 @@ public:
     void Load(const QString &file);
 	bool Save(const QString &file);
 	void AddLabel(const QString &label);
-	void AddSolidPrepare(uint16_t numBottle, uint16_t numTube, const QList<FeedItem> &weightFeeds);
-	void AddFixTube(uint16_t ch, uint16_t numTube);
-    void AddTubeRecycle(uint16_t ch, uint16_t pos);
-    void AddLiquidClear(uint16_t ch);
     void AddAction(ActionAbstrctItem *act);
 
     void RemoveAt(int idx);

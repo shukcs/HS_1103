@@ -348,10 +348,10 @@ void collectorOp::updateInfo(ReceiveData *data)
 //        }
 
         memcpy(byteArray.data(), &(data->collector[42]), 4);
-        tmp_f = strDecoder::bigEndianToFloat(byteArray);
+        tmp_f = DevContrlMgr::bigEndianToFloat(byteArray);
         ui->lineEdit_5->setText(QString::number(tmp_f));  //42
         memcpy(byteArray.data(), &(data->collector[46]), 4);
-        tmp_f = strDecoder::bigEndianToFloat(byteArray);
+        tmp_f = DevContrlMgr::bigEndianToFloat(byteArray);
         ui->lineEdit_6->setText(QString::number(tmp_f));  //46
     }
 }

@@ -1,5 +1,6 @@
 ﻿#include "AirWayGroupBox.h"
 #include "strDecoder/strdecoder.h"
+#include "strDecoder/CtrlAction.h"
 
 #include "Ui_AirWayGroupBox.h"
 #pragma execution_character_set("utf-8")
@@ -30,14 +31,12 @@ void AirWayGroupBox::initUi()
 
 void AirWayGroupBox::onClear()
 {
-	QString str = tr("%1 %2 吹扫气压 %3 MPa 吹扫时间 %4 s").arg(m_ui->lb_clr->text()).arg(m_ui->cmb_ch->currentText())
-		.arg(m_ui->spin_prsClr->text()).arg(m_ui->spinBox->text());
-	emit sig_Add(str);
+    if (auto act = new AirClrAction(m_ui->cmb_ch->currentIndex(), m_ui->spin_prsClr->value(), m_ui->spinBox->value()))
+        act->AddToEdit();
 }
 
 void AirWayGroupBox::onAirIn()
 {
-	QString str = tr("%1 %2 进气气压 %3 MPa 流速 %4 ml/s 背压阀 %4").arg(m_ui->lb_in->text()).arg(m_ui->cmb_ch->currentText())
-		.arg(m_ui->spin_prsIn->text()).arg(m_ui->spin_speed->text()).arg(m_ui->spin_speed->text());
-	emit sig_Add(str);
+    if (auto act = new AirInAction(m_ui->cmb_ch->currentIndex(), m_ui->spin_prsIn->value(), m_ui->spin_speed->value(), m_ui->spin_valve->value()))
+        act->AddToEdit();
 }

@@ -67,17 +67,12 @@ private:
 };
 
 class ActionItem;
-class strDecoder : public QObject
+class DevContrlMgr : public QObject
 {
     Q_OBJECT
 public:
-	enum {
-		Job_AirClear = 10,
-		Job_AirIn,
-	};
-public:
-    explicit strDecoder(QObject *parent = nullptr, const QString &name = "COM7");
-    ~strDecoder();
+    explicit DevContrlMgr(QObject *parent = nullptr, const QString &name = "COM7");
+    ~DevContrlMgr();
 
     void strTocmd(const QString &cmd);   //  添加待处理的命令
     void cmdSend();
@@ -88,7 +83,7 @@ public:
     static QByteArray floatToBigEndian(float value);
     static float bigEndianToFloat(const QByteArray& bytes);
     static int getStovePos(int ch);
-    static strDecoder *Instance();
+    static DevContrlMgr *Instance();
 public slots:
     void timer_out();
     void setTimer(int time);
@@ -145,14 +140,14 @@ private:
 
     void prcsMotor(const QByteArray& msg);
 private:
-    portThread* thread;
+    portThread  *m_thread;
     QTimer              *m_timer;
-    uint32_t    sleepTime;
-    uint32_t    m_countReq=0;
-    QString portName;
+    uint32_t            sleepTime;
+    uint32_t            m_countReq=0;
+    QString             portName;
     QList<QByteArray>   m_cmdlist;   // 发送队列
-    StepMotorStat   m_stepMotorStat[6];
-    ServoMotorStat  m_servoMotorStat;
+    StepMotorStat       m_stepMotorStat[6];
+    ServoMotorStat      m_servoMotorStat;
 };
 
 #endif // STRDECODER_H

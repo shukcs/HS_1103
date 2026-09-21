@@ -4,8 +4,8 @@
 #include <QFileInfo>
 #include <QDataStream>
 #include <QApplication>
-#include "materialFeeder/FeederActionItem.h"
 #include "common/ActionFactory.h"
+#include "common/ActionItem.h"
 
 uint16_t ProgmaMgr::s_seq = 0;
 ProgmaMgr::ProgmaMgr(QObject *p):QObject(p)
@@ -80,21 +80,6 @@ void ProgmaMgr::AddLabel(const QString &label)
 	addItem(new LabelItem(label));
 }
 
-void ProgmaMgr::AddSolidPrepare(uint16_t numBottle, uint16_t numTube, const QList<FeedItem> &weightFeeds)
-{
-    addItem(new SolidPrepareItem(numBottle, numTube, weightFeeds, s_seq++));
-}
-
-void ProgmaMgr::AddFixTube(uint16_t ch, uint16_t numTube)
-{
-    addItem(new FixTubeItem(ch, numTube, s_seq++));
-}
-
-void ProgmaMgr::AddTubeRecycle(uint16_t ch, uint16_t pos)
-{
-    addItem(new TubeBackItem(ch, pos, s_seq++));
-}
-
 void ProgmaMgr::AddAction(ActionAbstrctItem *act)
 {
     addItem(act);
@@ -102,17 +87,31 @@ void ProgmaMgr::AddAction(ActionAbstrctItem *act)
 
 void ProgmaMgr::RemoveAt(int idx)
 {
-
+    if (0 <= idx && idx < m_edits.size())
+    {
+        delete m_edits.takeAt(idx);
+        emit itemRemovd(idx);
+    }
 }
 
 void ProgmaMgr::MoveUpAt(int idx)
 {
-
+    if (0 < idx && idx < m_edits.size())
+    {
+        auto act = m_edits.takeAt(idx);
+        m_edits.insert(idx - 1, act);
+        emit itemMoveUp(idx);
+    }
 }
 
 void ProgmaMgr::MoveDownAt(int idx)
 {
-
+    if (0 <= idx && idx+1 < m_edits.size())
+    {
+        auto act = m_edits.takeAt(idx);
+        m_edits.insert(idx + 1, act);
+        emit itemMoveDown(idx);
+    }
 }
 
 ProgmaMgr &ProgmaMgr::Instance()
@@ -154,4 +153,10 @@ void ProgmaMgr::addItem(ActionAbstrctItem *item)
 
     m_edits << item;
     emit actionItemAdded(item);
+    if (item->getType() != FL_Label)
+    {
+        item->m_seq = s_seq++;
+        if (s_seq > 0x7fff)
+            s_seq = 0;
+    }
 }

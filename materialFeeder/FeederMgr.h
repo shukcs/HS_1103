@@ -2,7 +2,6 @@
 #define __FeederDecoder_H__
 #include <QMap>
 #include "FeederStruct.h"
-#include "common/ActionItem.h"
 
 class QSerialPort;
 class StepMotorStat;
@@ -27,12 +26,6 @@ public:
         Pos_Stove2 = Pos_None,
         Pos_Home = 0,
     };
-    enum JobType : int8_t {
-        J_PrepareMate,    ///反应管备料
-        J_StoveFixTube,   ///反应管入炉膛
-        J_StoveTubeBack,  ///回收炉膛反应管
-        J_Unknow = -1,
-    };
 public:
     FeederMgr(QObject* p);
     ~FeederMgr();
@@ -48,13 +41,14 @@ public:
     QStringList GetStoreNfcId(bool bContainUse = true, const QString &cur=QString());
     const QList<BottleStruct*> &AllBottles()const;
     const QList<TubeStruct*> &AllTubes()const;
-    QList<TubeStruct*> ValidTubes(JobType t=J_PrepareMate)const;
+    QList<TubeStruct*> ValidTubes(ActionType t=Group_PrepareSolidMate)const;
     QList<BottleStruct*> ValidBottls()const;
     TubeStruct *ValidTube(int index)const;
 
-    bool FeedSolidMaterial(QList<QPair<QString, float>> &mates, int numb, int nTub=-1, bool bFix=true, int ch=0);
-    bool FixTube(uint16_t nTb, uint16_t ch);
-    bool StoveTubeBack(int ch, int nBack=-1);
+    bool FeedSolidMaterial(QList<QPair<QString, float>> &mates, int numb, int nTub, int16_t seq=-1);
+    bool FixTube(uint16_t nTb, uint16_t ch, int16_t seq = -1);
+    bool StoveTubeBack(int ch, int nBack=-1, int16_t seq = -1);
+    void DoAction(ActionAbstrctItem *act);
     void CancleFeed(BottleStruct* bt);
     QString GetCurPortName()const;
     int GetCurPortBaut()const;
@@ -66,7 +60,7 @@ public:
     TubeStruct *GetInSotveTube(uint8_t ch)const;
     TubeStruct *getTube(int idx)const;
 	const FeederParam *GetfeedParamsByBottleNum(int numb) const;
-	bool CanAddWork(JobType t, int numTub, bool bProg = false)const;
+	bool CanAddWork(ActionType t, int numTub, bool bProg = false)const;
     void ReuseBottle(int num);
     void ReuseTube(int num);
 public:
@@ -109,7 +103,7 @@ private:
     void genBackActions(const WorkItem &itemb, bool bDo = true);///回收反应管
     void checkActions(bool bDo=true);
 	bool addWorkItem(const struct WorkItem &item);
-	QList<JobType> tubeJobs(int numTub)const;
+	QList<ActionType> tubeJobs(int numTub)const;
 
     StoreStruct* getStore(const QString& id)const;
 	StoreStruct* getStore(uint16_t num)const;
@@ -162,10 +156,10 @@ private:
     QList<BottleStruct*>    m_allBottle;
     QList<TubeStruct*>      m_allTube;
     QStringList             m_canFeedMatesNames;
-    QList<FeederParam>		        m_feedParams;
-    QList<int>                      m_jobs;
-    QList<ActionItem>               m_actions;     ///工作列表
-    QString                         m_portName;
+    QList<FeederParam>		m_feedParams;
+    QList<int64_t>          m_jobs;
+    QList<ActionItem>       m_actions;     ///工作列表
+    QString                 m_portName;
 };
 
 #endif // __FeederDecoder

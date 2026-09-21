@@ -348,10 +348,10 @@
     <ClCompile Include="..\HS_1103\materialFeeder\subMateUi\DlgMaterialModify.cpp">
       <Filter>materialFeeder\subMateUi</Filter>
     </ClCompile>
-    <ClCompile Include="..\HS_1103\strDecoder\portthread.cpp">
+    <ClCompile Include="..\HS_1103\DevContrlMgr\portthread.cpp">
       <Filter>strdecoder</Filter>
     </ClCompile>
-    <ClCompile Include="..\HS_1103\strDecoder\strdecoder.cpp">
+    <ClCompile Include="..\HS_1103\DevContrlMgr\strdecoder.cpp">
       <Filter>strdecoder</Filter>
     </ClCompile>
     <ClCompile Include="..\HS_1103\materialFeeder\subMateUi\MaterialsSelect.cpp">
@@ -743,10 +743,10 @@
     <CustomBuild Include="..\HS_1103\materialFeeder\subMateUi\DlgMaterialModify.h">
       <Filter>materialFeeder\subMateUi</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\HS_1103\strDecoder\portthread.h">
+    <CustomBuild Include="..\HS_1103\DevContrlMgr\portthread.h">
       <Filter>strdecoder</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\HS_1103\strDecoder\strdecoder.h">
+    <CustomBuild Include="..\HS_1103\DevContrlMgr\strdecoder.h">
       <Filter>strdecoder</Filter>
     </CustomBuild>
     <CustomBuild Include="..\HS_1103\materialFeeder\subMateUi\MaterialsSelect.ui">

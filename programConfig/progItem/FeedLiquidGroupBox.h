@@ -12,9 +12,7 @@ public:
     explicit FeedLiquidGroupBox(QWidget *parent=nullptr);
     ~FeedLiquidGroupBox();
 protected:
-    QString _getOutString()const;
     void onValueChanged(double f);
-signals:
     void sig_Add(const QString &str);
 private:
     Ui::FeedLiquidGroupBox*  m_ui;

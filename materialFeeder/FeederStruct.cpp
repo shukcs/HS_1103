@@ -116,7 +116,7 @@ void FeederParam::getFeedNameAndWeight(QList<QPair<QString, float> > *ret) const
     }
 }
 
-void FeederParam::feederFinish(int type) const
+void FeederParam::feederFinish(ActionType type) const
 {
     auto &feeder = FeederMgr::Instance();
     if (auto tb = feeder.getTube(m_numbTube))
@@ -124,15 +124,15 @@ void FeederParam::feederFinish(int type) const
 		TubeStat st = T_Prepared;
 		switch (type)
 		{
-		case FeederMgr::J_StoveFixTube:
+		case Group_StoveFixTube:
 			st = T_Fixed; break;
-		case FeederMgr::J_StoveTubeBack:
+		case Group_StoveTubeBack:
 			st = T_Recyced; break;
 		default:
 			break;
 		}
         tb->setFlag(st);
-        if (auto bt = FeederMgr::J_PrepareMate==type ? getBottle() : nullptr)
+        if (auto bt = Group_PrepareSolidMate==type ? getBottle() : nullptr)
             bt->setFlag(B_Used);
     }
 }
@@ -412,10 +412,10 @@ void FeederRecover::RecoverFeedParam(QList<FeederParam> &feeds)
     }
 }
 
-void FeederRecover::AddJobs(const QList<int> &jobs)
+void FeederRecover::AddJobs(const QList<int64_t> &jobs)
 {
     auto itr = getItem(R_Jobs, 0);
-    auto len = jobs.size() * sizeof(int32_t) + 6;
+    auto len = jobs.size() * sizeof(int64_t) + 6;
     if (itr != m_items.end())
     {
         int diff = len - itr->_len;
@@ -439,7 +439,7 @@ void FeederRecover::AddJobs(const QList<int> &jobs)
     }
 }
 
-void FeederRecover::RecoverJobs(QList<int> &feeds)
+void FeederRecover::RecoverJobs(QList<int64_t> &feeds)
 {
     auto itr = getItem(R_Jobs, 0);
     if (itr != m_items.end())
@@ -447,9 +447,9 @@ void FeederRecover::RecoverJobs(QList<int> &feeds)
         feeds.clear();
         for (int i = 0; i < itr->_id; ++i)
         {
-            auto offset = itr->_offset + 6 + i * sizeof(int32_t);
-            int32_t t = 0;
-            memcpy(&t, m_buff + offset, sizeof(int32_t));
+            auto offset = itr->_offset + 6 + i * sizeof(int64_t);
+            int64_t t = 0;
+            memcpy(&t, m_buff + offset, sizeof(int64_t));
             feeds << t;
         }
     }
@@ -607,7 +607,7 @@ uint16_t FeederRecover::writeData(const FeederParam *pr, const RecoverItem &r)
     return 0;
 }
 
-uint16_t FeederRecover::writeData(const QList<int> &jobs, const RecoverItem &r)
+uint16_t FeederRecover::writeData(const QList<int64_t> &jobs, const RecoverItem &r)
 {
     auto sz = jobs.size();
     if (sz==r._id && m_buff && m_size >= r._len + r._offset && r._len >= 6 + sz * 4)
@@ -615,8 +615,8 @@ uint16_t FeederRecover::writeData(const QList<int> &jobs, const RecoverItem &r)
         auto offset = r._offset + writeBase(r);
         for (auto itr : jobs)
         {
-            memcpy(m_buff + offset, &itr, sizeof(int32_t));
-            offset += sizeof(int32_t);
+            memcpy(m_buff + offset, &itr, sizeof(int64_t));
+            offset += sizeof(int64_t);
         }
         return r._len;
     }

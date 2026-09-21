@@ -253,7 +253,10 @@ void MaterialStore::initUi()
                 if (dlg.GetFeedParam(&mates) && !mates.isEmpty())
                 {
                     auto idx = dlg.GetChannel();
-                    FeederMgr::Instance().FeedSolidMaterial(mates, (int)bt->m_numb, dlg.GetTubeNumb(), idx < 0 ? false : true, idx);
+                    auto nTube = dlg.GetTubeNumb();
+                    FeederMgr::Instance().FeedSolidMaterial(mates, bt->m_numb, nTube);
+                    if (idx >= 0)
+                        FeederMgr::Instance().FixTube(nTube, idx);
                     m_ui->listWidget->update();
                 }
             }

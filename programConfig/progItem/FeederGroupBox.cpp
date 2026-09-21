@@ -2,7 +2,7 @@
 #include "common/mymessageBox.h"
 #include "strDecoder/strdecoder.h"
 #include "materialFeeder/FeederMgr.h"
-#include "programConfig/ProgmaMgr.h"
+#include "materialFeeder/FeederActionItem.h"
 
 #include "Ui_FeederGroupBox.h"
 #pragma execution_character_set("utf-8")
@@ -31,13 +31,13 @@ void FeederGroupBox::initUi()
     connect(m_ui->widget, &MaterialsSelect::avalidChanged, this, [=](bool b) { m_ui->pushButton->setEnabled(b); });
     for (auto itr : FeederMgr::Instance().AllTubes())
     {
-        if (FeederMgr::Instance().CanAddWork(FeederMgr::J_StoveFixTube, itr->getNumber(), true))
+        if (FeederMgr::Instance().CanAddWork(Group_StoveFixTube, itr->getNumber(), true))
             m_ui->cmb_tube->addItem(tr("反应管%1").arg(itr->getNumber()+1));
     }
 
     connect(&FeederMgr::Instance(), &FeederMgr::tubeChanged, this, [=](const TubeStruct *tb) {
         auto str = tr("反应管%1").arg(tb->getNumber()+1);
-        if (FeederMgr::Instance().CanAddWork(FeederMgr::J_StoveFixTube, tb->getNumber(), true))
+        if (FeederMgr::Instance().CanAddWork(Group_StoveFixTube, tb->getNumber(), true))
         {
             for (int i = 0; i < m_ui->cmb_tube->count(); ++i)
             {
@@ -75,18 +75,21 @@ void FeederGroupBox::onAdd()
     m_ui->widget->GetFeedMaterials(&feeds);
     auto tmpB = m_ui->widget->GetSelectedBottleNum();
     auto tmpT = m_ui->widget->GetTubeNumber();
-    ProgmaMgr::Instance().AddSolidPrepare(tmpB, tmpT, feeds);
+    if (auto act = new SolidPrepareItem(tmpB, tmpT, feeds))
+        act->AddToEdit();
 }
 
 void FeederGroupBox::onTubeBack()
 {
     auto ch = m_ui->comboBox->currentIndex();
-    ProgmaMgr::Instance().AddTubeRecycle(ch, 1);
+    if (auto act = new TubeBackItem(ch, 1))
+        act->AddToEdit();
 }
 
 void FeederGroupBox::onFix()
 {
     auto ch = m_ui->cmb_fix->currentIndex();
     auto nTube = m_ui->cmb_tube->currentIndex();
-    ProgmaMgr::Instance().AddFixTube(ch, nTube);
+    if (auto act = new FixTubeItem(ch, nTube))
+        act->AddToEdit();
 }

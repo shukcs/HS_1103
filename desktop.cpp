@@ -21,7 +21,7 @@ deskTop::deskTop(QWidget *parent) :
     setWindowTitle("双通道高压固定床反应器ADFD-2000");
     setWindowFlag(Qt::FramelessWindowHint);
 
-    decoder = new strDecoder(this, ui->state->port.name);   ///字符串转命令
+    decoder = new DevContrlMgr(this, ui->state->port.name);   ///字符串转命令
 
     ui->configBtn->setIcon(QIcon(":/image/set.png"));
     ui->configBtn->setIconSize(QSize(25, 25));
@@ -44,24 +44,24 @@ deskTop::deskTop(QWidget *parent) :
     m_mateSt = new MaterialStore;
     ui->mainUI->addWidget(m_mateSt);   // 隐藏界面
 
-    connect(manualOperation, &manualOp::cmdTorun, decoder, &strDecoder::strTocmd);
-    connect(deviceOperation, &deviceOp::cmdTorun, decoder, &strDecoder::strTocmd);
+    connect(manualOperation, &manualOp::cmdTorun, decoder, &DevContrlMgr::strTocmd);
+    connect(deviceOperation, &deviceOp::cmdTorun, decoder, &DevContrlMgr::strTocmd);
     connect(deviceOperation, SIGNAL(deviceOp::cmdTorun(const QString&)), manualOperation, SLOT(strToState(const QString&)));
-    connect(projectmode, &projectMode::cmdTorun, decoder, &strDecoder::strTocmd);
+    connect(projectmode, &projectMode::cmdTorun, decoder, &DevContrlMgr::strTocmd);
 
     collectorOperation = new collectorOp;     //  收集器界面
     ui->mainUI->addWidget(collectorOperation);
-    connect(collectorOperation, &collectorOp::cmdTorun, decoder, &strDecoder::strTocmd);
+    connect(collectorOperation, &collectorOp::cmdTorun, decoder, &DevContrlMgr::strTocmd);
 
     //connect(decoder,SIGNAL(setConnectionState(bool)),deviceOperation,SLOT(update_user_set(bool)));
-    connect(decoder, &strDecoder::setConnectionState, projectmode, &projectMode::update_user_set);
+    connect(decoder, &DevContrlMgr::setConnectionState, projectmode, &projectMode::update_user_set);
     connect(decoder, SIGNAL(setConnectionState(bool)), ui->state, SLOT(setConnectionState(bool)));
     connect(decoder->getThread(), &portThread::ReceiceDone, this, &deskTop::updateInfo);
     connect(decoder->getThread(), &portThread::heatAndKeepChanged, manualOperation->getDiagram(), &diagram::updateHeatAndKeep);
     connect(decoder->getThread(), &portThread::triEleValveStat, manualOperation->getDiagram(), &diagram::updateTriEleValveStat);
     connect(decoder,SIGNAL(startRecord(bool)),graph,SLOT(startRecord(bool)));
     connect(decoder,SIGNAL(autoSavedata()),graph,SLOT(autoSavedata()));
-    connect(ui->state, &stateBar::portChanged, decoder, &strDecoder::savePortName);
+    connect(ui->state, &stateBar::portChanged, decoder, &DevContrlMgr::savePortName);
     connect(ui->state,SIGNAL(sampleTimeChanged(int)),graph,SLOT(setTimer(int)));
     connect(ui->state,SIGNAL(sampleTimeChanged(int)),decoder,SLOT(setTimer(int)));
 
@@ -72,8 +72,8 @@ deskTop::deskTop(QWidget *parent) :
     connect(ui->state, &stateBar::storeBtn_clicked, this, &deskTop::StoreShow);
     connect(ui->tool,SIGNAL(logoBtn_clicked()),deviceOperation,SLOT(tempAdjustEnable()));
 
-    connect(ui->autoRunStep, &ProgramList::readyTorun, decoder, &strDecoder::strTocmd);
-    connect(decoder, &strDecoder::jobChaned, ui->autoRunStep, &ProgramList::OnStoveTubeChanged);
+    connect(ui->autoRunStep, &ProgramList::readyTorun, decoder, &DevContrlMgr::strTocmd);
+    connect(decoder, &DevContrlMgr::jobChaned, ui->autoRunStep, &ProgramList::OnActionDone);
     connect(ui->autoRunStep, &ProgramList::readyTorun_toColl, collectorOperation, &collectorOp::updateCmd);
     connect(ui->autoRunStep, &ProgramList::sendRunTime, this, &deskTop::updateRunTime);
     connect(ui->autoRunStep,SIGNAL(readyTorun(const QString&)),manualOperation,SLOT(strToState(const QString&)));

@@ -1,7 +1,7 @@
 ﻿#ifndef __FEEDERSTRUCT_H__
 #define __FEEDERSTRUCT_H__
 #include <QList>
-#include <QString>
+#include "common/ActionItem.h"
 
 enum StoreStat {
     S_None,			///无料仓
@@ -120,7 +120,7 @@ public:
     TubeStruct *getTube()const;
     const QList<FeedItem> &feedMaterial()const;
     void getFeedNameAndWeight(QList<QPair<QString, float> > *ret)const;
-    void feederFinish(int type)const;
+    void feederFinish(ActionType type)const;
 private:
     QList<FeedItem>m_feedMaterials;
     uint16_t    m_numbBottle;
@@ -163,8 +163,8 @@ public:
     void AddFeedParam(const FeederParam &pr);
     void Removed(const FeederParam &pr);
     void RecoverFeedParam(QList<FeederParam> &feeds);
-    void AddJobs(const QList<int> &jobs);
-    void RecoverJobs(QList<int> &feeds);
+    void AddJobs(const QList<int64_t> &jobs);
+    void RecoverJobs(QList<int64_t> &feeds);
     uint16_t GetRemainActions()const;
 
     void Save();
@@ -179,7 +179,7 @@ private:
     uint16_t writeData(const TubeStruct *tb, const RecoverItem &r);
     uint16_t writeData(const StoreStruct *st, const RecoverItem &r);
     uint16_t writeData(const FeederParam *pr, const RecoverItem &r);
-    uint16_t writeData(const QList<int> &jobs, const RecoverItem &r);
+    uint16_t writeData(const QList<int64_t> &jobs, const RecoverItem &r);
     uint16_t writeBase(const RecoverItem &r);
 private:
     QFile *m_mapFile; //内存映射文件

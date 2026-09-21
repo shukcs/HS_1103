@@ -152,23 +152,23 @@ StepMotorStat& StepMotorStat::operator=(const StepMotorStat& m)
 
 
 /*
-*   strDecoder
+*   DevContrlMgr
 */
-static strDecoder *sStrDecoder = nullptr;
-strDecoder::strDecoder(QObject *parent, const QString &name) : QObject(parent)
+static DevContrlMgr *sStrDecoder = nullptr;
+DevContrlMgr::DevContrlMgr(QObject *parent, const QString &name) : QObject(parent)
 , m_timer(new QTimer(this))
 {
-    thread = new portThread;
+    m_thread = new portThread;
     portName = name;
     sleepTime = 500;  // 默认0.5s采集一个点
-    connect(thread, &portThread::port_connected, this, &strDecoder::app_connected);
-    connect(thread, &portThread::port_disconnected, this, &strDecoder::app_disconnected);
-    connect(thread, &portThread::ackRecved, this, &strDecoder::onAckRecved);
-    connect(m_timer, &QTimer::timeout, this, &strDecoder::timer_out);
-    connect(&FeederMgr::Instance(), &FeederMgr::actionRun, this, &strDecoder::onActionRun);
-    connect(&FeederMgr::Instance(), &FeederMgr::feedJobFinished, this, &strDecoder::jobChaned);
-    connect(this, &strDecoder::stepMotorStatChanged, &FeederMgr::Instance(), &FeederMgr::OnStepMotor);
-    connect(this, &strDecoder::servoMotorStatChanged, &FeederMgr::Instance(), &FeederMgr::OnServoMotor);
+    connect(m_thread, &portThread::port_connected, this, &DevContrlMgr::app_connected);
+    connect(m_thread, &portThread::port_disconnected, this, &DevContrlMgr::app_disconnected);
+    connect(m_thread, &portThread::ackRecved, this, &DevContrlMgr::onAckRecved);
+    connect(m_timer, &QTimer::timeout, this, &DevContrlMgr::timer_out);
+    connect(&FeederMgr::Instance(), &FeederMgr::actionRun, this, &DevContrlMgr::onActionRun);
+    connect(&FeederMgr::Instance(), &FeederMgr::feedJobFinished, this, &DevContrlMgr::jobChaned);
+    connect(this, &DevContrlMgr::stepMotorStatChanged, &FeederMgr::Instance(), &FeederMgr::OnStepMotor);
+    connect(this, &DevContrlMgr::servoMotorStatChanged, &FeederMgr::Instance(), &FeederMgr::OnServoMotor);
     m_stepMotorStat[0].SetType(CtrlType::Motor_Pipelet);
     m_stepMotorStat[1].SetType(CtrlType::Motor_Pipelet);
     m_stepMotorStat[2].SetType(CtrlType::Motor_Tube);
@@ -190,12 +190,12 @@ strDecoder::strDecoder(QObject *parent, const QString &name) : QObject(parent)
     sStrDecoder = this;
 }
 
-strDecoder::~strDecoder()
+DevContrlMgr::~DevContrlMgr()
 {
     m_timer->deleteLater();
 }
 
-QByteArray strDecoder::floatToBigEndian(float value) {
+QByteArray DevContrlMgr::floatToBigEndian(float value) {
     QByteArray bytes;
     QDataStream stream(&bytes, QIODevice::WriteOnly);
 
@@ -207,7 +207,7 @@ QByteArray strDecoder::floatToBigEndian(float value) {
     return bytes;
 }
 
-float strDecoder::bigEndianToFloat(const QByteArray& bytes) {
+float DevContrlMgr::bigEndianToFloat(const QByteArray& bytes) {
     if (bytes.size() != 4) return 0.0f;
 
     QDataStream stream(bytes);
@@ -219,18 +219,18 @@ float strDecoder::bigEndianToFloat(const QByteArray& bytes) {
     return value;
 }
 
-strDecoder* strDecoder::Instance()
+DevContrlMgr* DevContrlMgr::Instance()
 {
     return sStrDecoder;
 }
 
-bool strDecoder::com_open(bool state, const QString &name)
+bool DevContrlMgr::com_open(bool state, const QString &name)
 {
     if(state)
     {
-        if(thread->port_setup(name))
+        if(m_thread->port_setup(name))
         {
-            thread->port_open(true);
+            m_thread->port_open(true);
             return true;
         }
         else {
@@ -239,24 +239,24 @@ bool strDecoder::com_open(bool state, const QString &name)
     }
     else
     {
-       thread->port_open(false);
+       m_thread->port_open(false);
        return false;
     }
 }
 
 
-void strDecoder::app_connected()
+void DevContrlMgr::app_connected()
 {
      emit setConnectionState(true);
 }
 
-void strDecoder::app_disconnected()
+void DevContrlMgr::app_disconnected()
 {
     emit setConnectionState(false);
     com_open(true,portName);  //  打开指定端口
 }
 
-void strDecoder::strTocmd(const QString &cmd)
+void DevContrlMgr::strTocmd(const QString &cmd)
 {
    if(cmd.isEmpty())
       return;
@@ -481,14 +481,14 @@ void strDecoder::strTocmd(const QString &cmd)
                     auto bts = FeederMgr::Instance().ValidBottls();
                     if (bts.isEmpty())
                     {
-                        emit jobChaned(FeederMgr::J_PrepareMate, 0);
+                        emit jobChaned(Group_PrepareSolidMate, 0);
                         return;
                     }
                     bottle = bts.first()->m_numb;
                 }
 				auto nTube = strlist.at(strlist.size()-1).toInt() - 1;
                 if (!FeederMgr::Instance().FeedSolidMaterial(feeds, bottle, nTube, false))
-                    emit jobChaned(FeederMgr::J_PrepareMate, 0);
+                    emit jobChaned(Group_PrepareSolidMate, 0);
             }
 			else if (!m_cmdlist.isEmpty())
 			{
@@ -502,14 +502,14 @@ void strDecoder::strTocmd(const QString &cmd)
 		auto ch = strlist.at(1).toInt() - 1;
 		auto tube = strlist.at(3).toInt() - 1;
 		if (!FeederMgr::Instance().FixTube(ch, tube))
-			emit jobChaned(FeederMgr::J_StoveFixTube, ch);
+			emit jobChaned(Group_StoveFixTube, ch);
 	}
 	else if (cmd.startsWith(tr("收回反应管")))
 	{
 		strlist = cmd.split(" ", QString::SkipEmptyParts);  //  以空格符分割
 		auto ch = strlist.at(2).toInt() - 1;
 		if (!FeederMgr::Instance().StoveTubeBack(ch))
-			emit jobChaned(FeederMgr::J_StoveTubeBack, ch);
+			emit jobChaned(Group_StoveTubeBack, ch);
 	}
 	else if (cmd.startsWith(tr("吹扫管道")))
 	{
@@ -525,7 +525,7 @@ void strDecoder::strTocmd(const QString &cmd)
         swCtrl_flow(ch, true);
 		QTimer::singleShot(time * 1000, this, [=] {
 			swCtrl(ch, false); 
-			emit jobChaned(Job_AirClear, 0);
+			emit jobChaned(Group_AirClear, 0);
 		});
 	}
 	else if (cmd.startsWith(tr("进气")))
@@ -543,13 +543,13 @@ void strDecoder::strTocmd(const QString &cmd)
         presCtrl_Range(ch, prsIn);
         swCtrl_flow(ch, true);
 		valve_set_pres(ch, prsOut);
-		emit jobChaned(Job_AirIn, 0);
+		emit jobChaned(Group_AirIn, 0);
 	}
 	if (!m_cmdlist.isEmpty() && cmd == m_cmdlist.first())
 		m_cmdlist.removeFirst();
 }
 
-void strDecoder::cmdSend()
+void DevContrlMgr::cmdSend()
 {
     if(m_cmdlist.isEmpty())  //  如果队列全部发送完了，则发送查询命令
     {
@@ -559,16 +559,16 @@ void strDecoder::cmdSend()
     else   //  队列存在未发送完成的命令
     {
         auto arr = m_cmdlist.at(0);
-        thread->port_write((uint8_t*)arr.data(), arr.length());
+        m_thread->port_write((uint8_t*)arr.data(), arr.length());
     }
 }
 
-portThread *strDecoder::getThread() const
+portThread *DevContrlMgr::getThread() const
 {
-    return thread;
+    return m_thread;
 }
 
-const StepMotorStat* strDecoder::GetStepMotorStatOf(int idx)const
+const StepMotorStat* DevContrlMgr::GetStepMotorStatOf(int idx)const
 {
     if (idx < 6)
         return m_stepMotorStat + idx;
@@ -576,22 +576,22 @@ const StepMotorStat* strDecoder::GetStepMotorStatOf(int idx)const
     return nullptr;
 }
 
-const ServoMotorStat* strDecoder::GetServoMotorStat()const
+const ServoMotorStat* DevContrlMgr::GetServoMotorStat()const
 {
     return &m_servoMotorStat;
 }
 
-void strDecoder::savePortName(QString name)
+void DevContrlMgr::savePortName(QString name)
 {
     portName = name;
 }
 
-void strDecoder::timer_out()
+void DevContrlMgr::timer_out()
 {
     cmdSend();
 }
 
-void strDecoder::setTimer(int time)
+void DevContrlMgr::setTimer(int time)
 {
     sleepTime = time;
     if(sleepTime > 500)
@@ -633,7 +633,7 @@ static int16_t checkPcMsgAndLength(const uint8_t* str, uint16_t* len)
     return -1;
 }
 
-void strDecoder::board_msg_request()
+void DevContrlMgr::board_msg_request()
 {
     uint8_t len = 5;
     uint8_t buff[9] = { 0x31,0,1,0x80,0,0,0 };
@@ -655,10 +655,10 @@ void strDecoder::board_msg_request()
     auto crc = ModubosProtocol::ModbusCrc(buff, len);
     buff[len] = (crc >> 8) & 0xFF;
     buff[len+1] = crc & 0xFF;
-    thread->port_write(buff, len + 2);
+    m_thread->port_write(buff, len + 2);
 }
 
-void strDecoder::swCtrl(int id, bool state)
+void DevContrlMgr::swCtrl(int id, bool state)
 {
     uint8_t buff[9] = {0x31,7,0x01,0x81,0x00,0x00,0x00};
     buff[4] = id;
@@ -675,7 +675,7 @@ void strDecoder::swCtrl(int id, bool state)
     appendToQue(buff, sizeof(buff));
 }
 
-void strDecoder::ctrlStepMotor(CtrlType::StepMotorType tp, uint8_t ch, uint8_t dir, uint16_t rpm)
+void DevContrlMgr::ctrlStepMotor(CtrlType::StepMotorType tp, uint8_t ch, uint8_t dir, uint16_t rpm)
 {
     uint8_t cmd = 0x93;
     int idx = 0;
@@ -700,14 +700,14 @@ void strDecoder::ctrlStepMotor(CtrlType::StepMotorType tp, uint8_t ch, uint8_t d
     appendToQue(buff, sizeof(buff));
 }
 
-void strDecoder::ctrlServoMotor(uint8_t pos)
+void DevContrlMgr::ctrlServoMotor(uint8_t pos)
 {
     uint8_t buff[7] = { 0x31, 5, 1, 0x96, pos };
     appendToQue(buff, sizeof(buff));
     m_servoMotorStat.Fresh();
 }
 
-void strDecoder::programStepMotor(const QStringList& strs, CtrlType::StepMotorType tp)
+void DevContrlMgr::programStepMotor(const QStringList& strs, CtrlType::StepMotorType tp)
 {
     uint8_t ch=0;
     uint8_t dir = 0;
@@ -755,7 +755,7 @@ void strDecoder::programStepMotor(const QStringList& strs, CtrlType::StepMotorTy
     ctrlStepMotor(tp, ch, dir);
 }
 
-void strDecoder::programMotorRobot(const QStringList& strs)
+void DevContrlMgr::programMotorRobot(const QStringList& strs)
 {
     for (auto itr = strs.begin(); itr != strs.end(); )
     {
@@ -775,7 +775,7 @@ void strDecoder::programMotorRobot(const QStringList& strs)
     }
 }
 
-void strDecoder::programHeatMixture(const QStringList& strs, int tp)
+void DevContrlMgr::programHeatMixture(const QStringList& strs, int tp)
 {
     uint8_t buff[9] = { 0x31, 7, 1, tp==HeatGroupBox::Dev_heat?0x97:0x98, 0, 0, 0};
     for (auto itr = strs.begin(); itr != strs.end(); )
@@ -818,7 +818,7 @@ void strDecoder::programHeatMixture(const QStringList& strs, int tp)
     appendToQue(buff, sizeof(buff));
 }
 
-void strDecoder::programValve3Ch(const QString& cmd)
+void DevContrlMgr::programValve3Ch(const QString& cmd)
 {
     uint8_t buff[8] = { 0x31, 7, 1, 0x99, 0, 0};
     auto strs = cmd.split(" ", QString::SkipEmptyParts);
@@ -856,7 +856,7 @@ void strDecoder::programValve3Ch(const QString& cmd)
     appendToQue(buff, sizeof(buff));
 }
 
-void strDecoder::swCtrl_flow(int id, bool state)
+void DevContrlMgr::swCtrl_flow(int id, bool state)
 {
     uint8_t buff[9] = {0x31,7,0x01,0x90,0x00,0x00,0x00};
     buff[4] = id;
@@ -873,7 +873,7 @@ void strDecoder::swCtrl_flow(int id, bool state)
     appendToQue(buff, sizeof(buff));
 }
 
-void strDecoder::flowCtrl(int id, double flow)
+void DevContrlMgr::flowCtrl(int id, double flow)
 {
     uint16_t temp = flow * 10;
     uint8_t buff[9] = {0x31,7,0x01,0x82,0x01,0x00,0x00};
@@ -885,7 +885,7 @@ void strDecoder::flowCtrl(int id, double flow)
     appendToQue(buff, sizeof(buff));
 }
 
-void strDecoder::flowCtrl_Range(int id, double flow)
+void DevContrlMgr::flowCtrl_Range(int id, double flow)
 {
     uint16_t temp = flow * 10;
     uint8_t buff[9] = {0x31,7,0x01,0x8C,0x01,0x00,0x00};
@@ -897,7 +897,7 @@ void strDecoder::flowCtrl_Range(int id, double flow)
     appendToQue(buff, sizeof(buff));
 }
 
-void strDecoder::liqudiCtrl_Range(int id, double flow)
+void DevContrlMgr::liqudiCtrl_Range(int id, double flow)
 {
     uint16_t temp = flow * 10;
     uint8_t buff[9] = {0x31,7,0x01,0x8E,0x01,0x00,0x00};
@@ -909,7 +909,7 @@ void strDecoder::liqudiCtrl_Range(int id, double flow)
     appendToQue(buff, sizeof(buff));
 }
 
-void strDecoder::presCtrl_Range(int id, double flow)
+void DevContrlMgr::presCtrl_Range(int id, double flow)
 {
     uint16_t temp = flow * 10;
     uint8_t buff[9] = {0x31,7,0x01,0x8D,0x01,0x00,0x00};
@@ -921,7 +921,7 @@ void strDecoder::presCtrl_Range(int id, double flow)
     appendToQue(buff, sizeof(buff));
 }
 
-void strDecoder::programTemp(QString cmd)
+void DevContrlMgr::programTemp(QString cmd)
 {
     QStringList strlist = cmd.split(" ");
     uint8_t buff[47] = {0x31,45,0x01,0x83,0x01,0x00,0x00};
@@ -937,7 +937,7 @@ void strDecoder::programTemp(QString cmd)
     appendToQue(buff, sizeof(buff));
 }
 
-void strDecoder::tempStop(int id)
+void DevContrlMgr::tempStop(int id)
 {
     uint8_t buff[9] = {0x31,7,0x01,0x83,0x01,0x00,0x00};
     buff[4] = id;
@@ -947,7 +947,7 @@ void strDecoder::tempStop(int id)
     appendToQue(buff, sizeof(buff));
 }
 
-void strDecoder::pointTemp(int id, int temp)
+void DevContrlMgr::pointTemp(int id, int temp)
 {
     uint8_t buff[9] = {0x31,7,0x01,0x83,0x01,0x00,0x00};
     buff[4] = id;
@@ -957,7 +957,7 @@ void strDecoder::pointTemp(int id, int temp)
     appendToQue(buff, sizeof(buff));
 }
 
-void strDecoder::sloPeTemp(int id, double temp1, int time, double temp2)
+void DevContrlMgr::sloPeTemp(int id, double temp1, int time, double temp2)
 {
     uint16_t val = temp1 * 10;
     uint8_t buff[13] = {0x31,11,0x01,0x83,0x01,0x00,0x00};
@@ -978,7 +978,7 @@ void strDecoder::sloPeTemp(int id, double temp1, int time, double temp2)
     appendToQue(buff, sizeof(buff));
 }
 
-void strDecoder::tempAdjust(int id,double temp)
+void DevContrlMgr::tempAdjust(int id,double temp)
 {
     uint16_t val = temp * 10;
     uint8_t buff[9] = {0x31,7,0x01,0x84,0x01,0x00,0x00};
@@ -989,7 +989,7 @@ void strDecoder::tempAdjust(int id,double temp)
     appendToQue(buff, sizeof(buff));
 }
 
-void strDecoder::stepTemp(int id, int index, int temp)
+void DevContrlMgr::stepTemp(int id, int index, int temp)
 {
     uint8_t buff[10] = {0x31,8,0x01,0x87,0x01,0x00,0x00};
     buff[4] = id;
@@ -1000,7 +1000,7 @@ void strDecoder::stepTemp(int id, int index, int temp)
     appendToQue(buff, sizeof(buff));
 }
 
-void strDecoder::stepTime(int id, int index, int time)
+void DevContrlMgr::stepTime(int id, int index, int time)
 {
     uint8_t buff[10] = {0x31,8,0x01,0x88,0x01,0x00,0x00};
     buff[4] = id;
@@ -1011,7 +1011,7 @@ void strDecoder::stepTime(int id, int index, int time)
     appendToQue(buff, sizeof(buff));
 }
 
-void strDecoder::currentCtrl(int current)
+void DevContrlMgr::currentCtrl(int current)
 {
     current = current * 10;
     uint8_t buff[9] = {0x31,7,0x01,0x85,0x01,0x00,0x00};
@@ -1022,7 +1022,7 @@ void strDecoder::currentCtrl(int current)
     appendToQue(buff, sizeof(buff));
 }
 
-void strDecoder::SepuZhipuCtrl(int id)
+void DevContrlMgr::SepuZhipuCtrl(int id)
 {
     uint8_t buff[9] = {0x31,7,0x01,0x85,0x01,0x00,0x00};
     buff[4] = id;
@@ -1032,7 +1032,7 @@ void strDecoder::SepuZhipuCtrl(int id)
     appendToQue(buff, sizeof(buff));
 }
 
-void strDecoder::pumpCtrl(uint8_t id, bool state)
+void DevContrlMgr::pumpCtrl(uint8_t id, bool state)
 {
     uint8_t buff[9] = {0x31,7,0x01,0x85,0x01,0x00,0x00};
     buff[4] = id;
@@ -1049,7 +1049,7 @@ void strDecoder::pumpCtrl(uint8_t id, bool state)
     appendToQue(buff, sizeof(buff));
 }
 
-void strDecoder::pumpSpeeed(uint8_t id, double speed)
+void DevContrlMgr::pumpSpeeed(uint8_t id, double speed)
 {
     uint16_t val = static_cast<uint16_t>(qRound(speed * 100.0));
     uint8_t buff[9] = {0x31,7,0x01,0x85,0x01,0x00,0x00};
@@ -1060,7 +1060,7 @@ void strDecoder::pumpSpeeed(uint8_t id, double speed)
     appendToQue(buff, sizeof(buff));
 }
 
-void strDecoder::pumpClean(uint8_t id, uint8_t state)
+void DevContrlMgr::pumpClean(uint8_t id, uint8_t state)
 {
     uint8_t buff[9] = {0x31,7,0x01,0x86,0x01,0x00,0x00};
     buff[4] = id;
@@ -1069,7 +1069,7 @@ void strDecoder::pumpClean(uint8_t id, uint8_t state)
     appendToQue(buff, sizeof(buff));
 }
 
-void strDecoder::pumpCali(uint8_t id, double cali)
+void DevContrlMgr::pumpCali(uint8_t id, double cali)
 {
     uint16_t val = cali * 1000;
     uint8_t buff[9] = {0x31,7,0x01,0x8F,0x01,0x00,0x00};
@@ -1080,7 +1080,7 @@ void strDecoder::pumpCali(uint8_t id, double cali)
     appendToQue(buff, sizeof(buff));
 }
 
-void strDecoder::valve_set_pres(uint8_t id, float pres)
+void DevContrlMgr::valve_set_pres(uint8_t id, float pres)
 {
     uint16_t val = pres * 100;
     uint8_t buff[9] = {0x31,7,0x01,0x89,0x01,0x00,0x00};
@@ -1091,7 +1091,7 @@ void strDecoder::valve_set_pres(uint8_t id, float pres)
     appendToQue(buff, sizeof(buff));
 }
 
-void strDecoder::valve_set_mode(uint8_t id, uint8_t mode)
+void DevContrlMgr::valve_set_mode(uint8_t id, uint8_t mode)
 {
     uint8_t buff[9] = {0x31,7,0x01,0x8A,0x01,0x00,0x00};
     buff[4] = id;
@@ -1100,7 +1100,7 @@ void strDecoder::valve_set_mode(uint8_t id, uint8_t mode)
     appendToQue(buff, sizeof(buff));
 }
 
-void strDecoder::valve_set_manual_state(uint8_t id, uint8_t mode)
+void DevContrlMgr::valve_set_manual_state(uint8_t id, uint8_t mode)
 {
     uint8_t buff[9] = {0x31,7,0x01,0x8B,0x01,0x00,0x00};
     buff[4] = id;
@@ -1108,7 +1108,7 @@ void strDecoder::valve_set_manual_state(uint8_t id, uint8_t mode)
     appendToQue(buff, sizeof(buff));
 }
 
-void strDecoder::collector_conn(QString cmd)
+void DevContrlMgr::collector_conn(QString cmd)
 {
     QStringList strlist = cmd.split(" ");
     uint16_t tmp;
@@ -1138,7 +1138,7 @@ void strDecoder::collector_conn(QString cmd)
     appendToQue(buff, sizeof(buff));
 }
 
-void strDecoder::appendToQue(const uint8_t* cmd, uint32_t len)
+void DevContrlMgr::appendToQue(const uint8_t* cmd, uint32_t len)
 {
     QByteArray arr((const char*)cmd, len);
     auto crc = ModubosProtocol::ModbusCrc(cmd, len - 2);
@@ -1147,7 +1147,7 @@ void strDecoder::appendToQue(const uint8_t* cmd, uint32_t len)
     m_cmdlist << arr;
 }
 
-void strDecoder::onAckRecved(const QByteArray& arr)
+void DevContrlMgr::onAckRecved(const QByteArray& arr)
 {
     if ((uint8_t)arr.at(2) == 0x81)
     {
@@ -1164,7 +1164,7 @@ void strDecoder::onAckRecved(const QByteArray& arr)
     cmdSend();
 }
 
-void strDecoder::prcsMotor(const QByteArray &msg)
+void DevContrlMgr::prcsMotor(const QByteArray &msg)
 {
     if (msg.at(3) != 11 || msg.size() != 13)
         return;
@@ -1186,7 +1186,7 @@ void strDecoder::prcsMotor(const QByteArray &msg)
     }
 }
 
-void strDecoder::onActionRun(const ActionItem *act)
+void DevContrlMgr::onActionRun(const ActionItem *act)
 {
     if (Act_Servo == act->getType())
         ctrlServoMotor(act->servoPos);

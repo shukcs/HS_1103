@@ -41,7 +41,7 @@ public slots:
     void runTimer_slot(void);
     void clear_sub_list();
     void obj_clicked(int index);
-    void OnStoveTubeChanged(uint16_t type, uint16_t idx);
+    void OnActionDone(uint16_t type, int16_t idx);
 protected:
     void runTitle();
 	void initList();

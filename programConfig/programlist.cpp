@@ -329,7 +329,7 @@ void ProgramList::obj_clicked(int index)
 	}
 }
 
-void ProgramList::OnStoveTubeChanged(uint16_t type, uint16_t idx)
+void ProgramList::OnActionDone(uint16_t type, int16_t idx)
 {
     if (programCnt < 0 || programCnt >= proList->count() || m_bReady)
         return;
@@ -339,21 +339,21 @@ void ProgramList::OnStoveTubeChanged(uint16_t type, uint16_t idx)
         return;
     switch (type)
     {
-    case FeederMgr::J_PrepareMate:
+    case Group_PrepareSolidMate:
         if (strlist.first()==tr("固体配料:") && strlist.at(1) == tr("称取"))
             m_bReady = true;
         break;
-    case FeederMgr::J_StoveFixTube:
+    case Group_StoveFixTube:
         if (strlist.at(0) == tr("装载炉膛:") && strlist.at(1).toInt()-1 == idx)
             m_bReady = true;
         break;
-    case FeederMgr::J_StoveTubeBack:
+    case Group_StoveTubeBack:
         if (strlist.at(0) == tr("回收反应管:") && strlist.at(1).toInt()-1 == idx)
 			m_bReady = true;
-	case strDecoder::Job_AirClear:
+	case Group_AirClear:
 		if (strlist.at(0) == tr("吹扫管道:"))
 			m_bReady = true;
-	case strDecoder::Job_AirIn:
+	case Group_AirIn:
 		if (strlist.at(0) == tr("进气:"))
 			m_bReady = true;
         break;

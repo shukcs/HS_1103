@@ -10,6 +10,7 @@
 #include "RobotMgr.h"
 #include "strDecoder/strdecoder.h"
 #include "common/ModubosProtocol.h"
+#include "FeederActionItem.h"
 #include "log/DeviceLog.h"
 #pragma execution_character_set("utf-8")
 
@@ -26,44 +27,44 @@ union DataU
 };
 
 struct WorkItem {
-    FeederMgr::JobType  type;
+    ActionType          type;
     uint8_t             nNumTube;
     uint8_t             chStove; ///炉膛位
-    int8_t              seq;   ///归还位 type=FeederMgr::J_StoveTubeBack有效
-	static WorkItem initFrom(FeederMgr::JobType t, uint8_t n, uint8_t idx = 0, int8_t seq=-1);
-	static WorkItem initFrom(int n);
-	int toInt()const;
+    int16_t             seq;   ///归还位 type=FeederMgr::J_StoveTubeBack有效
+	static WorkItem initFrom(ActionType t, uint8_t n, uint8_t idx = 0, int16_t seq=-1);
+	static WorkItem initFrom(int64_t n);
+	int64_t toInt()const;
     QString toString(bool bStart=true)const; ///bStart true: 开始的文字; false: 结束的文字
 };
 
-WorkItem WorkItem::initFrom(int n)
+WorkItem WorkItem::initFrom(int64_t n)
 {
 	WorkItem ret = *(WorkItem*)&n;
 	return ret;
 }
 
-WorkItem WorkItem::initFrom(FeederMgr::JobType t, uint8_t n, uint8_t idx, int8_t s)
+WorkItem WorkItem::initFrom(ActionType t, uint8_t n, uint8_t idx, int16_t s)
 {
 	WorkItem ret = { t, n, idx, s};
 	return ret;
 }
 
-int WorkItem::toInt() const
+int64_t WorkItem::toInt() const
 {
-	int ret = *(int*)this;
+	int ret = *(int64_t*)this;
 	return ret;
 }
 
 QString WorkItem::toString(bool b) const
 {
     auto str = b ? QApplication::translate("WorkItem", "开始") : QApplication::translate("WorkItem", "完成");
-    switch ((FeederMgr::JobType)type)
+    switch ((ActionType)type)
     {
-    case FeederMgr::J_PrepareMate:
+    case Group_PrepareSolidMate:
         return QApplication::translate("WorkItem", "备料: 反应管%1%2备料").arg(nNumTube + 1).arg(str);
-    case FeederMgr::J_StoveFixTube:
+    case Group_StoveFixTube:
         return QApplication::translate("WorkItem", "装填: 反应管%1%2装填炉膛%3").arg(nNumTube + 1).arg(str).arg(chStove + 1);
-    case FeederMgr::J_StoveTubeBack:
+    case Group_StoveTubeBack:
         return QApplication::translate("WorkItem", "回收: 反应管%1%2回收到回收位%3").arg(nNumTube + 1).arg(str).arg(chStove + 1);
     default:
         break;
@@ -672,7 +673,7 @@ void FeederMgr::adddRobotAct(uint16_t type, uint8_t index /*= 0*/, bool bWait /*
     m_actions << actRobot;
 }
 
-bool FeederMgr::CanAddWork(JobType t, int numTub, bool bProg)const
+bool FeederMgr::CanAddWork(ActionType t, int numTub, bool bProg)const
 {
 	auto tb = getTube(numTub);
 	auto flg = tb ? tb->getFlag() : T_None;
@@ -681,22 +682,22 @@ bool FeederMgr::CanAddWork(JobType t, int numTub, bool bProg)const
 	auto ls = tubeJobs(numTub);
 	if (ls.contains(t))
 		return false;
-	else if (J_PrepareMate==t)
+	else if (Group_PrepareSolidMate==t)
 		return T_WaitPrepare == flg;
 
 	switch (flg)
 	{
 	case T_WaitPrepare:
-		return ls.contains(JobType(t-1)) || bProg;
+		return ls.contains(ActionType(t-1)) || bProg;
 	case T_Preparing:
 	case T_Prepared:
-		if (J_StoveFixTube == t)
+		if (Group_StoveFixTube == t)
 			return true;
-		return ls.contains(JobType(t-1)) || bProg;
+		return ls.contains(ActionType(t-1)) || bProg;
 	case T_WaitFix:
 	case T_Fixing:
 	case T_Fixed:
-		return J_StoveTubeBack == t;
+		return Group_StoveTubeBack == t;
 	}
 
 	return false;
@@ -730,14 +731,14 @@ void FeederMgr::ReuseTube(int num)
     }
 }
 
-QList<FeederMgr::JobType> FeederMgr::tubeJobs(int numTub)const
+QList<ActionType> FeederMgr::tubeJobs(int numTub)const
 {
-	QList<JobType> ret;
+	QList<ActionType> ret;
 	for (auto itr : m_jobs)
 	{
 		WorkItem it = WorkItem::initFrom(itr);
 		if (it.nNumTube == numTub)
-			ret << (JobType)it.type;
+			ret << it.type;
 	}
 	return ret;
 }
@@ -857,7 +858,7 @@ void FeederMgr::genBackActions(const WorkItem &bt, bool bDo)
     if (!m_actions.isEmpty())
 		return;
 
-    auto tb = getTube(bt.nNumTube);
+    auto tb = GetInSotveTube(bt.chStove);
 	if (!tb || tb->getFlag()!=T_WaitRecycle)
 		return;
 
@@ -897,11 +898,11 @@ void FeederMgr::checkActions(bool bDo)
             auto item = WorkItem::initFrom(m_jobs.first());
             switch (item.type)
             {
-            case J_PrepareMate:
+            case Group_PrepareSolidMate:
                 genPrepareActions(item, bDo); break;
-            case J_StoveFixTube:
+            case Group_StoveFixTube:
                 genTubToStvoe(item, bDo); break;
-            case J_StoveTubeBack:
+            case Group_StoveTubeBack:
                 genBackActions(item, bDo); break;
             }
             if (bDo)
@@ -912,18 +913,18 @@ void FeederMgr::checkActions(bool bDo)
 
 bool FeederMgr::addWorkItem(const struct WorkItem &item)
 {
-	auto tp = (JobType)item.type;
 	if (auto tb = getTube(item.nNumTube))
-	{
+    {
+        auto tp = (ActionType)item.type;
 		switch (tp)
 		{
-		case FeederMgr::J_PrepareMate:
+        case Group_PrepareSolidMate:
 			break;
-		case FeederMgr::J_StoveFixTube:
+		case Group_StoveFixTube:
 			if (tb->getFlag() == T_Prepared)
 				tb->setFlag(T_WaitFix);
 			break;
-		case FeederMgr::J_StoveTubeBack:
+		case Group_StoveTubeBack:
 			if (tb->getFlag() == T_Fixed)
 				tb->setFlag(T_WaitRecycle);
 			break;
@@ -1120,22 +1121,22 @@ TubeStruct *FeederMgr::ValidTube(int index)const
     return nullptr;
 }
 
-QList<TubeStruct*> FeederMgr::ValidTubes(JobType t)const
+QList<TubeStruct*> FeederMgr::ValidTubes(ActionType t)const
 {
     QList<TubeStruct*> ret;
     for (auto itr : m_allTube)
     {
 		switch (t)
 		{
-		case FeederMgr::J_PrepareMate:
+		case Group_PrepareSolidMate:
 			if (T_WaitPrepare == itr->getFlag())
 				ret << itr;
 			break;
-		case FeederMgr::J_StoveFixTube:
+		case Group_StoveFixTube:
 			if (T_WaitFix == itr->getFlag())
 				ret << itr;
 			break;
-		case FeederMgr::J_StoveTubeBack:
+		case Group_StoveTubeBack:
 			if (T_WaitRecycle == itr->getFlag())
 				ret << itr;
 			break;
@@ -1155,7 +1156,7 @@ QList<BottleStruct*> FeederMgr::ValidBottls() const
     return ret;
 }
 
-bool FeederMgr::FeedSolidMaterial(QList<QPair<QString, float>> &feeds, int numb, int nTube, bool bFix, int ch)
+bool FeederMgr::FeedSolidMaterial(QList<QPair<QString, float>> &feeds, int numb, int nTube, int16_t seq)
 {
     if (feeds.isEmpty() || GetfeedParamsByBottleNum(numb))
         return false; 
@@ -1171,7 +1172,7 @@ bool FeederMgr::FeedSolidMaterial(QList<QPair<QString, float>> &feeds, int numb,
             }
         }
     }
-	if (!CanAddWork(J_PrepareMate, nTube))
+	if (!CanAddWork(Group_PrepareSolidMate, nTube))
 		return false;
     auto bt = getBottle(numb);
     if (!bt || bt->getFlag() != B_CanUse)
@@ -1190,28 +1191,21 @@ bool FeederMgr::FeedSolidMaterial(QList<QPair<QString, float>> &feeds, int numb,
     }
     m_feedParams << FeederParam(preNumDistrs, (uint16_t)numb, nTube);
     FeederRecover::Instance().AddFeedParam(m_feedParams.last());
-    auto item = WorkItem::initFrom(J_PrepareMate, nTube);
+    auto item = WorkItem::initFrom(Group_PrepareSolidMate, nTube, seq);
 	addWorkItem(item);
     genPrepareActions(item);
-    if (bFix)
-    {
-        item.type = J_StoveFixTube;
-        item.chStove = ch;
-        addWorkItem(item);
-    }
-
     readFeedStat();
     return true;
 }
 
-bool FeederMgr::FixTube(uint16_t nTb, uint16_t ch)
+bool FeederMgr::FixTube(uint16_t nTb, uint16_t ch, int16_t seq)
 {
 	auto fb = getfeedParamsByTube(nTb);
 	auto tb = getTube(nTb);
-	if (!tb || !fb || !CanAddWork(J_StoveFixTube, nTb))
+	if (!tb || !fb || !CanAddWork(Group_StoveFixTube, nTb, true))
 		return false;
 
-	WorkItem item = WorkItem::initFrom(J_StoveFixTube, nTb);
+	WorkItem item = WorkItem::initFrom(Group_StoveFixTube, nTb, ch, seq);
 	if (tb->getFlag() == T_Prepared)
     {
         tb->setStoveCh(ch);
@@ -1224,17 +1218,17 @@ bool FeederMgr::FixTube(uint16_t nTb, uint16_t ch)
 	return false;
 }
 
-bool FeederMgr::StoveTubeBack(int ch, int nBack)
+bool FeederMgr::StoveTubeBack(int ch, int nBack, int16_t seq)
 {
     auto tb = GetInSotveTube(ch);
     if (!tb)
         return false;
 
     auto fb = getfeedParamsByTube(tb->getNumber());
-    if (!fb && !CanAddWork(J_StoveFixTube, tb->getNumber()))
+    if (!fb && !CanAddWork(Group_StoveTubeBack, tb->getNumber()))
         return false;
 
-	WorkItem item = WorkItem::initFrom(J_StoveTubeBack, tb->getNumber(), nBack < 0 ? 0 : nBack);
+    WorkItem item = WorkItem::initFrom(Group_StoveTubeBack, nBack < 0 ? 0 : nBack, ch, seq);
     if (tb->getFlag() == T_Fixed)
 	{
 		addWorkItem(item);

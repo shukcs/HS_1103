@@ -29,8 +29,6 @@ protected:
     QString _getDirString()const;
 signals:
     void sig_Add(const QString &str);
- protected slots:
-     void onAdd();
 private:
     Ui::MotorGroupBox*  m_ui;
     MotorType           m_type;

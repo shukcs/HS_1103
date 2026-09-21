@@ -89,8 +89,8 @@ SOURCES += $$PWD/common/ActionFactory.cpp \
     $$PWD/stove/stove.cpp \
     $$PWD/stove/tabeledit.cpp \
     $$PWD/stove/stovetable.cpp \
-    $$PWD/strDecoder/portthread.cpp \
-    $$PWD/strDecoder/strdecoder.cpp \
+    $$PWD/DevContrlMgr/portthread.cpp \
+    $$PWD/DevContrlMgr/strdecoder.cpp \
     $$PWD/toolTitle/tooltitle.cpp \
     $$PWD/toolTitle/hslogo.cpp \
     $$PWD/desktop.cpp \
@@ -160,8 +160,8 @@ HEADERS += $$PWD/common/ActionFactory.h \
     $$PWD/stove/stove.h \
     $$PWD/stove/stovetable.h \
     $$PWD/stove/tabeledit.h \
-    $$PWD/strDecoder/portthread.h \
-    $$PWD/strDecoder/strdecoder.h \
+    $$PWD/DevContrlMgr/portthread.h \
+    $$PWD/DevContrlMgr/strdecoder.h \
     $$PWD/toolTitle/tooltitle.h \
     $$PWD/toolTitle/hslogo.h \
     $$PWD/desktop.h

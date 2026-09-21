@@ -24,7 +24,6 @@ enum ActionType : int8_t {
     Group_AirClear,
     Group_AirIn,
     Group_AirEnd,
-    Group_LiquiClear,
     Group_LiquiIn,
     Group_LiquiEnd,
     Group_StoveHeat,
@@ -41,10 +40,12 @@ public:
     bool isFinished()const;
     bool isStart()const;
     void start();
+    void AddToEdit();
     virtual void Save(QDataStream *dstr, bool bSaveStat = false);
     virtual void Load(QDataStream *dstr);
 private:
-    uint16_t    m_seq;
+    friend class ProgmaMgr;
+    int16_t    m_seq;
 	ActionType	m_type;       ///ActionType
     uint8_t m_bWaitFinish;   ///false: 可以同步进行下一个
     uint8_t m_bStart;        ///false: true, 已经开始

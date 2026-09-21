@@ -8,10 +8,9 @@ MotorGroupBox::MotorGroupBox(MotorType tp, QWidget *parent) : QGroupBox(parent)
 , m_ui(new Ui::MotorGroupBox), m_type(tp)
 {
     m_ui->setupUi(this);
-    connect(m_ui->pushButton, &QPushButton::clicked, this, &MotorGroupBox::onAdd);
     initType(tp);
     connect(m_ui->btn_test, &QPushButton::clicked, this, [=] {
-        if (auto dec = strDecoder::Instance())
+        if (auto dec = DevContrlMgr::Instance())
             dec->strTocmd(title() + _getChStr() + _getBracerStr() + _getDirString());
     });
 }
@@ -39,7 +38,6 @@ void MotorGroupBox::initReactionTubeUi()
     setTitle(tr("反应管"));
     m_ui->cmb_get->clear();
     m_ui->cmb_get->addItems({ tr("反应管上升"), tr("反应管下降") });
-    m_ui->pushButton->setVisible(false);
 }
 
 void MotorGroupBox::initFurnaceUi()
@@ -48,7 +46,6 @@ void MotorGroupBox::initFurnaceUi()
     m_ui->cmb_get->clear();
     m_ui->cmb_get->addItems({ tr("打开炉膛"), tr("闭合炉膛") });
     m_ui->cmb_get->setCurrentIndex(0);
-    m_ui->pushButton->setVisible(false);
 }
 
 void MotorGroupBox::initRobotUi()
@@ -61,7 +58,6 @@ void MotorGroupBox::initRobotUi()
     m_ui->lb_pos->setText(tr("工作点"));
     m_ui->lb_bracer->setVisible(false);
     m_ui->cmb_bracer->setVisible(false);
-    m_ui->pushButton->setVisible(false);
 }
 
 QString MotorGroupBox::_getChStr() const
@@ -100,9 +96,4 @@ QString MotorGroupBox::_getDirString() const
     }
 
     return tr(" 方向 ") + QString::number(m_ui->cmb_get->currentIndex() == 0 ? 1 : 0);
-}
-
-void MotorGroupBox::onAdd()
-{
-    emit sig_Add(title() + _getChStr() + _getBracerStr() + _getDirString());
 }

@@ -28,8 +28,7 @@ bool DlgFeedMaterial::GetFeedParam(QList<QPair<QString, float>>* mates)const
 
 int DlgFeedMaterial::GetTubeNumb()const
 {
-    auto tub = FeederMgr::Instance().ValidTube(m_ui->widget->GetTubeNumber());
-    return tub ? tub->getNumber() : -1;
+    return m_ui->widget->GetTubeNumber();
 }
 
 void DlgFeedMaterial::Init(const FeederParam* pr, BottleStruct *bt)

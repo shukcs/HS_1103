@@ -6,7 +6,7 @@
 #include <QApplication>
 #include "common/ActionFactory.h"
 #include "common/ActionItem.h"
-#include "strDecoder/CtrlAction.h"
+#include "DevContrlMgr/CtrlAction.h"
 
 uint16_t ProgmaMgr::s_seq = 0;
 ProgmaMgr::ProgmaMgr(QObject *p):QObject(p)

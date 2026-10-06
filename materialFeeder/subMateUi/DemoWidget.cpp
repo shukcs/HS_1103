@@ -1,6 +1,7 @@
 #include "DemoWidget.h"
 #include <QPainter>
 #include <QSet>
+#include "HsApplication.h"
 #include "materialFeeder/FeederMgr.h"
 #include "common/ModubosProtocol.h"
 #pragma execution_character_set("utf-8")
@@ -8,7 +9,7 @@
 DemoWidget::DemoWidget(QWidget *p) : QWidget(p)
 , m_bg(new QPixmap(":/image/balance.png"))
 {
-    connect(&FeederMgr::Instance(), &FeederMgr::storeChanged, this, [=](const StoreStruct *st) {
+    connect(hsApp->feederMgr(), &FeederMgr::storeChanged, this, [=](const StoreStruct *st) {
 		auto stat = st->getStat();
         static QSet<uint8_t> sSet = {S_Feeding, S_WaitFeed};
         bool bOld = sSet.contains(m_statStore);
@@ -30,7 +31,7 @@ DemoWidget::DemoWidget(QWidget *p) : QWidget(p)
             update();
         }
     });
-    connect(&FeederMgr::Instance(), &FeederMgr::feedingChanged, this, [=](float w, bool b) {
+    connect(hsApp->feederMgr(), &FeederMgr::feedingChanged, this, [=](float w, bool b) {
         if (b)
         {
             m_wFeed = w;

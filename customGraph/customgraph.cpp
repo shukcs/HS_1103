@@ -1,6 +1,5 @@
 ﻿#include "customgraph.h"
 #include <QScreen>
-
 #include <QEvent>
 #include <QMouseEvent>
 #include <QMoveEvent>
@@ -10,8 +9,10 @@
 #include "customGraph/customTool/graphopen.h"
 #include "customGraph/customTool/graphsave.h"
 #include "customGraph/customTool/graphexport.h"
-#include "strDecoder/portthread.h"
+#include "DevContrlMgr/portthread.h"
 #include "common/mymessageBox.h"
+#include "HsApplication.h"
+#include "DevContrlMgr/CtrlAction.h"
 #include "ui_customgraph.h"
 #pragma execution_character_set("utf-8")
 
@@ -247,6 +248,9 @@ customGraph::customGraph(QWidget *parent) :
     ui->y12Check->setStyleSheet("QCheckBox{color:rgb(128,128,255)}"); // 柱塞泵2压力 - 浅蓝
 
     connect(&timer,SIGNAL(timeout()),this,SLOT(timer_out()));
+	connect(hsApp->getThread(), &portThread::dateReceived, this, &customGraph::updateInfo);
+	//connect(hsApp->devContrlMgr(), &DevContrlMgr::startRecord, this, &customGraph::startRecord);
+	//connect(hsApp->devContrlMgr(), &DevContrlMgr::autoSavedata, this, &customGraph::autoSavedata);
 }
 
 customGraph::~customGraph()
@@ -336,7 +340,7 @@ void customGraph::startRecord(bool state)
 
 void customGraph::autoSavedata()
 {
-    QString path = QCoreApplication::applicationDirPath()+"/data";
+    QString path = HsApplication::AppDir("data");
     QDir dir(path);
     if(!dir.exists())   //  检查目录是否存在
     {

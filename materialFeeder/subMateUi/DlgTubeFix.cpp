@@ -1,4 +1,5 @@
 ﻿#include "DlgTubeFix.h"
+#include "HsApplication.h"
 #include "../FeederMgr.h"
 
 #include "ui_DlgTubeFix.h"
@@ -27,7 +28,7 @@ void DlgTubeFix::initUi()
 {
     connect(m_ui->btn_cancle, &QPushButton::clicked, this, &QDialog::rejected);
     connect(m_ui->btn_ok, &QPushButton::clicked, this, [=] {
-        FeederMgr::Instance().FixTube(m_ui->lb_numb->text().toInt() - 1, m_ui->cmb_ch->currentIndex());
+		hsApp->feederMgr()->FixTube(m_ui->lb_numb->text().toInt() - 1, m_ui->cmb_ch->currentIndex());
         accepted();
     });
 }

@@ -1,5 +1,6 @@
 #include "manualop.h"
 #include "ui_manualop.h"
+
 #pragma execution_character_set("utf-8")
 
 manualOp::manualOp(QWidget *parent) :
@@ -16,10 +17,6 @@ manualOp::~manualOp()
     delete ui;
 }
 
-void manualOp::updateInfo(ReceiveData *data)
-{
-    ui->Diagram->updateInfo(data);
-}
 diagram* manualOp::getDiagram()
 {
     return ui->Diagram;

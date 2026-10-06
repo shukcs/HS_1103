@@ -13,14 +13,15 @@
 #include <QFile>
 #include <QDir>
 #include <QList>
-#include <QCoreApplication>
 #include <QScrollArea>
 #include "common/mymessageBox.h"
 #include "customTool/ToolBox.h"
 #include "customTool/objlist.h"
 #include "materialFeeder/FeederMgr.h"
-#include "strDecoder/strdecoder.h"
+#include "DevContrlMgr/DevContrlMgr.h"
+#include "DevContrlMgr/CtrlAction.h"
 #include "ProgmaMgr.h"
+#include "HsApplication.h"
 #pragma execution_character_set("utf-8")
 
 ProgramList::ProgramList(QWidget *parent)
@@ -87,13 +88,6 @@ ProgramList::ProgramList(QWidget *parent)
 
     Toplayout->addStretch();
 
-//    circulate = new QPushButton;
-//    circulate->setText("0");
-//    circulate->setToolTip("已完成的循环次数");
-//    circulate->setFixedSize(60,40);
-//    Toplayout->addWidget(circulate);
-//    Toplayout->addStretch();
-
     QWidget *midWidget = new QWidget;
     midWidget->setFixedHeight(30);
     Vlayout->addWidget(midWidget);
@@ -157,6 +151,8 @@ ProgramList::ProgramList(QWidget *parent)
         Stylefile.close();
     }
 	initList();
+    connect(hsApp->feederMgr(), &FeederMgr::feedJobFinished, this, &ProgramList::OnActionDone);
+    connect(hsApp->devContrlMgr(), &DevContrlMgr::actionFinished, this, &ProgramList::OnActionDone);
 }
 
 ProgramList::~ProgramList()
@@ -331,39 +327,20 @@ void ProgramList::obj_clicked(int index)
 	}
 }
 
-void ProgramList::OnActionDone(uint16_t type, int16_t idx)
+void ProgramList::OnActionDone(uint16_t type, int16_t seq)
 {
-    if (programCnt < 0 || programCnt >= proList->count() || m_bReady)
+    if (m_runIndex >= m_titles.size() || seq < 0 || programCnt < 0 || programCnt >= proList->count() || m_bReady)
         return;
 
-    auto strlist = proList->item(programCnt)->text().split(" ", QString::SkipEmptyParts);  //  以空格符分割
-    if (strlist.size() <= 2)
-        return;
-    switch (type)
-    {
-    case Group_PrepareSolidMate:
-        if (strlist.first()==tr("固体配料:") && strlist.at(1) == tr("称取"))
-            m_bReady = true;
-        break;
-    case Group_StoveFixTube:
-        if (strlist.at(0) == tr("装载炉膛:") && strlist.at(1).toInt()-1 == idx)
-            m_bReady = true;
-        break;
-    case Group_StoveTubeBack:
-        if (strlist.at(0) == tr("回收反应管:") && strlist.at(1).toInt()-1 == idx)
-			m_bReady = true;
-	case Group_AirClear:
-		if (strlist.at(0) == tr("吹扫管道:"))
-			m_bReady = true;
-	case Group_AirIn:
-		if (strlist.at(0) == tr("进气:"))
-			m_bReady = true;
-        break;
-    }
+    auto &ctx = m_titles.at(m_runIndex);
+    auto act = ctx.list.at(programCnt);
+    if (act->getType() == type && act->GetSeq() == seq)
+        m_bReady = true;
 }
 
 void ProgramList::runTitle()
 {
+	if (m_runIndex >= m_titles.size()) return;
     auto sub_num = m_titles.at(m_runIndex).list.count();  // 获取子类数量
     obj->setRun(m_runIndex);
     programCnt++;
@@ -376,59 +353,23 @@ void ProgramList::runTitle()
     }
     else if (programCnt < sub_num)
     {
+        auto act = m_titles.at(m_runIndex).list.at(programCnt);
         proList->setCurrentRow(programCnt);
-        if (proList->item(programCnt)->text().contains("---"))  //  不处理功能标签
+        switch (act->getType())
         {
-            timer.start(1000);
-        }
-        else if (proList->item(programCnt)->text().contains("延时"))
-        {
-
-            QStringList list = proList->item(programCnt)->text().split(" ");
-            int delay = QString(list.at(1)).toDouble() * 60;  //  将分钟转换成秒钟
-            if (delay <= 1)
-                delay = 1;
-
-            timer.start(delay * 1000);
-        }
-        else if (proList->item(programCnt)->text().contains("开始循环"))
-        {
-            QStringList list = proList->item(programCnt)->text().split(" ");
-            totalcirculationCnt = QString(list.at(1)).toInt();  // 获取循环次数
-            CirculateStartLine = programCnt;  // 保存循环起始位置
-            timer.start(1000);
-        }
-        else if (proList->item(programCnt)->text().contains("结束循环"))
-        {
-            if (totalcirculationCnt > 0 && circulationCnt < totalcirculationCnt) // 判断循环次数大于0，且处于循环周期内
-            {
-                circulationCnt++;
-                if (circulationCnt == totalcirculationCnt)
-                {
-                    circulationCnt = 0;
-                    totalcirculationCnt = 0;
-                }
-                else
-                {
-                    programCnt = CirculateStartLine;
-                }
-            }
-            timer.start(1000);
-        }
-        else if (proList->item(programCnt)->text().contains("收集器"))
-        {
-            emit readyTorun_toColl(proList->item(programCnt)->text());
-            timer.start(1000);
-        }
-        else
-        {
-            auto str = proList->item(programCnt)->text();
-            if (str.startsWith(tr("固体配料")) || str.startsWith(tr("装载炉膛")) || str.startsWith(tr("收回反应管"))
-				|| str.startsWith(tr("吹扫管道")) || str.startsWith(tr("进气")))
-                m_bReady = false;
-
-            emit readyTorun(str);
-            timer.start(1000);
+        case Act_Delay:
+            timer.start(((DelayAction *)act)->DelaySeconds(1) * 1000); break;
+        case Act_CuverRec:
+            act->Distribute();
+        case FL_Label:
+            timer.start(1000); break;
+        case Act_Cycle:;
+            _cycle(act); break;
+            break;
+        default:
+            m_bReady = false;
+            act->Distribute();
+            break;
         }
     }
 }
@@ -444,4 +385,32 @@ void ProgramList::initList()
 			nameList->addItem(itr.first);
 		}
 	});
+}
+
+void ProgramList::_cycle(ActionAbstrctItem *act)
+{
+    auto actCyc = (CycleAction*)act;
+    if (actCyc->IsEnd())
+    {
+        if (totalcirculationCnt > 0 && circulationCnt < totalcirculationCnt) // 判断循环次数大于0，且处于循环周期内
+        {
+            circulationCnt++;
+            if (circulationCnt == totalcirculationCnt)
+            {
+                circulationCnt = 0;
+                totalcirculationCnt = 0;
+            }
+            else
+            {
+                programCnt = CirculateStartLine;
+            }
+        }
+        timer.start(1000);
+    }
+    else
+    {
+        totalcirculationCnt = actCyc->CycleCount();     // 获取循环次数
+        CirculateStartLine = programCnt;                // 保存循环起始位置
+        timer.start(1000);
+    }
 }

@@ -1,5 +1,6 @@
 ﻿#include "QSFunction.h"
-
+#include "DevContrlMgr/CtrlAction.h"
+#include "DevContrlMgr/DevContrlMgr.h"
 #include "ui_QSFunction.h"
 #pragma execution_character_set("utf-8")
 
@@ -24,18 +25,18 @@ void QSFunction::initUi()
 
 void QSFunction::onRec()
 {
-    emit functionPanelAdd(tr("曲线记录 %1").arg(m_ui->cmb_rec->currentText()));
+    if (auto act = new RecordAction(m_ui->cmb_rec->currentIndex()==0))
+        act->AddToEdit();
 }
 
 void QSFunction::onDelay()
 {
-    emit functionPanelAdd(tr("延时 %1 min").arg(m_ui->spin_time->text()));
+    if (auto act = new DelayAction(m_ui->spin_time->value()))
+        act->AddToEdit();
 }
 
 void QSFunction::onCycle()
 {
-	if (m_ui->cmb_cyc->currentIndex() == 0)
-		emit functionPanelAdd(tr("开始循环 %1 次").arg(m_ui->spin_cyc->value()));
-	else
-		emit functionPanelAdd("结束循环");
+    if (auto act = new CycleAction(m_ui->cmb_cyc->currentIndex() == 0 ? m_ui->spin_cyc->value() : 0))
+        act->AddToEdit();
 }

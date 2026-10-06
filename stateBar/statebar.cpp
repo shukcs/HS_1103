@@ -1,4 +1,9 @@
 ﻿#include "statebar.h"
+#include "HsApplication.h"
+#include "DevContrlMgr/DevContrlMgr.h"
+#include "deskTop.h"
+#include "customGraph/customgraph.h"
+
 #include "ui_statebar.h"
 #pragma execution_character_set("utf-8")
 
@@ -79,7 +84,10 @@ stateBar::stateBar(QWidget *parent) :
         text << port.name;
         file.close();
     }
-    connect(ui->btn_store, &QPushButton::clicked, this, [=] { emit storeBtn_clicked(); });
+	connect(ui->btn_store, &QPushButton::clicked, this, [=] {
+		qobject_cast<deskTop*>(hsApp->mainWidget())->StoreShow();
+	});
+	connect(hsApp->devContrlMgr(), &DevContrlMgr::setConnectionState, this, &stateBar::setConnectionState);
 }
 
 stateBar::~stateBar()
@@ -103,7 +111,11 @@ void stateBar::setConnectionState(bool state)
 
 void stateBar::on_sampleTime_currentTextChanged(const QString &arg1)
 {
-     emit sampleTimeChanged(arg1.toInt());
+    auto n = arg1.toInt();
+    if (auto g = hsApp->getGustomGraph())
+        g->startTimer(n);
+    if (auto de = hsApp->devContrlMgr())
+        de->setTimer(n);
 }
 
 void stateBar::on_connectState_clicked()
@@ -156,7 +168,7 @@ void stateBar::on_connectState_clicked()
             QTextStream text(&file);
             text << port.name;
             file.close();
-            emit portChanged(port.name);
+            hsApp->devContrlMgr()->savePortName(port.name);
             dlg->close();
         }
     });
@@ -166,20 +178,20 @@ void stateBar::on_connectState_clicked()
 
 void stateBar::on_autoBtn_clicked()
 {
-    emit autoBtn_clicked();
+    qobject_cast<deskTop*>(hsApp->mainWidget())->Scene1Show();
 }
 
 void stateBar::on_manualBtn_clicked()
 {
-    emit manualBtn_clicked();
+	qobject_cast<deskTop*>(hsApp->mainWidget())->Scene2Show();
 }
 
 void stateBar::on_collectorBtn_clicked()
 {
-    emit collectorBtn_clicked();
+	qobject_cast<deskTop*>(hsApp->mainWidget())->Scene6Show();
 }
 
 void stateBar::on_graphBtn_clicked()
 {
-    emit graphBtn_clicked();
+	qobject_cast<deskTop*>(hsApp->mainWidget())->Scene3Show();
 }

@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>320</width>
-    <height>128</height>
+    <height>134</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -26,23 +26,20 @@
    <string>Form</string>
   </property>
   <property name="styleSheet">
-   <string notr="true">QWidget#flowSet
-{
+   <string notr="true">QWidget#flowSet {
   background-color: rgb(205, 205, 205); 
 }
 
-QFrame#frame
-{
+QFrame#frame {
     background-color: rgb(121, 80, 148);    
 	border-radius: 10px; 
     border: 3px solid rgb(154, 127, 167);   
 }
 
 
-QPushButton
-{
+QPushButton {
     background-color: rgb(121, 80, 148);    
-	color: rgb(255, 255, 255);
+	color: white;
 	border-radius: 10px;   
     border: 2px solid rgb(255, 255, 255);   
    	font-family:SimHei;	
@@ -50,37 +47,32 @@ QPushButton
     font: bold;  
 }
 
-QPushButton:pressed
-{
+QPushButton:pressed {
 	background-color: rgb(0, 214, 230);
 	color: rgb(0, 0, 0);  
 }
 
-QListWidget
-{
+QListWidget {
    font-weight:bold;
    font-size: 14px;
 }
 
 
-QListWidget#file_list
-{
+QListWidget#file_list {
 	border: 2px solid rgb(255, 255, 255);
 	border-radius: 10px;   
     background:transparent;    
 	color: rgb(255, 255, 255);
 }
 
-QLabel
-{
-	color:rgb(255, 255, 255);   
+QLabel {
+	color: white;   
    	font-family:SimHei;	
 	font-size:24px;	   
     font: bold;  
 }
 
-QLabel#label_flow_name, #label_unit
-{
+QLabel#label_flow_name, #label_unit{
 	font-size:20px;	   
 }
 
@@ -95,14 +87,14 @@ QLineEdit {
 }
 
  QComboBox {
-                background-color: transparent;
-                color: black;
-                border: 1px solid #c0c0c0;
-                border-radius: 6px;
-                padding: 4px 8px;
-                font-size: 18px;
-                font-weight: bold;
-                min-height: 28px;
+    background-color: transparent;
+	color: white;   
+    border: 1px solid #c0c0c0;
+    border-radius: 6px;
+    padding: 4px 8px;
+    font-size: 18px;
+    font-weight: bold;
+    min-height: 28px;
 }
 QComboBox::drop-down {
 	subcontrol-origin: padding; 

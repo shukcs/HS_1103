@@ -66,7 +66,7 @@ private:
     bool m_bReached = false;
 };
 
-class ActionItem;
+class ActionAbstrctItem;
 class DevContrlMgr : public QObject
 {
     Q_OBJECT
@@ -82,7 +82,6 @@ public:
 
     static QByteArray floatToBigEndian(float value);
     static float bigEndianToFloat(const QByteArray& bytes);
-    static int getStovePos(int ch);
     static DevContrlMgr *Instance();
 public slots:
     void timer_out();
@@ -90,7 +89,8 @@ public slots:
     void savePortName(QString name);
     bool com_open(bool state,const QString &name);
     void app_connected();
-    void app_disconnected();
+	void app_disconnected();
+	void onActionRun(const ActionAbstrctItem *act, bool bIn=false);
 private:
     void board_msg_request();   // 查询
     void swCtrl(int id,bool state);  // 阀门控制
@@ -122,23 +122,30 @@ private:
     void collector_conn(QString cmd);
     void ctrlStepMotor(CtrlType::StepMotorType tp, uint8_t ch, uint8_t dir, uint16_t rpm = 0); ///rpm=转速*10；
     void ctrlServoMotor(uint8_t pos); ///rpm=转速*10；
+    void ctrValve3Ch(uint8_t ch, uint8_t dir);
+    void ctrlTempAndKeep(uint8_t ch, uint16_t tmp, int8_t tp);
 
     void appendToQue(const uint8_t* cmd, uint32_t len);
-	void onActionRun(const ActionItem *act);
+    void doClearAir();
+    void doAirIn();
+    void doLiquidIn();
+    void doLiquiEnd();
+    void doAirEnd();
 signals:
     void setConnectionState(bool state);
-    void startRecord(bool state);
-    void autoSavedata(void);
+    //void startRecord(bool state);
+    //void autoSavedata(void);
     void baseAdjust(void);
     void setPumpSpeed(uint32_t speed);
     void set_flow_sw_state(bool state);
     void stepMotorStatChanged(StepMotorStat*);
     void servoMotorStatChanged(int pos, bool);
-    void jobChaned(uint16_t type, uint16_t idx);
+    void actionFinished(uint16_t type, uint16_t idx);
 private:
     void onAckRecved(const QByteArray &arr);
 
     void prcsMotor(const QByteArray& msg);
+    void _checkAction(const StepMotorStat &st);
 private:
     portThread  *m_thread;
     QTimer              *m_timer;
@@ -148,6 +155,8 @@ private:
     QList<QByteArray>   m_cmdlist;   // 发送队列
     StepMotorStat       m_stepMotorStat[6];
     ServoMotorStat      m_servoMotorStat;
+    QList<const ActionAbstrctItem *> m_actions;
+    uint32_t                         m_stAct = 0; //0: 完成，未开始; 1:第2步开始未完成;  2: 第2步开始未完成; ...
 };
 
 #endif // STRDECODER_H

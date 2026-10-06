@@ -2,7 +2,7 @@
 #define DIAGRAM_H
 
 #include <QWidget>
-#include "strDecoder/portthread.h"
+#include "DevContrlMgr/portthread.h"
 
 #define SW_NUM      6
 #define ACTSW_NUM   2

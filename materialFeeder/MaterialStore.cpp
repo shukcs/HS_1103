@@ -13,6 +13,7 @@
 #include "common/DlgSocketSettings.h"
 #include "log/DeviceLog.h"
 #include "RobotMgr.h"
+#include "HsApplication.h"
 
 #include "ui_MaterialStore.h"
 #pragma execution_character_set("utf-8")
@@ -139,7 +140,7 @@ public:
 * MaterialStore
 */
 MaterialStore::MaterialStore(QWidget *parent) : QWidget(parent)
-, m_ui(new Ui::MaterialStore), m_robot(new RobotMgr(this))
+, m_ui(new Ui::MaterialStore)
 {
     m_ui->setupUi(this);
     m_ui->table_material->setColumnWidth(0, 55);
@@ -160,11 +161,6 @@ MaterialStore::MaterialStore(QWidget *parent) : QWidget(parent)
 MaterialStore::~MaterialStore()
 {
     delete m_ui;
-}
-
-RobotMgr* MaterialStore::GetRobotMgr()const
-{
-    return m_robot;
 }
 
 void MaterialStore::updateStore(const StoreStruct* c)
@@ -194,24 +190,24 @@ void MaterialStore::initFeederDecode()
 {
     m_ui->list_container->setItemDelegate(new ContainerDelegate(m_ui->list_container));
     m_ui->listWidget->setItemDelegate(new BottleDelegate(m_ui->listWidget));
-    for (auto itr : FeederMgr::Instance().AllBottles())
+    for (auto itr : hsApp->feederMgr()->AllBottles())
     {
         auto ite = new QListWidgetItem(QString::number(itr->m_numb+1));
         ite->setData(Qt::UserRole + 1, QVariant::fromValue(itr));
         m_ui->listWidget->addItem(ite);
     }
     m_ui->listWidget_2->setItemDelegate(new TubeDelegate(m_ui->listWidget_2));
-    for (auto itr : FeederMgr::Instance().AllTubes())
+    for (auto itr : hsApp->feederMgr()->AllTubes())
     {
         auto ite = new QListWidgetItem(QString::number(itr->getNumber()+1));
         ite->setData(Qt::UserRole + 1, QVariant::fromValue(itr));
         m_ui->listWidget_2->addItem(ite);
     }
-    connect(&FeederMgr::Instance(), &FeederMgr::materialAdded, m_ui->table_material, &MaterialTableWidget::AddMaterial);
-    connect(&FeederMgr::Instance(), &FeederMgr::materialChanged, m_ui->table_material, &MaterialTableWidget::ChangeMaterial);
-    connect(&FeederMgr::Instance(), &FeederMgr::storeChanged, this, &MaterialStore::updateStore);
-    connect(&FeederMgr::Instance(), &FeederMgr::bottleChanged, this, [=] {m_ui->listWidget->update(); });
-    connect(&FeederMgr::Instance(), &FeederMgr::tubeChanged, this, [=] {m_ui->listWidget_2->update(); });
+    connect(hsApp->feederMgr(), &FeederMgr::materialAdded, m_ui->table_material, &MaterialTableWidget::AddMaterial);
+    connect(hsApp->feederMgr(), &FeederMgr::materialChanged, m_ui->table_material, &MaterialTableWidget::ChangeMaterial);
+    connect(hsApp->feederMgr(), &FeederMgr::storeChanged, this, &MaterialStore::updateStore);
+    connect(hsApp->feederMgr(), &FeederMgr::bottleChanged, this, [=] {m_ui->listWidget->update(); });
+    connect(hsApp->feederMgr(), &FeederMgr::tubeChanged, this, [=] {m_ui->listWidget_2->update(); });
 }
 
 void MaterialStore::initUi()
@@ -228,7 +224,7 @@ void MaterialStore::initUi()
         dlg.setWindowTitle(title);
         dlg.Modify(c->pMate, c->nfcid);
         if (dlg.exec() == QDialog::Accepted)
-            FeederMgr::Instance().AddMaterial(c->nfcid, dlg.GetName(), dlg.GetWeight());
+			hsApp->feederMgr()->AddMaterial(c->nfcid, dlg.GetName(), dlg.GetWeight());
     });
 
     connect(m_ui->listWidget, &QListWidget::itemClicked, this, [=](QListWidgetItem* item) {
@@ -236,7 +232,7 @@ void MaterialStore::initUi()
         //if (bt->getFlag() == B_Used)
         //    return;
         DlgFeedMaterial dlg(this);
-        dlg.Init(FeederMgr::Instance().GetfeedParamsByBottleNum(bt->m_numb), bt);
+        dlg.Init(hsApp->feederMgr()->GetfeedParamsByBottleNum(bt->m_numb), bt);
         connect(&dlg, &DlgFeedMaterial::bottleAvlibleChanged, this, [=](bool b) {
             bt->setFlag(b ? B_CanUse : B_None);
             m_ui->listWidget->update();
@@ -245,7 +241,7 @@ void MaterialStore::initUi()
         {
             if (bt && bt->getFlag() == B_Used)
             {
-                FeederMgr::Instance().ReuseBottle(bt->m_numb);
+				hsApp->feederMgr()->ReuseBottle(bt->m_numb);
             }
             else
             {
@@ -254,9 +250,9 @@ void MaterialStore::initUi()
                 {
                     auto idx = dlg.GetChannel();
                     auto nTube = dlg.GetTubeNumb();
-                    FeederMgr::Instance().FeedSolidMaterial(mates, bt->m_numb, nTube);
+					hsApp->feederMgr()->FeedSolidMaterial(mates, bt->m_numb, nTube);
                     if (idx >= 0)
-                        FeederMgr::Instance().FixTube(nTube, idx);
+						hsApp->feederMgr()->FixTube(nTube, idx);
                     m_ui->listWidget->update();
                 }
             }
@@ -271,9 +267,9 @@ void MaterialStore::initUi()
             if (QDialog::Accepted == dlg.exec())
             {
                 if (tb->getFlag() == T_Fixed)
-                    FeederMgr::Instance().StoveTubeBack(tb->getNumber());
+					hsApp->feederMgr()->StoveTubeBack(tb->getNumber());
                 else
-                    FeederMgr::Instance().ReuseTube(tb->getNumber());
+					hsApp->feederMgr()->ReuseTube(tb->getNumber());
             }
             return;
         }
@@ -308,12 +304,12 @@ void MaterialStore::initRobotStat()
     m_ui->btn_progma->setEnabled(false);
     connect(m_ui->btn_robot, &QPushButton::clicked, this, [=] {
         DlgSocketSettings dlg(this);
-        dlg.Inital(m_robot->GetHost(), m_robot->GetPort());
+        dlg.Inital(hsApp->GetRobotMgr()->GetHost(), hsApp->GetRobotMgr()->GetPort());
         if (dlg.exec() == QDialog::Accepted)
-            m_robot->ConnectSocket(dlg.GetHost(), dlg.GetPort());
+			hsApp->GetRobotMgr()->ConnectSocket(dlg.GetHost(), dlg.GetPort());
     });
-    connect(m_ui->btn_progma, &QPushButton::clicked, m_robot, &RobotMgr::SetPause);
-    connect(m_robot, &RobotMgr::connectStatChanged, this, [=](RobotMgr::RobotStat st) {
+    connect(m_ui->btn_progma, &QPushButton::clicked, hsApp->GetRobotMgr(), &RobotMgr::SetPause);
+    connect(hsApp->GetRobotMgr(), &RobotMgr::connectStatChanged, this, [=](RobotMgr::RobotStat st) {
         QString strIcon = ":/stateBar/image/connected.png";
         QString strProgma = ":/image/start.png";
         m_ui->btn_progma->setEnabled(false);
@@ -350,11 +346,11 @@ void MaterialStore::initFeederStat()
 {
     connect(m_ui->btn_com, &QPushButton::clicked, this, [=] {
         DlgSerialSettings dlg(this);
-        dlg.Inital(FeederMgr::Instance().serialPort());
+        dlg.Inital(hsApp->feederMgr()->serialPort());
         if (dlg.exec() == QDialog::Accepted)
-            FeederMgr::Instance().ConnectPort();
+			hsApp->feederMgr()->ConnectPort();
     });
-    connect(&FeederMgr::Instance(), &FeederMgr::connectStatChanged, this, [=](FeederMgr::PortStat st) {
+    connect(hsApp->feederMgr(), &FeederMgr::connectStatChanged, this, [=](FeederMgr::PortStat st) {
         QString strIcon = ":/stateBar/image/closed.png";
         switch (st)
         {
@@ -383,12 +379,12 @@ void MaterialStore::initLog()
     });
 
     connect(m_ui->btn_export, &QPushButton::clicked, this, [=] {
-        auto str = QFileDialog::getSaveFileName(this, tr("导出日志"), FeederMgr::AppDir("log"), "*.lg");
+        auto str = QFileDialog::getSaveFileName(this, tr("导出日志"), HsApplication::AppDir("log"), "*.lg");
         if (!str.isEmpty())
             DeviceLog::Instance().Export(str);
     });
     connect(m_ui->btn_import, &QPushButton::clicked, this, [=] {
-        auto str = QFileDialog::getOpenFileName(this, tr("导入日志"), FeederMgr::AppDir("log"), "*.lg");
+        auto str = QFileDialog::getOpenFileName(this, tr("导入日志"), HsApplication::AppDir("log"), "*.lg");
         if (!str.isEmpty())
             DeviceLog::Instance().Import(str);
     });

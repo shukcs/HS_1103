@@ -1,10 +1,13 @@
 ﻿#include "projectmode.h"
 #include "ui_projectmode.h"
+#include "common/mymessageBox.h"
+#include "DevContrlMgr/portthread.h"
+#include "HsApplication.h"
+#include "DevContrlMgr/DevContrlMgr.h"
 #pragma execution_character_set("utf-8")
 
-projectMode::projectMode(QWidget *parent) :
-    QWidget(parent),
-    ui(new Ui::projectMode)
+projectMode::projectMode(QWidget *parent) : QWidget(parent)
+, ui(new Ui::projectMode)
 {
     ui->setupUi(this);
 
@@ -16,6 +19,9 @@ projectMode::projectMode(QWidget *parent) :
 
     ui->state->setIcon(QIcon(":/projectMode/image/refresh.png"));
     ui->state->setIconSize(QSize(25,25));
+
+	connect(hsApp->getThread(), &portThread::dateReceived, this, &projectMode::updateInfo);
+	connect(hsApp->devContrlMgr(), &DevContrlMgr::setConnectionState, this, &projectMode::update_user_set);
 }
 
 projectMode::~projectMode()
@@ -135,15 +141,6 @@ void projectMode::on_pump2_cali_editingFinished()
     {
        temp = 2;
     }
-//    MyMessageBox:: StandardButton result = MyMessageBox::information(this,"设置柱塞泵校准系数?","注意!!!",MyMessageBox::Yes | MyMessageBox::No);
-//    switch (result)
-//    {
-//        case MyMessageBox::Yes:
-//             break;
-//        case MyMessageBox::No:
-//        default:
-//             return ;
-//    }
     cmdTorun("柱塞泵 1 校准系数设置为 " + QString::number(temp));
 }
 

@@ -1,4 +1,4 @@
-﻿#include "strdecoder.h"
+﻿#include "DevContrlMgr.h"
 #include <QString>
 #include <QWidget>
 #include <QDebug>
@@ -8,7 +8,15 @@
 #include "programConfig/progItem/HeatGroupBox.h"
 #include "materialFeeder/FeederMgr.h"
 #include "common/ModubosProtocol.h"
+#include "HsApplication.h"
+#include "CtrlAction.h"
+
 #pragma execution_character_set("utf-8")
+
+enum {
+    Pipelet_Up = 1,
+    Pipelet_Down = 0,
+};
 
 bool operator==(const StepMotorStat& m1, const StepMotorStat& m2)
 {
@@ -165,10 +173,8 @@ DevContrlMgr::DevContrlMgr(QObject *parent, const QString &name) : QObject(paren
     connect(m_thread, &portThread::port_disconnected, this, &DevContrlMgr::app_disconnected);
     connect(m_thread, &portThread::ackRecved, this, &DevContrlMgr::onAckRecved);
     connect(m_timer, &QTimer::timeout, this, &DevContrlMgr::timer_out);
-    connect(&FeederMgr::Instance(), &FeederMgr::actionRun, this, &DevContrlMgr::onActionRun);
-    connect(&FeederMgr::Instance(), &FeederMgr::feedJobFinished, this, &DevContrlMgr::jobChaned);
-    connect(this, &DevContrlMgr::stepMotorStatChanged, &FeederMgr::Instance(), &FeederMgr::OnStepMotor);
-    connect(this, &DevContrlMgr::servoMotorStatChanged, &FeederMgr::Instance(), &FeederMgr::OnServoMotor);
+    connect(this, &DevContrlMgr::stepMotorStatChanged, hsApp->feederMgr(), &FeederMgr::OnStepMotor);
+    connect(this, &DevContrlMgr::servoMotorStatChanged, hsApp->feederMgr(), &FeederMgr::OnServoMotor);
     m_stepMotorStat[0].SetType(CtrlType::Motor_Pipelet);
     m_stepMotorStat[1].SetType(CtrlType::Motor_Pipelet);
     m_stepMotorStat[2].SetType(CtrlType::Motor_Tube);
@@ -449,102 +455,7 @@ void DevContrlMgr::strTocmd(const QString &cmd)
 			QString str3 = strlist.at(4);
 			stepTime(str1.toInt(),str2.toInt(),str3.toInt());
 	}
-	else if(cmd.contains("曲线记录"))
-	{
-		strlist = cmd.split(" ");  //  以空格符分割
-		if(strlist.at(1) == "开始")
-		{
-			emit startRecord(true);
-		}
-		else if(strlist.at(1) == "停止")
-		{
-			emit startRecord(false);
-			emit autoSavedata();
-		}
-	}
-	else if (cmd.startsWith(tr("固体配料:")))
-	{
-		strlist = cmd.split(" ", QString::SkipEmptyParts);  //  以空格符分割
-		if (strlist.size() > 4)
-		{
-            if (strlist.at(1) == tr("称取"))
-			{
-				QList<QPair<QString, float>> feeds;
-				int i = 2;
-				for (; i + 1 < strlist.size()-5; i += 2)
-				{
-                    feeds << QPair<QString, float>(strlist.at(i), strlist.at(i + 1).toFloat());
-				}
-                auto bottle = strlist.at(i+2).toInt()-1;
-                if (bottle<0)
-                {
-                    auto bts = FeederMgr::Instance().ValidBottls();
-                    if (bts.isEmpty())
-                    {
-                        emit jobChaned(Group_PrepareSolidMate, 0);
-                        return;
-                    }
-                    bottle = bts.first()->m_numb;
-                }
-				auto nTube = strlist.at(strlist.size()-1).toInt() - 1;
-                if (!FeederMgr::Instance().FeedSolidMaterial(feeds, bottle, nTube, false))
-                    emit jobChaned(Group_PrepareSolidMate, 0);
-            }
-			else if (!m_cmdlist.isEmpty())
-			{
-				m_cmdlist.removeFirst();
-			}
-		}
-	}
-	else if (cmd.startsWith(tr("装载炉膛")))
-	{
-		strlist = cmd.split(" ", QString::SkipEmptyParts);  //  以空格符分割
-		auto ch = strlist.at(1).toInt() - 1;
-		auto tube = strlist.at(3).toInt() - 1;
-		if (!FeederMgr::Instance().FixTube(ch, tube))
-			emit jobChaned(Group_StoveFixTube, ch);
-	}
-	else if (cmd.startsWith(tr("收回反应管")))
-	{
-		strlist = cmd.split(" ", QString::SkipEmptyParts);  //  以空格符分割
-		auto ch = strlist.at(2).toInt() - 1;
-		if (!FeederMgr::Instance().StoveTubeBack(ch))
-			emit jobChaned(Group_StoveTubeBack, ch);
-	}
-	else if (cmd.startsWith(tr("吹扫管道")))
-	{
-		strlist = cmd.split(" ", QString::SkipEmptyParts);  //  以空格符分割
-		if (strlist.size() < 7)
-			return;
-		auto str = strlist.at(1);
-		auto ch = str.remove(tr("通道")).toInt() - 1;
-		auto prs = strlist.at(3).toDouble();
-		auto time = strlist.at(5).toInt(); 
-		swCtrl(ch, true);
-        presCtrl_Range(ch, prs);
-        swCtrl_flow(ch, true);
-		QTimer::singleShot(time * 1000, this, [=] {
-			swCtrl(ch, false); 
-			emit jobChaned(Group_AirClear, 0);
-		});
-	}
-	else if (cmd.startsWith(tr("进气")))
-	{
-		strlist = cmd.split(" ", QString::SkipEmptyParts);  //  以空格符分割
-		if (strlist.size() < 9)
-			return;
-		auto str = strlist.at(1);
-		auto ch = str.remove(tr("通道")).toInt() - 1;
-		auto prsIn = strlist.at(3).toDouble();
-		auto speed = strlist.at(6).toInt();
-		auto prsOut = strlist.at(9).toInt();
-		swCtrl(ch + 2, true);
-		flowCtrl_Range(ch, speed);
-        presCtrl_Range(ch, prsIn);
-        swCtrl_flow(ch, true);
-		valve_set_pres(ch, prsOut);
-		emit jobChaned(Group_AirIn, 0);
-	}
+
 	if (!m_cmdlist.isEmpty() && cmd == m_cmdlist.first())
 		m_cmdlist.removeFirst();
 }
@@ -707,6 +618,20 @@ void DevContrlMgr::ctrlServoMotor(uint8_t pos)
     m_servoMotorStat.Fresh();
 }
 
+void DevContrlMgr::ctrValve3Ch(uint8_t ch, uint8_t dir)
+{
+    uint8_t buff[8] = { 0x31, 7, 1, 0x99, ch, dir };
+    appendToQue(buff, sizeof(buff));
+}
+
+void DevContrlMgr::ctrlTempAndKeep(uint8_t ch, uint16_t tmp, int8_t tp)
+{
+    uint8_t buff[9] = { 0x31, 7, 1, tp == HeatGroupBox::Dev_heat ? 0x97 : 0x98, ch, 0, 0 };
+    buff[5] = tmp & 0xff;
+    buff[6] = (tmp >> 8) & 0xff;
+    appendToQue(buff, sizeof(buff));
+}
+
 void DevContrlMgr::programStepMotor(const QStringList& strs, CtrlType::StepMotorType tp)
 {
     uint8_t ch=0;
@@ -777,7 +702,8 @@ void DevContrlMgr::programMotorRobot(const QStringList& strs)
 
 void DevContrlMgr::programHeatMixture(const QStringList& strs, int tp)
 {
-    uint8_t buff[9] = { 0x31, 7, 1, tp==HeatGroupBox::Dev_heat?0x97:0x98, 0, 0, 0};
+    uint16_t tmp = 0;
+    uint8_t ch = 0;
     for (auto itr = strs.begin(); itr != strs.end(); )
     {
         if (*itr == tr("通道"))
@@ -785,13 +711,13 @@ void DevContrlMgr::programHeatMixture(const QStringList& strs, int tp)
             bool bSuc;
             while (++itr != strs.end())
             {
-                auto tmp = itr->toInt(&bSuc);
+                tmp = itr->toInt(&bSuc);
                 if (!bSuc)
                     break;
                 if (1 == tmp)
-                    buff[4] |= 1;
+                    ch |= 1;
                 else if (2 == tmp)
-                    buff[4] |= 2;
+                    ch |= 2;
             }
             continue;
         }
@@ -803,25 +729,20 @@ void DevContrlMgr::programHeatMixture(const QStringList& strs, int tp)
                 auto tmp = itr->toInt(&bSuc);
                 if (!bSuc)
                     break;
-                buff[5] = tmp & 0xff;
-                buff[6] = (tmp >> 8) & 0xff;
             }
             continue;
         }
-        if (*itr == tr("停止加热"))
-        {
-            buff[5] = 0xff;
-            buff[6] = 0xff;
-        }
+        tmp = 0xffff;
         ++itr;
     }
-    appendToQue(buff, sizeof(buff));
+    ctrlTempAndKeep(ch, tmp, tp);
 }
 
 void DevContrlMgr::programValve3Ch(const QString& cmd)
 {
-    uint8_t buff[8] = { 0x31, 7, 1, 0x99, 0, 0};
     auto strs = cmd.split(" ", QString::SkipEmptyParts);
+    uint8_t ch = 0;
+    uint8_t dir = 0;
     for (auto itr = strs.begin(); itr != strs.end(); )
     {
         if (*itr == tr("通道"))
@@ -833,9 +754,9 @@ void DevContrlMgr::programValve3Ch(const QString& cmd)
                 if (!bSuc)
                     break;
                 if (1 == tmp)
-                    buff[4] |= 1;
+                    ch |= 1;
                 else if (2 == tmp)
-                    buff[4] |= 2;
+                    ch |= 2;
             }
             continue;
         }
@@ -847,13 +768,13 @@ void DevContrlMgr::programValve3Ch(const QString& cmd)
                 auto tmp = itr->toInt(&bSuc);
                 if (!bSuc)
                     break;
-                buff[5] = tmp;
+                dir = tmp;
             }
             continue;
         }
         ++itr;
     }
-    appendToQue(buff, sizeof(buff));
+    ctrValve3Ch(ch, dir);
 }
 
 void DevContrlMgr::swCtrl_flow(int id, bool state)
@@ -1162,6 +1083,90 @@ void DevContrlMgr::onAckRecved(const QByteArray& arr)
         m_cmdlist.takeAt(0);
 
     cmdSend();
+    if (!m_actions.isEmpty())
+    {
+        auto act = m_actions.first();
+        auto tp = act->getType();
+        switch (tp)
+        {
+        case  Group_AirClear:
+            {
+                static QMap<uint8_t, int> sClearStep = { { 0x8D, 0}, { 0x82, 1}, { 0x8B, 2},{ 0x81, 3 } };
+                auto itr = sClearStep.find((uint8_t)arr.at(2));
+                if (itr != sClearStep.end())
+                {
+                    m_stAct++;
+                    doClearAir();
+                }
+            }
+            break;
+        case  Group_AirIn:
+            {
+                static QMap<uint8_t, int> sAirInStep = { { 0x8D, 0}, { 0x8C, 1}, { 0x8B, 2}, { 0x89, 3 }, { 0x90, 4 }, { 0x81, 5 } };
+                auto itr = sAirInStep.find((uint8_t)arr.at(2));
+                if (itr != sAirInStep.end() && itr.value()==m_stAct)
+                {
+                    m_stAct++;
+                    doAirIn();
+                }
+            }
+            break;
+        case  Group_LiquidIn:
+            {
+                static QMap<uint8_t, int> sAirInStep = { { 0x99, 1 },{ 0x85, 2 } };
+                auto itr = sAirInStep.find((uint8_t)arr.at(2));
+                if (itr != sAirInStep.end() && itr.value() == m_stAct)
+                {
+                    m_stAct++;
+                    doLiquidIn();
+                }
+            }
+            break;
+        case  Group_LiquidEnd:
+            {
+                if (0 == m_stAct && 0x85 == (uint8_t)arr.at(2))
+                {
+                    m_stAct++;
+                    doLiquiEnd();
+                }
+            }
+            break;
+        case Group_AirEnd:
+            {
+                static QMap<uint8_t, int> sAirEnsStep = { { 0x81, 0 },{ 0x8B, 1 } };
+                auto itr = sAirEnsStep.find((uint8_t)arr.at(2));
+                if (itr != sAirEnsStep.end() && itr.value() == m_stAct)
+                {
+                    m_stAct++;
+                    doLiquiEnd();
+                }
+            }
+            break;
+        case Act_PreHeat:
+        case Act_Keep:
+            if ((uint8_t)arr.at(2) == (Act_PreHeat == tp) ? 0x97 : 0x98)
+            {
+                m_stAct = 0;
+                emit actionFinished(tp, act->GetSeq());
+                m_actions.takeFirst();
+                if (!m_actions.isEmpty())
+                    onActionRun(m_actions.first(), true);
+            }
+            break;
+        case Group_StoveHeat:
+            if ((uint8_t)arr.at(2) == 0x83)
+            {
+                m_stAct = 0;
+                emit actionFinished(tp, act->GetSeq());
+                m_actions.takeFirst();
+                if (!m_actions.isEmpty())
+                    onActionRun(m_actions.first(), true);
+            }
+            break;
+        default:
+            break;
+        }
+    }
 }
 
 void DevContrlMgr::prcsMotor(const QByteArray &msg)
@@ -1176,6 +1181,8 @@ void DevContrlMgr::prcsMotor(const QByteArray &msg)
         {
             m_stepMotorStat[i] = st;
             emit stepMotorStatChanged(m_stepMotorStat + i);
+            if (st.GetType() == CtrlType::Motor_Pipelet)
+                _checkAction(st);
         }
     }
     ServoMotorStat st(msg.at(10));
@@ -1186,11 +1193,205 @@ void DevContrlMgr::prcsMotor(const QByteArray &msg)
     }
 }
 
-void DevContrlMgr::onActionRun(const ActionItem *act)
+void DevContrlMgr::_checkAction(const StepMotorStat &st)
 {
-    if (Act_Servo == act->getType())
-        ctrlServoMotor(act->servoPos);
-    else if (Act_StepMotor == act->getType())
-        ctrlStepMotor((CtrlType::StepMotorType)act->stepType, act->stepCh==0?1:2, act->stepDirCont ? 1 : 0);
+    auto act = (m_actions.isEmpty()&&st.GetType()==CtrlType::Motor_Pipelet) ? nullptr : m_actions.first();
+    if (!act) return;
+    if (act->getType() == Group_LiquidIn)
+    {
+        auto liAct = (LiquidInAction*)act;
+        if (liAct->GetChannel()==st.GetChannel() && 0==m_stAct && st.IsDown() && st.IsLimitL())///伸出取液管
+        {
+            m_stAct++;
+            doLiquidIn();
+        }
+    }
+    else if (act->getType() == Group_LiquidEnd)
+    {
+        auto liAct = (LiquidEndAction*)act;
+        if (liAct->GetChannel()==st.GetChannel() && 1==m_stAct && !st.IsDown() && st.IsLimitH()) ///收回取液管
+        {
+            m_stAct++;
+            doLiquiEnd();
+        }
+    }
 }
 
+void DevContrlMgr::onActionRun(const ActionAbstrctItem *act, bool bIn)
+{
+    if (act->GetSeq() >= 0 && !bIn)
+        m_actions << act;
+
+    switch (act->getType())
+    {
+    case Act_Servo:
+        ctrlServoMotor(((const ServoMotorAction*)act)->GetServoPos());
+        break;
+    case Act_StepMotor:
+        {
+            auto stepAct = (const StepMotorAction*)act;
+            ctrlStepMotor((CtrlType::StepMotorType)stepAct->GetMotorType(), stepAct->GetChannel() == 0 ? 1 : 2, stepAct->GetDirector() ? 1 : 0);
+        }
+        break;
+    case Group_AirClear:
+        if (m_actions.size() < 2 || m_actions.first()==act)
+            doClearAir();
+        break;
+    case Group_AirIn:
+        if (m_actions.size() < 2 || m_actions.first() == act)
+            doAirIn();
+        break;
+    case Group_LiquidIn:
+        if (m_actions.size() < 2 || m_actions.first() == act)
+            doLiquidIn();
+        break;
+    case Act_PreHeat:
+        {
+            auto hAct = (const HeatAction*)act;
+            ctrlTempAndKeep(hAct->GetTemp(), hAct->GetChannel() == 0 ? 1 : 2, HeatGroupBox::Dev_heat);
+        }
+        break;
+    case Act_Keep:
+        {
+            auto hAct = (const KeepAction*)act;
+            ctrlTempAndKeep(hAct->GetTemp(), hAct->GetChannel() == 0 ? 1 : 2, HeatGroupBox::Dev_montain);
+        }
+        break;
+    case Group_StoveHeat:
+        {
+            auto hAct = (const StoveHeatAction*)act;
+            if (hAct->UpSeconds() < 1)
+                tempStop(hAct->GetChannel());
+            else
+                sloPeTemp(hAct->GetChannel(), hAct->GetBegTemperature(),hAct->UpMins(), hAct->GetDstTemperature());
+        }
+    break;
+    default:
+        break;
+    }
+}
+
+void DevContrlMgr::doClearAir()
+{
+    if (auto act = (!m_actions.isEmpty() && m_actions.first()->getType()==Group_AirClear)? (const AirClrAction*)m_actions.first() : nullptr)
+    {
+        switch (m_stAct)
+        {
+        case 0:
+            presCtrl_Range(act->GetChannel(), act->GetPressure()); break;//减压阀
+        case 1:
+            flowCtrl(act->GetChannel(), 50);///流量计
+        case 2:
+            valve_set_manual_state(act->GetChannel(), 1); break;//被压阀全开
+        case 3:
+            swCtrl(act->GetChannel(), true); break;//气路1开
+        case 4:
+            QTimer::singleShot(act->ClearSeconds() * 1000, this, [=] {
+                swCtrl(act->GetChannel(), false);
+                m_stAct = 0;
+                m_actions.takeFirst();
+                if (!m_actions.isEmpty())
+                    onActionRun(m_actions.first(), true);
+                emit actionFinished(Group_AirClear, act->GetSeq());               
+            }); break;
+        default:
+            break;
+        }
+    }
+}
+
+void DevContrlMgr::doAirIn()
+{
+    if (auto act = (!m_actions.isEmpty() && m_actions.first()->getType() == Group_AirClear) ? (const AirInAction*)m_actions.first() : nullptr)
+    {
+        switch (m_stAct)
+        {
+        case 0:
+            presCtrl_Range(act->GetChannel(), act->GetPressIn()); break;///减压 0x8D 0x8C 0x8B 0x89 0x90 0x81
+        case 1:
+            flowCtrl_Range(act->GetChannel(), act->GetFlow()); break;///流量计 0x8C
+        case 2:
+            valve_set_manual_state(act->GetChannel(), 0); break;///被压阀全开取消 0x8B
+        case 3:
+            valve_set_pres(act->GetChannel(), 0); break;///被压压力 0x89
+        case 4:
+            swCtrl_flow(act->GetChannel(), true); break;///流量计开 0x90
+        case 5:
+            swCtrl(act->GetChannel()+2, true); break;///气路2开 0x81
+        default:
+            m_stAct = 0;
+            m_actions.takeFirst();
+            if (!m_actions.isEmpty())
+                onActionRun(m_actions.first(), true);
+            break;
+        }
+    }
+}
+
+void DevContrlMgr::doLiquidIn()
+{
+    if (auto act = (!m_actions.isEmpty() && m_actions.first()->getType() == Group_LiquidIn) ? (const LiquidInAction*)m_actions.first() : nullptr)
+    {
+        switch (m_stAct)
+        {
+        case 0:
+            ctrlStepMotor(CtrlType::Motor_Pipelet, act->GetChannel() == 0 ? 1 : 2, Pipelet_Down); break;///取液管下降 0x93
+        case 1:
+            ctrValve3Ch(act->GetChannel()==0 ? 1:2, 0); break;///三通阀排空 0x99 0x85 0x8B 0x89 0x90 0x81
+        case 2:
+            pumpSpeeed(act->GetChannel(), act->GetFlow()); break;///被压阀全开取消 0x85
+        case 3:
+            QTimer::singleShot(act->ClearAirSeconds() * 1000, this, [=] {
+                ctrValve3Ch(act->GetChannel() == 0 ? 1 : 2, 1);
+                m_stAct = 0;
+                m_actions.takeFirst();
+                if (!m_actions.isEmpty())
+                    onActionRun(m_actions.first(), true);
+
+                emit actionFinished(Group_AirClear, act->GetSeq());
+            }); break;
+        case 4:
+            ctrlStepMotor(CtrlType::Motor_Pipelet, act->GetChannel() == 0 ? 1 : 2, 0); break;///取液管上升 0x93
+        }
+    }
+}
+
+void DevContrlMgr::doLiquiEnd()
+{
+    if (auto act = (!m_actions.isEmpty() && m_actions.first()->getType()==Group_LiquidEnd) ? (const LiquidEndAction*)m_actions.first() : nullptr)
+    {
+        switch (m_stAct)
+        {
+        case 0:
+            pumpSpeeed(act->GetChannel(), 0); break;///被压阀全开取消 0x85
+        case 1:
+            ctrlStepMotor(CtrlType::Motor_Pipelet, act->GetChannel() == 0 ? 1 : 2, Pipelet_Up); break;///取液管下降 0x93
+        default:
+            m_stAct = 0;
+            m_actions.takeFirst();
+            if (!m_actions.isEmpty())
+                onActionRun(m_actions.first(), true);
+            break;
+        }
+    }
+}
+
+void DevContrlMgr::doAirEnd()
+{
+    if (auto act = (!m_actions.isEmpty() && m_actions.first()->getType() == Group_AirEnd) ? (const AirEndAction*)m_actions.first() : nullptr)
+    {
+        switch (m_stAct)
+        {
+        case 0:
+            swCtrl(act->GetChannel() + 2, false); break;///气路2开 0x81 0x8B
+        case 1:
+            valve_set_manual_state(act->GetChannel(), 1); break;///被压阀全开 0x8B
+        default:
+            m_stAct = 0;
+            m_actions.takeFirst();
+            if (!m_actions.isEmpty())
+                onActionRun(m_actions.first(), true);
+            break;
+        }
+    }
+}

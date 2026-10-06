@@ -10,7 +10,6 @@ class MaterialStore;
 class ReceiveData;
 class manualOp;
 class deviceOp;
-class customGraph;
 class progConfig;
 class DevContrlMgr;
 class projectMode;
@@ -22,6 +21,9 @@ class deskTop : public QWidget
 public:
     explicit deskTop(QWidget *parent = 0);
     ~deskTop();
+
+	DevContrlMgr *getDevContrlMgr()const;
+    deviceOp *getDeviceOp()const;
 public slots:
     void Scene1Show();
     void Scene2Show();
@@ -30,7 +32,6 @@ public slots:
     void Scene5Show();
     void Scene6Show();
     void StoreShow();
-    void updateInfo(ReceiveData *data);
     void updateRunTime(int time);
 private slots:
     void on_configBtn_clicked();
@@ -38,9 +39,9 @@ private slots:
 private:
     Ui::deskTop     *ui;
     MaterialStore   *m_mateSt;
-    manualOp *manualOperation;
-    deviceOp *deviceOperation;
-    customGraph *graph;
+    manualOp    *manualOperation;
+    deviceOp    *deviceOperation;
+    QWidget     *m_graph;
   //  ProgramConfig *programconfig;
     progConfig *progconfig;
     DevContrlMgr *decoder;

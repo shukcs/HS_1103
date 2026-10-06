@@ -1,5 +1,5 @@
 ﻿#include "FeedLiquidGroupBox.h"
-#include "strDecoder/CtrlAction.h"
+#include "DevContrlMgr/CtrlAction.h"
 #include "Ui_FeedLiquidGroupBox.h"
 #pragma execution_character_set("utf-8")
 

@@ -16,8 +16,6 @@ class MaterialStore : public QWidget
 public:
     explicit MaterialStore(QWidget *parent = 0);
     ~MaterialStore();
-
-    RobotMgr *GetRobotMgr()const;
 private slots:
     void updateStore(const StoreStruct* c);
 private:
@@ -28,7 +26,6 @@ private:
     void initLog();
 private:
     Ui::MaterialStore       *m_ui;
-    RobotMgr                *m_robot;
 };
 
 #endif //__MaterialStore_H__

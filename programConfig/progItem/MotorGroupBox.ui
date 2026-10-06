@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>472</width>
-    <height>144</height>
+    <height>150</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -71,7 +71,7 @@ QListView{font-family:SimHei;font-size:20px;}</string>
       </size>
      </property>
      <property name="currentIndex">
-      <number>2</number>
+      <number>0</number>
      </property>
      <item>
       <property name="text">
@@ -81,11 +81,6 @@ QListView{font-family:SimHei;font-size:20px;}</string>
      <item>
       <property name="text">
        <string>通道2</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string>通道1+通道2</string>
       </property>
      </item>
     </widget>

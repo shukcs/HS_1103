@@ -1,5 +1,5 @@
 ﻿#include "HeatGroupBox.h"
-
+#include "DevContrlMgr/CtrlAction.h"
 #include "Ui_HeatGroupBox.h"
 #pragma execution_character_set("utf-8")
 
@@ -44,5 +44,14 @@ QString HeatGroupBox::_getTmpString() const
 
 void HeatGroupBox::onAdd()
 {
-    emit sig_Add(title() + _getChStr() + _getTmpString());
+    if (tr("保温箱") == title())
+    {
+        if (auto act = new KeepAction(m_ui->spinBox->value(), m_ui->cmb_ch->currentIndex()))
+            act->AddToEdit();
+    }
+    else
+    {
+        if (auto act = new HeatAction(m_ui->spinBox->value(), m_ui->cmb_ch->currentIndex()))
+            act->AddToEdit();
+    }
 }

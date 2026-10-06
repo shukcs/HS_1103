@@ -13,7 +13,7 @@ HsList::HsList(QWidget *parent) : QListWidget(parent)
     initContent();
 }
 
-void HsList::dropEvent(QDropEvent *event)
+void HsList::dropEvent(QDropEvent *)
 {
 }
 

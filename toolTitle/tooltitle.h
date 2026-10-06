@@ -15,9 +15,6 @@ public:
     explicit toolTitle(QWidget *parent = 0);
     ~toolTitle();
 
-signals:
-    void logoBtn_clicked();
-
 private slots:
     void logoBtn_slot();
 private:

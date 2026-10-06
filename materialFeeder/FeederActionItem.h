@@ -9,7 +9,7 @@ class SolidPrepareItem :  public ActionAbstrctItem
 public:
     SolidPrepareItem(uint16_t numBottle=0, uint16_t numTube=0, const QList<FeedItem>&weightFeeds=QList<FeedItem>(), int16_t seq=-1);
     QString ToString(bool bStart = true)const override;
-	void Save(QDataStream *dstr, bool bSaveStat = false)override;
+	void Save(QDataStream *dstr)override;
     void Load(QDataStream *dstr)override;
 	void Distribute()override;
 public:
@@ -23,7 +23,7 @@ class FixTubeItem : public ActionAbstrctItem
 public:
     FixTubeItem(uint16_t ch=0, uint16_t numTub=0, int16_t seq=-1);
 	QString ToString(bool bStart = true)const override;
-	void Save(QDataStream *dstr, bool bSaveStat = false)override;
+	void Save(QDataStream *dstr)override;
 	void Distribute()override;
 public:
     uint16_t m_ch;
@@ -35,7 +35,7 @@ class TubeBackItem : public ActionAbstrctItem
 public:
     TubeBackItem(uint16_t ch=0, uint16_t pos=0, int16_t seq = -1);
     QString ToString(bool bStart = true)const override;
-	void Save(QDataStream *dstr, bool bSaveStat = false)override;
+	void Save(QDataStream *dstr)override;
 	void Distribute()override;
 public:
     uint16_t m_ch;

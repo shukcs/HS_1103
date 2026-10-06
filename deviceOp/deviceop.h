@@ -2,18 +2,13 @@
 #define DEVICEOP_H
 
 #include <QWidget>
-#include <QFile>
-#include <QDir>
-#include <QValidator>
-#include <QTextStream>
 #include "common/mymessageBox.h"
-#include "strDecoder/portthread.h"
-
 
 namespace Ui {
 class deviceOp;
 }
 
+class ReceiveData;
 class deviceOp : public QWidget
 {
     Q_OBJECT
@@ -21,46 +16,13 @@ class deviceOp : public QWidget
 public:
     explicit deviceOp(QWidget *parent = 0);
     ~deviceOp();
-    void updateInfo(ReceiveData *data);
-
-signals:
-    void cmdTorun(const QString &);
-    void selfcmdTorun(const QString&);
-
 public slots:
     void update_user_set(bool state);
     void autoRun(bool state);       // 运行状态更新
     void tempAdjustEnable(void);
     void readyTorun(const QString&);
     void stove_refresh(int who,int row,int col,float val);
-
 private slots:
-//    void on_temp1_editingFinished();
-//    void on_temp2_editingFinished();
-//    void on_temp3_editingFinished();
-//    void on_temp4_editingFinished();
-//    void on_temp5_editingFinished();
-//    void on_temp6_editingFinished();
-//    void on_temp7_editingFinished();
-//    void on_temp8_editingFinished();
-//    void on_temp9_editingFinished();
-//    void on_temp10_editingFinished();
-
-//    void on_time1_editingFinished();
-//    void on_time2_editingFinished();
-//    void on_time3_editingFinished();
-//    void on_time4_editingFinished();
-//    void on_time5_editingFinished();
-//    void on_time6_editingFinished();
-//    void on_time7_editingFinished();
-//    void on_time8_editingFinished();
-//    void on_time9_editingFinished();
-//    void on_time10_editingFinished();
-
-//    void on_run_clicked();
-//    void on_stop_clicked();
-//    void on_save_clicked();
-
     void on_temp1Adj_btn_clicked();
 
     void on_pres_auto_clicked();
@@ -101,7 +63,11 @@ private slots:
 //    void on_pump_cali_2_editingFinished();
 
     bool check_run(QString str);
-
+private:
+	void updateInfo(ReceiveData *data);
+signals:
+	void cmdTorun(const QString &);
+	void selfcmdTorun(const QString&);
 private:
     Ui::deviceOp *ui;
     int stove_No = 0;

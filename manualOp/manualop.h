@@ -16,7 +16,6 @@ public:
     explicit manualOp(QWidget *parent = 0);
     ~manualOp();
 
-    void updateInfo(ReceiveData *data);
     diagram* getDiagram();
 signals:
     void cmdTorun(const QString &str);

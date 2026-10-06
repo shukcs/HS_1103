@@ -3,7 +3,8 @@
 #include <QTimer>
 #include <QMessageBox>
 
-#include "strDecoder/portthread.h"
+#include "HsApplication.h"
+#include "DevContrlMgr/portthread.h"
 #include "flowset.h"
 
 #include "ui_diagram.h"
@@ -40,6 +41,9 @@ diagram::diagram(QWidget *parent) :
     //ui->pres3->hide();
     //ui->pres7->hide();
     initSlots();
+	connect(hsApp->getThread(), &portThread::dateReceived, this, &diagram::updateInfo);
+	connect(hsApp->getThread(), &portThread::heatAndKeepChanged, this, &diagram::updateHeatAndKeep);
+	connect(hsApp->getThread(), &portThread::triEleValveStat, this, &diagram::updateTriEleValveStat);
 }
 
 diagram::~diagram()

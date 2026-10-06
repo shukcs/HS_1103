@@ -1,6 +1,6 @@
 ﻿#include "AirWayGroupBox.h"
-#include "strDecoder/strdecoder.h"
-#include "strDecoder/CtrlAction.h"
+#include "DevContrlMgr/DevContrlMgr.h"
+#include "DevContrlMgr/CtrlAction.h"
 
 #include "Ui_AirWayGroupBox.h"
 #pragma execution_character_set("utf-8")

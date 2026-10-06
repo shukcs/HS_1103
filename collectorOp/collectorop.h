@@ -2,25 +2,14 @@
 #define COLLECTOROP_H
 
 #include <QWidget>
-#include <QFile>
-#include <QDir>
-#include <QValidator>
-#include <QTextStream>
-#include <QMessageBox>
-#include <QByteArray>
-#include <QDataStream>
-#include "common/mymessageBox.h"
-#include "strDecoder/portthread.h"
-#include "strDecoder/strdecoder.h"
-
 
 #define COLL_CNT    16
-
 
 namespace Ui {
 class collectorOp;
 }
-
+class QLabel;
+class ReceiveData;
 class collectorOp : public QWidget
 {
     Q_OBJECT
@@ -28,8 +17,6 @@ class collectorOp : public QWidget
 public:
     explicit collectorOp(QWidget *parent = 0);
     ~collectorOp();
-    void updateInfo(ReceiveData *data);
-
 signals:
     void cmdTorun(const QString &);
     void selfcmdTorun(const QString &);
@@ -39,7 +26,9 @@ public slots:
     void readyTorun(const QString& str);
     void updateCmd(const QString& str);
 protected:
-    bool eventFilter(QObject* obj, QEvent* event)override;
+	bool eventFilter(QObject* obj, QEvent* event)override;
+
+	void updateInfo(ReceiveData *data);
 private slots:
     void on_readbtn_clicked();
     void on_writebtn_clicked();
@@ -47,7 +36,6 @@ private slots:
     void LabelUpdate(int index);
     void SampleUpdate(int index);
     bool check_run(const QString& str);
-
 private:
     Ui::collectorOp *ui;
     QLabel* mask;

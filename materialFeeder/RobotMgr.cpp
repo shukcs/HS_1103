@@ -6,6 +6,7 @@
 #include <QTcpSocket>
 #include <qevent.h>
 #include <stdio.h>
+#include "HsApplication.h"
 #include "FeederMgr.h"
 #include "common/ModubosProtocol.h"
 #include "log/DeviceLog.h"
@@ -35,8 +36,7 @@ static QMap<RobotMgr::RobotStat, InitAct> sInit = { { RobotMgr::PowerOff,{ Robot
 RobotMgr::RobotMgr(QObject* p) : QObject(p)
 , m_modbusTcp(new ModubosProtocol(new QTcpSocket(this), Robot_ModbusAddr))
 {
-    connect(&FeederMgr::Instance(), &FeederMgr::actionRun, this, &RobotMgr::DoAction);
-    connect(this, &RobotMgr::actionDone, &FeederMgr::Instance(), &FeederMgr::OnRobotDone);
+    connect(this, &RobotMgr::actionDone, hsApp->feederMgr(), &FeederMgr::OnRobotDone);
 
     QSettings settings(FeederMgr::DefaultConfigFile(), QSettings::IniFormat);
     settings.beginGroup("RobotPort");
@@ -65,14 +65,11 @@ bool RobotMgr::IsConnenct()const
     return socket && socket->isOpen();
 }
 
-void RobotMgr::DoAction(const ActionItem *act)
+void RobotMgr::DoAction(const RobotActionItem *act)
 {
-    if (Act_Robot == act->getType())
-    {
-        m_curAct = (RobotAction)act->robotStep;
-        m_curIdx = act->robotIndex;
-        QTimer::singleShot(200, this, &RobotMgr::ctrl);
-    }
+    m_curAct = (RobotAction)act->GetStepType();
+    m_curIdx = act->GetIndex();
+    QTimer::singleShot(200, this, &RobotMgr::ctrl);
 }
 
 void RobotMgr::ConnectSocket(const QString &ip, uint16_t port)

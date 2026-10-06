@@ -1,6 +1,17 @@
 ﻿#include "collectorop.h"
 #include <qevent.h>
 #include <QTimer>
+#include <QFile>
+#include <QDir>
+#include <QValidator>
+#include <QTextStream>
+#include <QMessageBox>
+#include <QByteArray>
+#include <QDataStream>
+#include "common/mymessageBox.h"
+#include "DevContrlMgr/portthread.h"
+#include "DevContrlMgr/DevContrlMgr.h"
+#include "HsApplication.h"
 #include "ui_collectorop.h"
 #pragma execution_character_set("utf-8")
 
@@ -180,6 +191,7 @@ collectorOp::collectorOp(QWidget *parent) :
     QRegularExpressionValidator *validator = new QRegularExpressionValidator(rx, this);
     ui->lineEdit_5->setValidator(validator);
     ui->lineEdit_6->setValidator(validator);
+	connect(hsApp->getThread(), &portThread::dateReceived, this, &collectorOp::updateInfo);
 }
 
 collectorOp::~collectorOp()

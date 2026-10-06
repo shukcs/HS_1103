@@ -2,14 +2,11 @@
 #define PROJECTMODE_H
 
 #include <QWidget>
-#include "common/mymessageBox.h"
-#include "strDecoder/portthread.h"
-
 
 namespace Ui {
 class projectMode;
 }
-
+class ReceiveData;
 class projectMode : public QWidget
 {
     Q_OBJECT
@@ -18,8 +15,8 @@ public:
     explicit projectMode(QWidget *parent = 0);
     ~projectMode();
 
-    void updateInfo(ReceiveData *data);
-
+protected:
+	void updateInfo(ReceiveData *data);
 signals:
     void cmdTorun(const QString &str);
 

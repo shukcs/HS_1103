@@ -1,6 +1,7 @@
 ﻿#include "FeederGroupBox.h"
+#include "HsApplication.h"
 #include "common/mymessageBox.h"
-#include "strDecoder/strdecoder.h"
+#include "DevContrlMgr/DevContrlMgr.h"
 #include "materialFeeder/FeederMgr.h"
 #include "materialFeeder/FeederActionItem.h"
 
@@ -29,15 +30,15 @@ void FeederGroupBox::initUi()
     connect(m_ui->btn_tubeback, &QPushButton::clicked, this, &FeederGroupBox::onTubeBack);
     connect(m_ui->btn_fix, &QPushButton::clicked, this, &FeederGroupBox::onFix);
     connect(m_ui->widget, &MaterialsSelect::avalidChanged, this, [=](bool b) { m_ui->pushButton->setEnabled(b); });
-    for (auto itr : FeederMgr::Instance().AllTubes())
+    for (auto itr : hsApp->feederMgr()->AllTubes())
     {
-        if (FeederMgr::Instance().CanAddWork(Group_StoveFixTube, itr->getNumber(), true))
+        if (hsApp->feederMgr()->CanAddWork(Group_StoveFixTube, itr->getNumber(), true))
             m_ui->cmb_tube->addItem(tr("反应管%1").arg(itr->getNumber()+1));
     }
 
-    connect(&FeederMgr::Instance(), &FeederMgr::tubeChanged, this, [=](const TubeStruct *tb) {
+    connect(hsApp->feederMgr(), &FeederMgr::tubeChanged, this, [=](const TubeStruct *tb) {
         auto str = tr("反应管%1").arg(tb->getNumber()+1);
-        if (FeederMgr::Instance().CanAddWork(Group_StoveFixTube, tb->getNumber(), true))
+        if (hsApp->feederMgr()->CanAddWork(Group_StoveFixTube, tb->getNumber(), true))
         {
             for (int i = 0; i < m_ui->cmb_tube->count(); ++i)
             {

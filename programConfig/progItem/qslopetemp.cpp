@@ -13,6 +13,7 @@
 #include <QFile>
 #include <QListView>
 #include "common/mymessageBox.h"
+#include "DevContrlMgr/CtrlAction.h"    
 #pragma execution_character_set("utf-8")
 
 QSlopeTemp::QSlopeTemp(QWidget *parent) : QGroupBox(parent)
@@ -197,12 +198,6 @@ void QSlopeTemp::addBtn_clicked()
         return ;
     }
 
-    if(timeInput->text().toInt() == 0)  //  判断时间是否为0
-    {
-       emit slopePanelAdd(slopeTempList->currentText()+" "+QString::number(slopeTempList->currentIndex())+" 降温");
-    }
-    else if(timeInput->text().toInt() > 0)  //  判断时间是否为0
-    {
-       emit slopePanelAdd(slopeTempList->currentText()+" "+QString::number(slopeTempList->currentIndex())+" "+timeInput->text()+" min内从 "+temp1Input->text()+" ℃"+"升温至 "+temp2Input->text()+" ℃");
-    }
+    if (auto act = new StoveHeatAction(slopeTempList->currentIndex(), temp1Input->text().toDouble(), temp2Input->text().toDouble(), timeInput->text().toDouble()))
+        act->AddToEdit();
 }

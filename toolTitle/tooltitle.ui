@@ -91,10 +91,10 @@ QLabel#bar
    <item row="0" column="1">
     <spacer name="horizontalSpacer">
      <property name="orientation">
-      <enum>Qt::Orientation::Horizontal</enum>
+      <enum>Qt::Horizontal</enum>
      </property>
      <property name="sizeType">
-      <enum>QSizePolicy::Policy::Fixed</enum>
+      <enum>QSizePolicy::Fixed</enum>
      </property>
      <property name="sizeHint" stdset="0">
       <size>
@@ -114,7 +114,7 @@ QLabel#bar
    <item row="0" column="3">
     <spacer name="horizontalSpacer_2">
      <property name="orientation">
-      <enum>Qt::Orientation::Horizontal</enum>
+      <enum>Qt::Horizontal</enum>
      </property>
      <property name="sizeHint" stdset="0">
       <size>
@@ -134,10 +134,10 @@ QLabel#bar
    <item row="0" column="5">
     <spacer name="horizontalSpacer_3">
      <property name="orientation">
-      <enum>Qt::Orientation::Horizontal</enum>
+      <enum>Qt::Horizontal</enum>
      </property>
      <property name="sizeType">
-      <enum>QSizePolicy::Policy::Fixed</enum>
+      <enum>QSizePolicy::Fixed</enum>
      </property>
      <property name="sizeHint" stdset="0">
       <size>

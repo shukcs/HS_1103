@@ -1,6 +1,7 @@
 ﻿#include "MaterialsSelect.h"
 #include <qEvent.h>
 #include <QMap>
+#include "HsApplication.h"
 #include "../FeederMgr.h"
 #include "common/MaskWidget.h"
 
@@ -16,9 +17,9 @@ MaterialsSelect::MaterialsSelect(QWidget *parent) : QWidget(parent)
     initUi(m_ui->cmb_id, m_ui->w_id);
     changeAvalidTube();
     changeAvalidBottle();
-    connect(&FeederMgr::Instance(), &FeederMgr::matesCanFeedChanged, this, &MaterialsSelect::changeAvalidMate);
-    connect(&FeederMgr::Instance(), &FeederMgr::canUsedTubeChanged, this, &MaterialsSelect::changeAvalidTube);
-    connect(&FeederMgr::Instance(), &FeederMgr::canUsedBottleChanged, this, &MaterialsSelect::changeAvalidBottle);
+    connect(hsApp->feederMgr(), &FeederMgr::matesCanFeedChanged, this, &MaterialsSelect::changeAvalidMate);
+    connect(hsApp->feederMgr(), &FeederMgr::canUsedTubeChanged, this, &MaterialsSelect::changeAvalidTube);
+    connect(hsApp->feederMgr(), &FeederMgr::canUsedBottleChanged, this, &MaterialsSelect::changeAvalidBottle);
 }
 
 MaterialsSelect::~MaterialsSelect()
@@ -106,7 +107,7 @@ void MaterialsSelect::initUi(QComboBox* cmb, SpinCust* sp)
     auto mask = new MaskWidget(cmb);
     mask->hide();
 
-    auto strLs = FeederMgr::Instance().AllAvalidMaterials();
+    auto strLs = hsApp->feederMgr()->AllAvalidMaterials();
     for (auto& itr : m_unitMates)
     {
         strLs.removeAll(itr.cmb->currentText());
@@ -142,7 +143,7 @@ void MaterialsSelect::delUnit(SpinCust* sp)
     if (idx >= m_unitMates.size() || idx < 0)
         return;
 
-    auto strLs = FeederMgr::Instance().AllAvalidMaterials();
+    auto strLs = hsApp->feederMgr()->AllAvalidMaterials();
     auto u = m_unitMates.at(idx);
     QString str = u.cmb->currentText();
     if (!str.isEmpty())
@@ -187,13 +188,13 @@ int MaterialsSelect::indexUnit(SpinCust* sp)
 
 void MaterialsSelect::changeAvalidMate()
 {
-    auto strLs = FeederMgr::Instance().AllAvalidMaterials();
+    auto strLs = hsApp->feederMgr()->AllAvalidMaterials();
     if (m_bVallid && strLs.isEmpty())
     {
         m_bVallid = false;
         emit avalidChanged(m_bVallid);
     }
-    else if (!m_bVallid && !strLs.isEmpty() && !FeederMgr::Instance().ValidBottls().isEmpty() && !FeederMgr::Instance().ValidTubes().isEmpty())
+    else if (!m_bVallid && !strLs.isEmpty() && !hsApp->feederMgr()->ValidBottls().isEmpty() && !hsApp->feederMgr()->ValidTubes().isEmpty())
     {
         m_bVallid = true;
         emit avalidChanged(m_bVallid);
@@ -214,13 +215,13 @@ void MaterialsSelect::changeAvalidMate()
 
 void MaterialsSelect::changeAvalidTube()
 {
-    auto vts = FeederMgr::Instance().ValidTubes();
+    auto vts = hsApp->feederMgr()->ValidTubes();
     if (m_bVallid && vts.isEmpty())
     {
         m_bVallid = false;
         emit avalidChanged(m_bVallid);
     }
-    else if (!m_bVallid && !vts.isEmpty() && !FeederMgr::Instance().ValidBottls().isEmpty() && !FeederMgr::Instance().AllAvalidMaterials().isEmpty())
+    else if (!m_bVallid && !vts.isEmpty() && !hsApp->feederMgr()->ValidBottls().isEmpty() && !hsApp->feederMgr()->AllAvalidMaterials().isEmpty())
     {
         m_bVallid = true;
         emit avalidChanged(m_bVallid);
@@ -237,13 +238,13 @@ void MaterialsSelect::changeAvalidTube()
 
 void MaterialsSelect::changeAvalidBottle()
 {
-    auto vbs = FeederMgr::Instance().ValidBottls();
+    auto vbs = hsApp->feederMgr()->ValidBottls();
     if (m_bVallid && vbs.isEmpty())
     {
         m_bVallid = false;
         emit avalidChanged(m_bVallid);
     }
-    else if (!m_bVallid && !vbs.isEmpty() && !FeederMgr::Instance().ValidTubes().isEmpty() && !FeederMgr::Instance().AllAvalidMaterials().isEmpty())
+    else if (!m_bVallid && !vbs.isEmpty() && !hsApp->feederMgr()->ValidTubes().isEmpty() && !hsApp->feederMgr()->AllAvalidMaterials().isEmpty())
     {
         m_bVallid = true;
         emit avalidChanged(m_bVallid);

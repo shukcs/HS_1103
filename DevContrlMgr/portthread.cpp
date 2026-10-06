@@ -6,7 +6,6 @@
 #include <QDebug>
 #include <QApplication>
 
-#include "strdecoder.h"
 #include "materialFeeder/FeederMgr.h"
 #include "common/ModubosProtocol.h"
 
@@ -290,7 +289,7 @@ void portThread::prcsReport(const QByteArray& msg)
         break;
     }
 
-    emit ReceiceDone(m_recdata);
+    emit dateReceived(m_recdata);
 }
 
 void portThread::prcsHeatAndKeep(const QByteArray& msg)

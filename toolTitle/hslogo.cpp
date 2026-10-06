@@ -43,16 +43,6 @@ void Hslogo::mousePressEvent(QMouseEvent *event)
     {
        timer.start(3000);
     }
-//    if (event->button() == Qt::LeftButton) {
-//        if(state)
-//        {
-//          emit logo_clicked();
-//            qDebug()<<"hello";
-//        }
-//    }
-//    else if (event->button() == Qt::RightButton) {
-
-    //    }
 }
 
 void Hslogo::mouseReleaseEvent(QMouseEvent *event)

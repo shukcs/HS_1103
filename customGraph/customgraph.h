@@ -49,12 +49,6 @@ public:
     explicit customGraph(QWidget *parent = 0);
     ~customGraph();
 
-    QCPAxis *xAxis;
-    QCPAxis *yAxis;
-    QCPAxis *yAxis2;
-    QCPItemText *TextTip;
-    QCPItemTracer *Trace;
-    HSGraphData GraphData[LINE_NUM];
 
     void startBtn_enable(bool state);
     void clearBtn_enable(bool state);
@@ -63,10 +57,13 @@ public:
     void openBtn_enable(bool state);
     void baseBtn_enable(bool state);
  //   void setTimer(int time);
-    void updateInfo(ReceiveData *data);
 //    void startRecord(bool state);
 //    void autoSavedata(void); // 保存曲线数据
 
+    void startRecord(bool state);
+    void autoSavedata(void); // 保存曲线数据
+protected:
+	void updateInfo(ReceiveData *data);
 signals:
 
 private slots:
@@ -76,8 +73,6 @@ private slots:
     void ongraphMouseMove(QMouseEvent * event);
     void timer_out();
     void setTimer(int time);
-    void startRecord(bool state);
-    void autoSavedata(void); // 保存曲线数据
     void on_y1Max_editingFinished();
     void on_y1Min_editingFinished();
     void on_y2Max_editingFinished();
@@ -107,6 +102,12 @@ private slots:
     void save_graph_data(QString path);
 
 private:
+    QCPAxis *xAxis;
+    QCPAxis *yAxis;
+    QCPAxis *yAxis2;
+    QCPItemText *TextTip;
+    QCPItemTracer *Trace;
+    HSGraphData GraphData[LINE_NUM];
     Ui::customGraph *ui;
     QTimer timer;
     uint32_t sleepTime;

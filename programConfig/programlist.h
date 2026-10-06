@@ -40,10 +40,11 @@ public slots:
     void runTimer_slot(void);
     void clear_sub_list();
     void obj_clicked(int index);
-    void OnActionDone(uint16_t type, int16_t idx);
+    void OnActionDone(uint16_t type, int16_t seq);
 protected:
     void runTitle();
 	void initList();
+    void _cycle(ActionAbstrctItem *act);
 private:
     QComboBox *nameList;
     QPushButton *refresh;

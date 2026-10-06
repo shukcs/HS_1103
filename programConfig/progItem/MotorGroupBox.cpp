@@ -1,5 +1,5 @@
 ﻿#include "MotorGroupBox.h"
-#include "strDecoder/strdecoder.h"
+#include "DevContrlMgr/DevContrlMgr.h"
 
 #include "Ui_MotorGroupBox.h"
 #pragma execution_character_set("utf-8")

@@ -5,10 +5,12 @@
 #include "deviceOp/deviceop.h"
 #include "customGraph/customgraph.h"
 #include "programConfig/progconfig.h"
-#include "strDecoder/strdecoder.h"
+#include "DevContrlMgr/DevContrlMgr.h"
 #include "projectMode/projectmode.h"
 #include "collectorOp/collectorop.h"
 #include "Diagram/diagram.h"
+#include "HsApplication.h"
+#include "materialFeeder/FeederMgr.h"
 
 #include "ui_desktop.h"
 #pragma execution_character_set("utf-8")
@@ -32,8 +34,8 @@ deskTop::deskTop(QWidget *parent) :
     deviceOperation = new deviceOp;     //  手动界面
     ui->mainUI->addWidget(deviceOperation);
 
-    graph = new customGraph;     //  曲线界面
-    ui->mainUI->addWidget(graph);
+    m_graph = hsApp->getGustomGraph();     // 曲线界面
+    ui->mainUI->addWidget(m_graph);
 
     progconfig = new progConfig;
     ui->mainUI->addWidget(progconfig);   // 程序配置界面
@@ -54,39 +56,39 @@ deskTop::deskTop(QWidget *parent) :
     connect(collectorOperation, &collectorOp::cmdTorun, decoder, &DevContrlMgr::strTocmd);
 
     //connect(decoder,SIGNAL(setConnectionState(bool)),deviceOperation,SLOT(update_user_set(bool)));
-    connect(decoder, &DevContrlMgr::setConnectionState, projectmode, &projectMode::update_user_set);
-    connect(decoder, SIGNAL(setConnectionState(bool)), ui->state, SLOT(setConnectionState(bool)));
-    connect(decoder->getThread(), &portThread::ReceiceDone, this, &deskTop::updateInfo);
-    connect(decoder->getThread(), &portThread::heatAndKeepChanged, manualOperation->getDiagram(), &diagram::updateHeatAndKeep);
-    connect(decoder->getThread(), &portThread::triEleValveStat, manualOperation->getDiagram(), &diagram::updateTriEleValveStat);
-    connect(decoder,SIGNAL(startRecord(bool)),graph,SLOT(startRecord(bool)));
-    connect(decoder,SIGNAL(autoSavedata()),graph,SLOT(autoSavedata()));
-    connect(ui->state, &stateBar::portChanged, decoder, &DevContrlMgr::savePortName);
-    connect(ui->state,SIGNAL(sampleTimeChanged(int)),graph,SLOT(setTimer(int)));
-    connect(ui->state,SIGNAL(sampleTimeChanged(int)),decoder,SLOT(setTimer(int)));
-
-    connect(ui->state,SIGNAL(autoBtn_clicked()),this,SLOT(Scene1Show()));
-    connect(ui->state,SIGNAL(manualBtn_clicked()),this,SLOT(Scene2Show()));
-    connect(ui->state,SIGNAL(collectorBtn_clicked()),this,SLOT(Scene6Show()));
-    connect(ui->state, SIGNAL(graphBtn_clicked()), this, SLOT(Scene3Show()));
-    connect(ui->state, &stateBar::storeBtn_clicked, this, &deskTop::StoreShow);
-    connect(ui->tool,SIGNAL(logoBtn_clicked()),deviceOperation,SLOT(tempAdjustEnable()));
+    //connect(decoder, SIGNAL(setConnectionState(bool)), ui->state, SLOT(setConnectionState(bool)));
+    //connect(decoder->getThread(), &portThread::dateReceived, this, &deskTop::updateInfo);
+    //connect(decoder->getThread(), &portThread::heatAndKeepChanged, manualOperation->getDiagram(), &diagram::updateHeatAndKeep);
+    //connect(decoder->getThread(), &portThread::triEleValveStat, manualOperation->getDiagram(), &diagram::updateTriEleValveStat);
+    //connect(decoder,SIGNAL(startRecord(bool)),graph,SLOT(startRecord(bool)));
+    //connect(decoder,SIGNAL(autoSavedata()),graph,SLOT(autoSavedata()));
+    //connect(ui->state, &stateBar::portChanged, decoder, &DevContrlMgr::savePortName);
+    //connect(ui->state,SIGNAL(sampleTimeChanged(int)),graph,SLOT(setTimer(int)));
+    //connect(ui->state,SIGNAL(sampleTimeChanged(int)),decoder,SLOT(setTimer(int)));
+    //connect(ui->tool,SIGNAL(logoBtn_clicked()), deviceOperation,SLOT(tempAdjustEnable()));
 
     connect(ui->autoRunStep, &ProgramList::readyTorun, decoder, &DevContrlMgr::strTocmd);
-    connect(decoder, &DevContrlMgr::jobChaned, ui->autoRunStep, &ProgramList::OnActionDone);
     connect(ui->autoRunStep, &ProgramList::readyTorun_toColl, collectorOperation, &collectorOp::updateCmd);
     connect(ui->autoRunStep, &ProgramList::sendRunTime, this, &deskTop::updateRunTime);
     connect(ui->autoRunStep,SIGNAL(readyTorun(const QString&)),manualOperation,SLOT(strToState(const QString&)));
 
     connect(ui->autoRunStep,SIGNAL(autoRun(bool)),manualOperation,SLOT(autoRun(bool)));
     connect(ui->autoRunStep,SIGNAL(autoRun(bool)),deviceOperation,SLOT(autoRun(bool)));
-
-    connect(ui->tool,SIGNAL(logoBtn_clicked()),this,SLOT(Scene5Show()));
 }
 
 deskTop::~deskTop()
 {
     delete ui;
+}
+
+DevContrlMgr * deskTop::getDevContrlMgr() const
+{
+	return decoder;
+}
+
+deviceOp * deskTop::getDeviceOp() const
+{
+    return deviceOperation;
 }
 
 void deskTop::Scene1Show()
@@ -101,7 +103,7 @@ void deskTop::Scene2Show()
 
 void deskTop::Scene3Show()
 {
-    ui->mainUI->setCurrentWidget(graph);
+    ui->mainUI->setCurrentWidget(m_graph);
 }
 
 void deskTop::Scene4Show()
@@ -122,15 +124,6 @@ void deskTop::Scene6Show()
 void deskTop::StoreShow()
 {
     ui->mainUI->setCurrentWidget(m_mateSt);
-}
-
-void deskTop::updateInfo(ReceiveData *data)
-{
-    manualOperation->updateInfo(data);   // 刷新相应界面内的数据
-    deviceOperation->updateInfo(data);
-    collectorOperation->updateInfo(data);
-    graph->updateInfo(data);
-    projectmode->updateInfo(data);
 }
 
 void deskTop::updateRunTime(int time)

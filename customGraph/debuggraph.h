@@ -9,7 +9,7 @@
 #include <QTimer>
 #include <QDebug>
 #include "customGraph/qcustomplot.h"
-#include "strDecoder/portthread.h"
+#include "DevContrlMgr/portthread.h"
 #include "common/mymessageBox.h"
 
 #define DEBUG_LINE_NUM 3

@@ -3,9 +3,10 @@
 #include <QDataStream>
 #include <QFile>
 
+#include "HsApplication.h"
 #include "FeederMgr.h"
 #include "RobotMgr.h"
-#include "strDecoder/strdecoder.h"
+#include "DevContrlMgr/DevContrlMgr.h"
 
 /*
 * MaterialStruct
@@ -33,9 +34,9 @@ void StoreStruct::setStat(StoreStat s, bool bRvr)
 	if (s != stat)
     {
 		stat = s;
-        if (bRvr && FeederMgr::Instance().getStore(numb))
+        if (bRvr &&  hsApp->feederMgr()->getStore(numb))
             FeederRecover::Instance().AddStore(*this);
-		emit FeederMgr::Instance().storeChanged(this);
+		emit  hsApp->feederMgr()->storeChanged(this);
 	}
 }
 /*
@@ -61,9 +62,9 @@ void BottleStruct::setFlag(BottleStat f, bool bRvr)
         if (!bRvr)
         {
             FeederRecover::Instance().AddBottle(*this);
-            emit FeederMgr::Instance().bottleChanged(this);
+            emit  hsApp->feederMgr()->bottleChanged(this);
             if (b)
-                emit FeederMgr::Instance().canUsedTubeChanged();
+                emit  hsApp->feederMgr()->canUsedTubeChanged();
         }
     }
 }
@@ -83,7 +84,7 @@ int16_t FeederParam::getBottleNumb() const
 
 BottleStruct *FeederParam::getBottle() const
 {
-    return FeederMgr::Instance().getBottle(m_numbBottle);
+    return  hsApp->feederMgr()->getBottle(m_numbBottle);
 }
 
 uint16_t FeederParam::getTubeNumb() const
@@ -93,7 +94,7 @@ uint16_t FeederParam::getTubeNumb() const
 
 TubeStruct *FeederParam::getTube() const
 {
-    return FeederMgr::Instance().getTube(m_numbTube);
+    return  hsApp->feederMgr()->getTube(m_numbTube);
 }
 
 const QList<FeederParam::FeedItem> & FeederParam::feedMaterial() const
@@ -106,11 +107,11 @@ void FeederParam::getFeedNameAndWeight(QList<QPair<QString, float> > *ret) const
     if (!ret)
         return;
 
-    auto &feeder = FeederMgr::Instance();
+    auto feeder = hsApp->feederMgr();
     ret->clear();
     for (auto &itr : m_feedMaterials)
     {
-        auto c = feeder.GetStore(itr.first);
+        auto c = feeder->GetStore(itr.first);
         if (auto m = c ? c->pMate : nullptr)
             *ret << QPair<QString, float>(m->name, itr.second);
     }
@@ -118,8 +119,8 @@ void FeederParam::getFeedNameAndWeight(QList<QPair<QString, float> > *ret) const
 
 void FeederParam::feederFinish(ActionType type) const
 {
-    auto &feeder = FeederMgr::Instance();
-    if (auto tb = feeder.getTube(m_numbTube))
+    auto feeder = hsApp->feederMgr();
+    if (auto tb = feeder->getTube(m_numbTube))
     {
 		TubeStat st = T_Prepared;
 		switch (type)
@@ -158,10 +159,10 @@ void TubeStruct::setFlag(TubeStat f, bool bRvr)
         m_flag = f;
         if (!bRvr)
         {
-            emit FeederMgr::Instance().tubeChanged(this);
+            emit  hsApp->feederMgr()->tubeChanged(this);
             FeederRecover::Instance().AddTube(*this);
             if (b)
-                emit FeederMgr::Instance().canUsedTubeChanged();
+                emit  hsApp->feederMgr()->canUsedTubeChanged();
         }
     }
 }
@@ -467,7 +468,7 @@ void FeederRecover::Save()
 
 FeederRecover & FeederRecover::Instance()
 {
-    static FeederRecover sRcv = FeederMgr::AppDir("user") + "/recover";
+    static FeederRecover sRcv = HsApplication::AppDir("user") + "/recover";
     return sRcv;
 }
 
@@ -523,19 +524,19 @@ void FeederRecover::writeItem(int32_t from)
             continue;
         }
         itr._offset = offset;
-        auto &ist = FeederMgr::Instance();
+        auto ist = hsApp->feederMgr();
         switch (itr._type)
         {
         case R_Bottle:
-            offset += writeData(ist.getBottle(itr._id), itr); break;
+            offset += writeData(ist->getBottle(itr._id), itr); break;
         case R_Tube:
-            offset += writeData(ist.getTube(itr._id), itr); break;
+            offset += writeData(ist->getTube(itr._id), itr); break;
         case R_Store:
-            offset += writeData(ist.getStore(itr._id), itr); break;
+            offset += writeData(ist->getStore(itr._id), itr); break;
         case R_Param:
-            offset += writeData(ist.GetfeedParamsByBottleNum(itr._id), itr); break;
+            offset += writeData(ist->GetfeedParamsByBottleNum(itr._id), itr); break;
         case R_Jobs:
-            offset += writeData(ist.m_jobs, itr); break;
+            offset += writeData(ist->m_jobs, itr); break;
         default:
             break;
         }

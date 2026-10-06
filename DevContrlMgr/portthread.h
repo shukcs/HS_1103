@@ -128,7 +128,7 @@ signals:
     void port_connected();
     void port_disconnected();
     void timer_stop();
-    void ReceiceDone(ReceiveData* data);
+    void dateReceived(ReceiveData* data);
     void ackRecved(const QByteArray&);
     void heatAndKeepChanged(int idx, float);
     void triEleValveStat(int, int, bool);

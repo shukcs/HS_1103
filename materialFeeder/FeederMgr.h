@@ -48,7 +48,6 @@ public:
     bool FeedSolidMaterial(QList<QPair<QString, float>> &mates, int numb, int nTub, int16_t seq=-1);
     bool FixTube(uint16_t nTb, uint16_t ch, int16_t seq = -1);
     bool StoveTubeBack(int ch, int nBack=-1, int16_t seq = -1);
-    void DoAction(ActionAbstrctItem *act);
     void CancleFeed(BottleStruct* bt);
     QString GetCurPortName()const;
     int GetCurPortBaut()const;
@@ -66,14 +65,13 @@ public:
 public:
     static RobotPostion getStovePos(int ch);
     static QString DefaultConfigFile();
-    static QString AppDir(const QString& subDir);
-    static FeederMgr& Instance();
     static QString CmdDescrib(uint16_t cmd);
     static QString ServoPosDescrib(RobotPostion pos);
 public slots:
     void OnRobotDone(int step);
     void OnServoMotor(int pos, bool bReached);
-    void OnStepMotor(StepMotorStat *st);
+	void OnStepMotor(StepMotorStat *st);
+	void OnWait();
 protected:
     void timerEvent(QTimerEvent* event)override;
     void decode(const uint8_t *buff, uint16_t len);
@@ -87,8 +85,6 @@ protected:
     bool prcsFeederStat(uint16_t stat);
     void checkMatesCanFeed();
     void sumFeederWeight(QMap<int, float> *feeds) const;
-
-    void onWait();
 private:
     void readMaterials(int idx = 0);
     void readStore(int idx = 0);
@@ -111,7 +107,7 @@ private:
     const FeederParam *getfeedParamsByTube(int numb) const;
     StoreStruct* getPropStore(float weight, const QString& name, const QMap<int, float> &preDistrs)const;
     BottleStruct *getBottle(int numb) const;
-    void actionDone(QList<ActionItem>::iterator itr);
+    void actionDone(QList<FeederAction*>::iterator itr);
 
     void addFeederAct(uint16_t cmd, bool bWait = true, int32_t act = -1, uint8_t numStore=0xff, float wFeed=0.0);
     void addServoMotorAct(RobotPostion pos, bool bWait = true);
@@ -126,8 +122,7 @@ signals:
     void storeChanged(const StoreStruct *);
     void bottleChanged(const BottleStruct*);
     void tubeChanged(const TubeStruct*);
-    void actionRun(const ActionItem*);
-	void feedJobFinished(uint16_t type, uint16_t ch); ///type: JobType类型
+	void feedJobFinished(uint16_t type, int16_t seq); ///type: JobType类型
     void canUsedBottleChanged();
     void canUsedTubeChanged();
     void matesCanFeedChanged();
@@ -158,8 +153,8 @@ private:
     QStringList             m_canFeedMatesNames;
     QList<FeederParam>		m_feedParams;
     QList<int64_t>          m_jobs;
-    QList<ActionItem>       m_actions;     ///工作列表
-    QString                 m_portName;
+    QList<FeederAction*>    m_actions;     ///工作列表
+    QString					m_portName;
 };
 
 #endif // __FeederDecoder

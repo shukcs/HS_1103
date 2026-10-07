@@ -82,7 +82,6 @@ public:
 
     static QByteArray floatToBigEndian(float value);
     static float bigEndianToFloat(const QByteArray& bytes);
-    static DevContrlMgr *Instance();
 public slots:
     void timer_out();
     void setTimer(int time);

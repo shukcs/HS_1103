@@ -66,7 +66,9 @@ deviceOp::deviceOp(QWidget *parent) :
     ui->temp1Adj->setValidator(new QIntValidator(0, 999, this));
 
 	connect(this, &deviceOp::selfcmdTorun, this, &deviceOp::check_run);
-	connect(hsApp->getThread(), &portThread::dateReceived, this, &deviceOp::updateInfo);
+    QTimer::singleShot(10, this, [=] {
+        connect(hsApp->getThread(), &portThread::dateReceived, this, &deviceOp::updateInfo);
+    });
 }
 
 deviceOp::~deviceOp()

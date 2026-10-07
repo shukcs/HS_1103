@@ -33,7 +33,7 @@ void SolidPrepareItem::Save(QDataStream *dstr)
 	{
 		ActionAbstrctItem::Save(dstr);
 		*dstr << m_numBottle << m_numTube;
-		*dstr << m_weightFeeds.size();
+		*dstr << (int32_t)m_weightFeeds.size();
 		for (auto &itr : m_weightFeeds)
 		{
 			*dstr << itr.first << itr.second;
@@ -46,7 +46,7 @@ void SolidPrepareItem::Load(QDataStream *dstr)
     if (!dstr)
         return;
     ActionAbstrctItem::Load(dstr);
-    qsizetype sz;
+    int32_t sz;
     *dstr >> m_numBottle >> m_numTube >>sz;
     for (int i = 0; i < sz; ++i)
     {

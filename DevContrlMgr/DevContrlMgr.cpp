@@ -14,8 +14,8 @@
 #pragma execution_character_set("utf-8")
 
 enum {
-    Pipelet_Up = 1,
-    Pipelet_Down = 0,
+    Pipelet_Up = 0,
+    Pipelet_Down = 1,
 };
 
 bool operator==(const StepMotorStat& m1, const StepMotorStat& m2)
@@ -162,19 +162,12 @@ StepMotorStat& StepMotorStat::operator=(const StepMotorStat& m)
 /*
 *   DevContrlMgr
 */
-static DevContrlMgr *sStrDecoder = nullptr;
 DevContrlMgr::DevContrlMgr(QObject *parent, const QString &name) : QObject(parent)
 , m_timer(new QTimer(this))
 {
     m_thread = new portThread;
     portName = name;
     sleepTime = 500;  // 默认0.5s采集一个点
-    connect(m_thread, &portThread::port_connected, this, &DevContrlMgr::app_connected);
-    connect(m_thread, &portThread::port_disconnected, this, &DevContrlMgr::app_disconnected);
-    connect(m_thread, &portThread::ackRecved, this, &DevContrlMgr::onAckRecved);
-    connect(m_timer, &QTimer::timeout, this, &DevContrlMgr::timer_out);
-    connect(this, &DevContrlMgr::stepMotorStatChanged, hsApp->feederMgr(), &FeederMgr::OnStepMotor);
-    connect(this, &DevContrlMgr::servoMotorStatChanged, hsApp->feederMgr(), &FeederMgr::OnServoMotor);
     m_stepMotorStat[0].SetType(CtrlType::Motor_Pipelet);
     m_stepMotorStat[1].SetType(CtrlType::Motor_Pipelet);
     m_stepMotorStat[2].SetType(CtrlType::Motor_Tube);
@@ -193,7 +186,14 @@ DevContrlMgr::DevContrlMgr(QObject *parent, const QString &name) : QObject(paren
         m_timer->start(sleepTime);
         portTimer->stop();
     });
-    sStrDecoder = this;
+    QTimer::singleShot(10, this, [=] {
+        connect(m_thread, &portThread::port_connected, this, &DevContrlMgr::app_connected);
+        connect(m_thread, &portThread::port_disconnected, this, &DevContrlMgr::app_disconnected);
+        connect(m_thread, &portThread::ackRecved, this, &DevContrlMgr::onAckRecved);
+        connect(m_timer, &QTimer::timeout, this, &DevContrlMgr::timer_out);
+        connect(this, &DevContrlMgr::stepMotorStatChanged, hsApp->feederMgr(), &FeederMgr::OnStepMotor);
+        connect(this, &DevContrlMgr::servoMotorStatChanged, hsApp->feederMgr(), &FeederMgr::OnServoMotor);
+    });
 }
 
 DevContrlMgr::~DevContrlMgr()
@@ -223,11 +223,6 @@ float DevContrlMgr::bigEndianToFloat(const QByteArray& bytes) {
     float value;
     stream >> value;
     return value;
-}
-
-DevContrlMgr* DevContrlMgr::Instance()
-{
-    return sStrDecoder;
 }
 
 bool DevContrlMgr::com_open(bool state, const QString &name)
@@ -620,7 +615,7 @@ void DevContrlMgr::ctrlServoMotor(uint8_t pos)
 
 void DevContrlMgr::ctrValve3Ch(uint8_t ch, uint8_t dir)
 {
-    uint8_t buff[8] = { 0x31, 7, 1, 0x99, ch, dir };
+    uint8_t buff[8] = { 0x31, 6, 1, 0x99, ch, dir };
     appendToQue(buff, sizeof(buff));
 }
 
@@ -1083,6 +1078,7 @@ void DevContrlMgr::onAckRecved(const QByteArray& arr)
         m_cmdlist.takeAt(0);
 
     cmdSend();
+    auto cmd = (uint8_t)arTmp.at(1);
     if (!m_actions.isEmpty())
     {
         auto act = m_actions.first();
@@ -1092,7 +1088,7 @@ void DevContrlMgr::onAckRecved(const QByteArray& arr)
         case  Group_AirClear:
             {
                 static QMap<uint8_t, int> sClearStep = { { 0x8D, 0}, { 0x82, 1}, { 0x8B, 2},{ 0x81, 3 } };
-                auto itr = sClearStep.find((uint8_t)arr.at(2));
+                auto itr = sClearStep.find(cmd);
                 if (itr != sClearStep.end())
                 {
                     m_stAct++;
@@ -1103,7 +1099,7 @@ void DevContrlMgr::onAckRecved(const QByteArray& arr)
         case  Group_AirIn:
             {
                 static QMap<uint8_t, int> sAirInStep = { { 0x8D, 0}, { 0x8C, 1}, { 0x8B, 2}, { 0x89, 3 }, { 0x90, 4 }, { 0x81, 5 } };
-                auto itr = sAirInStep.find((uint8_t)arr.at(2));
+                auto itr = sAirInStep.find(cmd);
                 if (itr != sAirInStep.end() && itr.value()==m_stAct)
                 {
                     m_stAct++;
@@ -1114,7 +1110,7 @@ void DevContrlMgr::onAckRecved(const QByteArray& arr)
         case  Group_LiquidIn:
             {
                 static QMap<uint8_t, int> sAirInStep = { { 0x99, 1 },{ 0x85, 2 } };
-                auto itr = sAirInStep.find((uint8_t)arr.at(2));
+                auto itr = sAirInStep.find(cmd);
                 if (itr != sAirInStep.end() && itr.value() == m_stAct)
                 {
                     m_stAct++;
@@ -1124,7 +1120,7 @@ void DevContrlMgr::onAckRecved(const QByteArray& arr)
             break;
         case  Group_LiquidEnd:
             {
-                if (0 == m_stAct && 0x85 == (uint8_t)arr.at(2))
+                if (0 == m_stAct && 0x85 == cmd)
                 {
                     m_stAct++;
                     doLiquiEnd();
@@ -1134,17 +1130,17 @@ void DevContrlMgr::onAckRecved(const QByteArray& arr)
         case Group_AirEnd:
             {
                 static QMap<uint8_t, int> sAirEnsStep = { { 0x81, 0 },{ 0x8B, 1 } };
-                auto itr = sAirEnsStep.find((uint8_t)arr.at(2));
+                auto itr = sAirEnsStep.find(cmd);
                 if (itr != sAirEnsStep.end() && itr.value() == m_stAct)
                 {
                     m_stAct++;
-                    doLiquiEnd();
+                    doAirEnd();
                 }
             }
             break;
         case Act_PreHeat:
         case Act_Keep:
-            if ((uint8_t)arr.at(2) == (Act_PreHeat == tp) ? 0x97 : 0x98)
+            if (cmd == (Act_PreHeat == tp) ? 0x97 : 0x98)
             {
                 m_stAct = 0;
                 emit actionFinished(tp, act->GetSeq());
@@ -1154,7 +1150,7 @@ void DevContrlMgr::onAckRecved(const QByteArray& arr)
             }
             break;
         case Group_StoveHeat:
-            if ((uint8_t)arr.at(2) == 0x83)
+            if (cmd == 0x83)
             {
                 m_stAct = 0;
                 emit actionFinished(tp, act->GetSeq());
@@ -1181,9 +1177,9 @@ void DevContrlMgr::prcsMotor(const QByteArray &msg)
         {
             m_stepMotorStat[i] = st;
             emit stepMotorStatChanged(m_stepMotorStat + i);
-            if (st.GetType() == CtrlType::Motor_Pipelet)
-                _checkAction(st);
         }
+        if (m_stepMotorStat[i].GetType()==CtrlType::Motor_Pipelet)
+            _checkAction((m_stepMotorStat[i]));
     }
     ServoMotorStat st(msg.at(10));
     if (st != m_servoMotorStat)
@@ -1195,12 +1191,12 @@ void DevContrlMgr::prcsMotor(const QByteArray &msg)
 
 void DevContrlMgr::_checkAction(const StepMotorStat &st)
 {
-    auto act = (m_actions.isEmpty()&&st.GetType()==CtrlType::Motor_Pipelet) ? nullptr : m_actions.first();
+    auto act = (st.GetType()==CtrlType::Motor_Pipelet&&m_actions.isEmpty()) ? nullptr : m_actions.first();
     if (!act) return;
     if (act->getType() == Group_LiquidIn)
     {
         auto liAct = (LiquidInAction*)act;
-        if (liAct->GetChannel()==st.GetChannel() && 0==m_stAct && st.IsDown() && st.IsLimitL())///伸出取液管
+        if (liAct->GetChannel()==st.GetChannel() && 0==m_stAct && !st.IsDown() && st.IsLimitH())///伸出取液管
         {
             m_stAct++;
             doLiquidIn();
@@ -1209,7 +1205,7 @@ void DevContrlMgr::_checkAction(const StepMotorStat &st)
     else if (act->getType() == Group_LiquidEnd)
     {
         auto liAct = (LiquidEndAction*)act;
-        if (liAct->GetChannel()==st.GetChannel() && 1==m_stAct && !st.IsDown() && st.IsLimitH()) ///收回取液管
+        if (liAct->GetChannel()==st.GetChannel() && 1==m_stAct && st.IsDown() && st.IsLimitL()) ///收回取液管
         {
             m_stAct++;
             doLiquiEnd();
@@ -1241,9 +1237,17 @@ void DevContrlMgr::onActionRun(const ActionAbstrctItem *act, bool bIn)
         if (m_actions.size() < 2 || m_actions.first() == act)
             doAirIn();
         break;
+    case Group_AirEnd:
+        if (m_actions.size() < 2 || m_actions.first() == act)
+            doAirEnd();
+        break;
     case Group_LiquidIn:
         if (m_actions.size() < 2 || m_actions.first() == act)
             doLiquidIn();
+        break;
+    case Group_LiquidEnd:
+        if (m_actions.size() < 2 || m_actions.first() == act)
+            doLiquiEnd();
         break;
     case Act_PreHeat:
         {
@@ -1302,7 +1306,7 @@ void DevContrlMgr::doClearAir()
 
 void DevContrlMgr::doAirIn()
 {
-    if (auto act = (!m_actions.isEmpty() && m_actions.first()->getType() == Group_AirClear) ? (const AirInAction*)m_actions.first() : nullptr)
+    if (auto act = (!m_actions.isEmpty() && m_actions.first()->getType() == Group_AirIn) ? (const AirInAction*)m_actions.first() : nullptr)
     {
         switch (m_stAct)
         {
@@ -1323,6 +1327,7 @@ void DevContrlMgr::doAirIn()
             m_actions.takeFirst();
             if (!m_actions.isEmpty())
                 onActionRun(m_actions.first(), true);
+            emit actionFinished(Group_AirIn, act->GetSeq());
             break;
         }
     }
@@ -1348,7 +1353,7 @@ void DevContrlMgr::doLiquidIn()
                 if (!m_actions.isEmpty())
                     onActionRun(m_actions.first(), true);
 
-                emit actionFinished(Group_AirClear, act->GetSeq());
+                emit actionFinished(Group_LiquidIn, act->GetSeq());
             }); break;
         case 4:
             ctrlStepMotor(CtrlType::Motor_Pipelet, act->GetChannel() == 0 ? 1 : 2, 0); break;///取液管上升 0x93
@@ -1365,12 +1370,13 @@ void DevContrlMgr::doLiquiEnd()
         case 0:
             pumpSpeeed(act->GetChannel(), 0); break;///被压阀全开取消 0x85
         case 1:
-            ctrlStepMotor(CtrlType::Motor_Pipelet, act->GetChannel() == 0 ? 1 : 2, Pipelet_Up); break;///取液管下降 0x93
+            ctrlStepMotor(CtrlType::Motor_Pipelet, act->GetChannel() == 0 ? 1 : 2, Pipelet_Up); break;///取液管上升 0x93
         default:
             m_stAct = 0;
             m_actions.takeFirst();
             if (!m_actions.isEmpty())
                 onActionRun(m_actions.first(), true);
+            emit actionFinished(Group_LiquidEnd, act->GetSeq());
             break;
         }
     }
@@ -1391,6 +1397,7 @@ void DevContrlMgr::doAirEnd()
             m_actions.takeFirst();
             if (!m_actions.isEmpty())
                 onActionRun(m_actions.first(), true);
+            emit actionFinished(Group_AirEnd, act->GetSeq());
             break;
         }
     }

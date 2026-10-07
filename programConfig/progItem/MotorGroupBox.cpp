@@ -1,4 +1,5 @@
 ﻿#include "MotorGroupBox.h"
+#include "HsApplication.h"
 #include "DevContrlMgr/DevContrlMgr.h"
 
 #include "Ui_MotorGroupBox.h"
@@ -10,7 +11,7 @@ MotorGroupBox::MotorGroupBox(MotorType tp, QWidget *parent) : QGroupBox(parent)
     m_ui->setupUi(this);
     initType(tp);
     connect(m_ui->btn_test, &QPushButton::clicked, this, [=] {
-        if (auto dec = DevContrlMgr::Instance())
+        if (auto dec = hsApp->devContrlMgr())
             dec->strTocmd(title() + _getChStr() + _getBracerStr() + _getDirString());
     });
 }

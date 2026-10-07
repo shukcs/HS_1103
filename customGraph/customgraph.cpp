@@ -248,7 +248,9 @@ customGraph::customGraph(QWidget *parent) :
     ui->y12Check->setStyleSheet("QCheckBox{color:rgb(128,128,255)}"); // 柱塞泵2压力 - 浅蓝
 
     connect(&timer,SIGNAL(timeout()),this,SLOT(timer_out()));
-	connect(hsApp->getThread(), &portThread::dateReceived, this, &customGraph::updateInfo);
+    QTimer::singleShot(10, this, [=] {
+        connect(hsApp->getThread(), &portThread::dateReceived, this, &customGraph::updateInfo);
+    });
 	//connect(hsApp->devContrlMgr(), &DevContrlMgr::startRecord, this, &customGraph::startRecord);
 	//connect(hsApp->devContrlMgr(), &DevContrlMgr::autoSavedata, this, &customGraph::autoSavedata);
 }

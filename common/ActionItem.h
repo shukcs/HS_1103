@@ -37,7 +37,7 @@ public:
     ActionAbstrctItem(ActionType type, int16_t seq=-1);
     virtual ~ActionAbstrctItem();
     ActionType getType()const;
-    uint16_t GetSeq()const;
+    int16_t GetSeq()const;
     void AddToEdit();
     virtual void Save(QDataStream *dstr);
 	virtual void Load(QDataStream *dstr);
@@ -100,7 +100,7 @@ public:
 	RobotActionItem(uint16_t step, uint8_t idx=0, bool bWait = true);
 	QString ToString(bool bStart = true)const override;
 
-	uint8_t GetStepType()const;
+    uint16_t GetStepType()const;
 	uint8_t GetIndex()const;
 	void Distribute();
 protected:

@@ -21,10 +21,11 @@
 
 union DataU
 {
-    uint8_t cD[4];
-    float   fD;
-    uint16_t u16D;
-    uint32_t u32D;
+    uint8_t cD[8];
+    float   fD[2];
+    uint32_t u32D[2];
+    int64_t  n64D;
+    uint16_t u16Ds[4];
 };
 
 struct WorkItem {
@@ -32,7 +33,7 @@ struct WorkItem {
     uint8_t             nNumTube;
     uint8_t             chStove; ///炉膛位
     int16_t             seq;   ///归还位 type=FeederMgr::J_StoveTubeBack有效
-	static WorkItem initFrom(ActionType t, uint8_t n, uint8_t idx = 0, int16_t seq=-1);
+    static WorkItem initFrom(ActionType t, uint8_t n, uint8_t idx = 0, int16_t seq = -1);
 	static WorkItem initFrom(int64_t n);
 	int64_t toInt()const;
     QString toString(bool bStart=true)const; ///bStart true: 开始的文字; false: 结束的文字
@@ -40,7 +41,13 @@ struct WorkItem {
 
 WorkItem WorkItem::initFrom(int64_t n)
 {
-	WorkItem ret = *(WorkItem*)&n;
+    DataU u;
+    u.n64D = n;
+    WorkItem ret;
+    ret.type = (ActionType)u.cD[0];
+    ret.nNumTube = u.cD[1];
+    ret.chStove = u.cD[2];
+    ret.seq = u.u16Ds[3];
 	return ret;
 }
 
@@ -52,8 +59,12 @@ WorkItem WorkItem::initFrom(ActionType t, uint8_t n, uint8_t idx, int16_t s)
 
 int64_t WorkItem::toInt() const
 {
-	int ret = *(int64_t*)this;
-	return ret;
+    DataU u;
+    u.cD[0] = type;
+    u.cD[1] = nNumTube;
+    u.cD[2] = chStove;
+    u.u16Ds[3] = seq;
+	return u.n64D;
 }
 
 QString WorkItem::toString(bool b) const
@@ -118,16 +129,16 @@ FeederMgr::FeederMgr(QObject* p) : QObject(p)
     settings.endGroup();
     ConnectPort();
     readMaterials();
-    QTimer::singleShot(50, this, [=] {
-        for (int i = 0; i < 6; i++)
-        {
-            AddMaterial("000" + QString::number(123 + i), "固体" + QString::number(i), 57.1 + i);
-        }
-        for (int i = 0; i < 6; i++)
-        {
-            updateStore(i > 0 ? "000" + QString::number(123 + i) : QString(), i);
-        }
-    });
+    //QTimer::singleShot(50, this, [=] {
+    //    for (int i = 0; i < 6; i++)
+    //    {
+    //        AddMaterial("000" + QString::number(123 + i), "固体" + QString::number(i), 57.1 + i);
+    //    }
+    //    for (int i = 0; i < 6; i++)
+    //    {
+    //        updateStore(i > 0 ? "000" + QString::number(123 + i) : QString(), i);
+    //    }
+    //});
 }
 
 FeederMgr::~FeederMgr()
@@ -245,7 +256,8 @@ TubeStruct * FeederMgr::GetInSotveTube(uint8_t ch) const
     {
         if (auto tb = itr.getTube())
         {
-            if (T_Fixed==tb->getFlag() && tb->getStoveCh()==ch)
+            if ((T_WaitRecycle==tb->getFlag() || T_Fixed==tb->getFlag())
+                && tb->getStoveCh()==ch)
                 return tb;
         }
     }
@@ -285,7 +297,7 @@ void FeederMgr::OnServoMotor(int pos, bool bReached)
 	auto itr = m_actions.begin();
     for (; itr != m_actions.end(); ++itr)
 	{
-		auto act = Act_Robot == (*itr)->getType() ? (ServoMotorAction*)*itr : nullptr;
+		auto act = Act_Servo==(*itr)->getType() ? (ServoMotorAction*)*itr : nullptr;
 		if (!act) continue;
         if (act->GetServoPos()==pos)
         {
@@ -309,8 +321,8 @@ void FeederMgr::OnStepMotor(StepMotorStat* st)
     auto itr = m_actions.begin();
     for (; itr != m_actions.end(); ++itr)
 	{
-		auto act = Act_Robot == (*itr)->getType() ? (StepMotorAction*)*itr : nullptr;
-        if (!act || act->GetMotorType() != st->GetType() || act->GetChannel() != st->GetChannel())
+		auto act = Act_StepMotor == (*itr)->getType() ? (StepMotorAction*)*itr : nullptr;
+        if (!act || act->GetMotorType()!=st->GetType() || act->GetChannel() != st->GetChannel())
             continue;
 
         bool bReached = act->GetDirector() ? st->IsLimitH() : st->IsLimitL();
@@ -456,7 +468,7 @@ bool FeederMgr::prcsFeederStat(uint16_t stat)
     bool bDoNext = false;
     for (auto itr = m_actions.begin(); itr != m_actions.end(); ++itr)
 	{
-		auto act = Act_Robot == (*itr)->getType() ? (ActionItem*)*itr : nullptr;
+		auto act = Act_Feeder==(*itr)->getType() ? (ActionItem*)*itr : nullptr;
 		if (!act)continue;
         if (act && act->cmdAck == stat)
         {
@@ -639,7 +651,7 @@ void FeederMgr::addServoMotorAct(RobotPostion pos, bool bWait /*= true*/)
 
 void FeederMgr::addStepMotorAct(uint8_t type, uint8_t ch, bool bCont, bool bWait /*= true*/)
 {
-    m_actions << new StepMotorAction(type, ch, bCont, bWait);
+    m_actions << new StepMotorAction(type, bCont, ch, bWait);
 }
 
 
@@ -809,7 +821,7 @@ void FeederMgr::genTubToStvoe(const WorkItem &bt, bool bDo)
     addServoMotorAct(Pos_BlanceDoor);
     adddRobotAct(RobotMgr::MoveTube, bt.nNumTube);
     addStepMotorAct(CtrlType::Motor_Stove, bt.chStove, true, false);
-    m_actions << new ActionItem(1.5);//等1.5S
+    m_actions << new DelayItem(1.5);//等1.5S
     addStepMotorAct(CtrlType::Motor_Tube, bt.chStove, false, false);
 
     auto pos = getStovePos(bt.chStove);
@@ -1166,7 +1178,7 @@ bool FeederMgr::FeedSolidMaterial(QList<QPair<QString, float>> &feeds, int numb,
     }
     m_feedParams << FeederParam(preNumDistrs, (uint16_t)numb, nTube);
     FeederRecover::Instance().AddFeedParam(m_feedParams.last());
-    auto item = WorkItem::initFrom(Group_PrepareSolidMate, nTube, seq);
+    auto item = WorkItem::initFrom(Group_PrepareSolidMate, nTube, 0, seq);
 	addWorkItem(item);
     genPrepareActions(item);
     readFeedStat();

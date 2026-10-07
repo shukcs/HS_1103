@@ -1,9 +1,10 @@
 ﻿#include "projectmode.h"
-#include "ui_projectmode.h"
+#include <QTimer>
 #include "common/mymessageBox.h"
 #include "DevContrlMgr/portthread.h"
 #include "HsApplication.h"
 #include "DevContrlMgr/DevContrlMgr.h"
+#include "ui_projectmode.h"
 #pragma execution_character_set("utf-8")
 
 projectMode::projectMode(QWidget *parent) : QWidget(parent)
@@ -20,8 +21,10 @@ projectMode::projectMode(QWidget *parent) : QWidget(parent)
     ui->state->setIcon(QIcon(":/projectMode/image/refresh.png"));
     ui->state->setIconSize(QSize(25,25));
 
-	connect(hsApp->getThread(), &portThread::dateReceived, this, &projectMode::updateInfo);
-	connect(hsApp->devContrlMgr(), &DevContrlMgr::setConnectionState, this, &projectMode::update_user_set);
+    QTimer::singleShot(10, this, [=] {
+        connect(hsApp->getThread(), &portThread::dateReceived, this, &projectMode::updateInfo);
+        connect(hsApp->devContrlMgr(), &DevContrlMgr::setConnectionState, this, &projectMode::update_user_set);
+    });
 }
 
 projectMode::~projectMode()

@@ -1,4 +1,5 @@
 ﻿#include "statebar.h"
+#include <QTimer>
 #include "HsApplication.h"
 #include "DevContrlMgr/DevContrlMgr.h"
 #include "deskTop.h"
@@ -33,17 +34,19 @@ stateBar::stateBar(QWidget *parent) :
     ui->btn_store->setIconSize(QSize(30, 30));
     ui->btn_store->setIcon(QIcon(":/image/feeder.png"));
 
-    ui->sampleTime->setToolTip("ms");
-    ui->sampleTime->addItem("200");
-    ui->sampleTime->addItem("300");
-    ui->sampleTime->addItem("400");
-    ui->sampleTime->addItem("500");
-    ui->sampleTime->addItem("600");
-    ui->sampleTime->addItem("700");
-    ui->sampleTime->addItem("800");
-    ui->sampleTime->addItem("900");
-    ui->sampleTime->addItem("1000");
-    ui->sampleTime->setCurrentIndex(8);  // 默认选择1000ms
+    QTimer::singleShot(10, this, [=] {
+        ui->sampleTime->setToolTip("ms");
+        ui->sampleTime->addItem("200");
+        ui->sampleTime->addItem("300");
+        ui->sampleTime->addItem("400");
+        ui->sampleTime->addItem("500");
+        ui->sampleTime->addItem("600");
+        ui->sampleTime->addItem("700");
+        ui->sampleTime->addItem("800");
+        ui->sampleTime->addItem("900");
+        ui->sampleTime->addItem("1000");
+        ui->sampleTime->setCurrentIndex(8);  // 默认选择1000ms
+    });
 
     QString path = QCoreApplication::applicationDirPath()+"/user";
     QDir dir(path);
@@ -87,7 +90,8 @@ stateBar::stateBar(QWidget *parent) :
 	connect(ui->btn_store, &QPushButton::clicked, this, [=] {
 		qobject_cast<deskTop*>(hsApp->mainWidget())->StoreShow();
 	});
-	connect(hsApp->devContrlMgr(), &DevContrlMgr::setConnectionState, this, &stateBar::setConnectionState);
+    QTimer::singleShot(10, this, [=] {
+        connect(hsApp->devContrlMgr(), &DevContrlMgr::setConnectionState, this, &stateBar::setConnectionState); });
 }
 
 stateBar::~stateBar()

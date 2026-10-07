@@ -236,6 +236,7 @@ void progConfig::on_move_down_clicked()
 
 void progConfig::on_obj_del_clicked()
 {
-    QListWidgetItem *item = ui->listWidget->takeItem(ui->listWidget->currentRow());
-    delete  item;
+    auto idx = ui->listWidget->currentRow();
+    if (idx > 0)
+        ProgmaMgr::Instance().RemoveAt(idx);
 }

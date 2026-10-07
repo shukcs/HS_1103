@@ -1,7 +1,7 @@
 ﻿#include "portthread.h"
 #include <QSerialPort>
 #include <QSerialPortInfo>
-#include <QTimer>
+#include <QDateTime>
 #include <QWidget>
 #include <QDebug>
 #include <QApplication>
@@ -14,15 +14,13 @@
 *******************************************************************************************/
 portThread::portThread(QWidget *parent) : QThread(parent)
 , m_recdata(new ReceiveData), m_serialport(new QSerialPort)
-, m_timer(new QTimer)
 {
     connection_state = false;
     buff_state[0] = false;
     buff_state[1] = false;
     m_serialport->moveToThread(this);
-
-    connect(m_timer, &QTimer::timeout, this, &portThread::timer_timeout);
-    connect(this, &portThread::timer_stop, this, &portThread::stop_timer);
+    m_idTimer = startTimer(500);
+    m_tmLastRcv = QDateTime::currentMSecsSinceEpoch();
     connect(m_serialport, &QSerialPort::readyRead, this, &portThread::serial_ready);
     start();
 }
@@ -105,16 +103,10 @@ bool portThread::port_state()
 
 void portThread::port_write(uint8_t *data, int len)
 {
-    if(m_serialport->isOpen() == true)
-    {
+    if(m_serialport->isOpen())
        m_serialport->write((const char*)data,len);
-       if(!m_timer->isActive())
-           m_timer->start(2000);
-    }
     else
-    {
        timer_timeout();
-    }
 }
 
 bool portThread::get_connection_state()
@@ -143,10 +135,7 @@ void portThread::stop_timer()
     buff_state[0] = buff_state[1];
     buff_state[1] = connection_state;
     if(buff_state[0] != buff_state[1])
-    {
         emit port_connected();
-    }
-    m_timer->stop();
 }
 
 void portThread::serial_ready()
@@ -156,6 +145,7 @@ void portThread::serial_ready()
 
     m_buff += m_serialport->readAll();
     auto msg = pickMsg();
+    bool bRcv = false;
     while (!msg.isEmpty())
     {
         auto data = (uint8_t*)msg.data();
@@ -168,9 +158,16 @@ void portThread::serial_ready()
         else if (data[2] == 0x83)
             prcsTriEleValve(msg);
 
-        connection_state = true;
+        if (!connection_state)
+        {
+            connection_state = true;
+            port_connected();
+        }
         msg = pickMsg();
+        bRcv = true;
     }
+    if (bRcv)
+        m_tmLastRcv = QDateTime::currentMSecsSinceEpoch();
 }
 
 void portThread::prcsReport(const QByteArray& msg)
@@ -366,9 +363,20 @@ QByteArray portThread::pickMsg()
     return QByteArray();
 }
 
+void portThread::timerEvent(QTimerEvent *e)
+{
+    if (e->timerId() == m_idTimer && connection_state)
+    {
+        auto ms = QDateTime::currentMSecsSinceEpoch();
+        if (ms - m_tmLastRcv > 2000)
+            timer_timeout();
+
+        return;
+    }
+}
+
 void portThread::timer_timeout()
 {
-     m_timer->stop();
      connection_state = false;
      buff_state[0] = false;
      buff_state[1] = false;

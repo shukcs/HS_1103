@@ -152,7 +152,9 @@ ProgramList::ProgramList(QWidget *parent)
     }
 	initList();
     connect(hsApp->feederMgr(), &FeederMgr::feedJobFinished, this, &ProgramList::OnActionDone);
-    connect(hsApp->devContrlMgr(), &DevContrlMgr::actionFinished, this, &ProgramList::OnActionDone);
+    QTimer::singleShot(10, this, [=] {
+        connect(hsApp->devContrlMgr(), &DevContrlMgr::actionFinished, this, &ProgramList::OnActionDone);
+    });
 }
 
 ProgramList::~ProgramList()
@@ -335,7 +337,10 @@ void ProgramList::OnActionDone(uint16_t type, int16_t seq)
     auto &ctx = m_titles.at(m_runIndex);
     auto act = ctx.list.at(programCnt);
     if (act->getType() == type && act->GetSeq() == seq)
+    {
         m_bReady = true;
+        runTitle();
+    }
 }
 
 void ProgramList::runTitle()

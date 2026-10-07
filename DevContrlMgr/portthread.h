@@ -124,6 +124,7 @@ protected:
     void prcsHeatAndKeep(const QByteArray& msg);
     void prcsTriEleValve(const QByteArray& msg);
     QByteArray pickMsg();
+    void timerEvent(QTimerEvent *event)override;
 signals:
     void port_connected();
     void port_disconnected();
@@ -135,7 +136,8 @@ signals:
 private:
     ReceiveData     *m_recdata;
     QSerialPort     *m_serialport;
-    QTimer          *m_timer;
+    int             m_idTimer;
+    int64_t         m_tmLastRcv;
     bool            connection_state;
     QString         com_name;
     QByteArray      m_buff;

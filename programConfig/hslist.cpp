@@ -29,7 +29,7 @@ void HsList::initContent()
     });
     connect(mgr, &ProgmaMgr::itemRemovd, this, [=](int idx) {
         if (idx >= 0 && idx < count())
-            removeItemWidget(item(idx));
+            delete QListWidget::takeItem(idx);
     });
     connect(mgr, &ProgmaMgr::itemMoveUp, this, [=](int idx) {
         if (idx > 0 && idx < count())

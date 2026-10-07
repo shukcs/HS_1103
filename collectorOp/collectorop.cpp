@@ -191,7 +191,9 @@ collectorOp::collectorOp(QWidget *parent) :
     QRegularExpressionValidator *validator = new QRegularExpressionValidator(rx, this);
     ui->lineEdit_5->setValidator(validator);
     ui->lineEdit_6->setValidator(validator);
-	connect(hsApp->getThread(), &portThread::dateReceived, this, &collectorOp::updateInfo);
+    QTimer::singleShot(10, this, [=] {
+        connect(hsApp->getThread(), &portThread::dateReceived, this, &collectorOp::updateInfo);
+    });
 }
 
 collectorOp::~collectorOp()

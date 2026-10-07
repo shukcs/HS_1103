@@ -26,7 +26,7 @@ ActionType ActionAbstrctItem::getType() const
     return m_type;
 }
 
-uint16_t ActionAbstrctItem::GetSeq() const
+int16_t ActionAbstrctItem::GetSeq() const
 {
     return m_seq;
 }
@@ -165,7 +165,7 @@ QString RobotActionItem::ToString(bool bStart /*= true*/) const
 	return QApplication::translate("RobotActionItem", "机械臂") + RobotMgr::actionDescribe((RobotMgr::RobotAction)m_robotStep, m_robotIndex) + str;
 }
 
-uint8_t RobotActionItem::GetStepType() const
+uint16_t RobotActionItem::GetStepType() const
 {
 	return m_robotStep;
 }

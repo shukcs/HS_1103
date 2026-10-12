@@ -68,6 +68,7 @@ SOURCES += $$PWD/common/ActionFactory.cpp \
     $$PWD/programConfig/progItem/qtcdpanel.cpp \
     $$PWD/programConfig/progItem/QSFunction.cpp \
     $$PWD/programConfig/progItem/FeederGroupBox.cpp \
+    $$PWD/programConfig/progItem/FinishWorkGroupBox.cpp \
     $$PWD/programConfig/progItem/HeatGroupBox.cpp \
     $$PWD/programConfig/progItem/MotorGroupBox.cpp \
     $$PWD/programConfig/progItem/FeedLiquidGroupBox.cpp \
@@ -143,6 +144,7 @@ HEADERS += $$PWD/common/ActionFactory.h \
     $$PWD/programConfig/progItem/QSFunction.h \
     $$PWD/programConfig/progItem/qpumpctrl.h \
     $$PWD/programConfig/progItem/FeederGroupBox.h \
+    $$PWD/programConfig/progItem/FinishWorkGroupBox.h \
     $$PWD/programConfig/progItem/HeatGroupBox.h \
     $$PWD/programConfig/progItem/MotorGroupBox.h \
     $$PWD/programConfig/progItem/FeedLiquidGroupBox.h \
@@ -191,6 +193,7 @@ FORMS += \
     $$PWD/programConfig/progItem/HeatGroupBox.ui \
     $$PWD/programConfig/progItem/MotorGroupBox.ui \
     $$PWD/programConfig/progItem/FeedLiquidGroupBox.ui \
+    $$PWD/programConfig/progItem/FinishWorkGroupBox.ui \
     $$PWD/programConfig/progItem/QSFunction.ui \
     $$PWD/customGraph/customTool/graphopen.ui \
     $$PWD/customGraph/customTool/graphsave.ui \

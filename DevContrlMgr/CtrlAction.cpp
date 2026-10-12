@@ -338,6 +338,11 @@ float DelayAction::DelaySeconds(uint32_t msec) const
     return ret;
 }
 
+uint16_t DelayAction::GetChannel() const
+{
+    return m_ch;
+}
+
 /*
 *RecordAction
 */
@@ -445,8 +450,10 @@ HeatAction::HeatAction(uint16_t tmp /*= 0*/, uint16_t ch, int16_t seq /*= -1*/)
 
 QString HeatAction::ToString(bool bStart /*= true*/) const
 {
-    auto str =QApplication::translate("HeatAction", "加热套: 通道%1加热温度%2℃").arg(m_nCh+1).arg(m_nTmp);
-    return str;
+    if (m_nTmp == 0xffff)
+        return QApplication::translate("HeatAction", "加热套: 通道%1停止加热").arg(m_nCh + 1);
+
+    return QApplication::translate("HeatAction", "加热套: 通道%1加热温度%2℃").arg(m_nCh+1).arg(m_nTmp);
 }
 
 void HeatAction::Save(QDataStream *dstr)
@@ -492,8 +499,10 @@ KeepAction::KeepAction(uint16_t tmp /*= 0*/, uint16_t ch, int16_t seq /*= -1*/)
 
 QString KeepAction::ToString(bool bStart /*= true*/) const
 {
-    auto str = QApplication::translate("KeepAction", "保温箱: 通道%1保持温度%2℃").arg(m_nCh+1).arg(m_nTmp);
-    return str;
+    if (m_nTmp == 0xffff)
+        return QApplication::translate("HeatAction", "保温箱: 通道%1停止保温").arg(m_nCh + 1);
+
+    return QApplication::translate("KeepAction", "保温箱: 通道%1保持温度%2℃").arg(m_nCh+1).arg(m_nTmp);
 }
 
 void KeepAction::Save(QDataStream *dstr)

@@ -30,6 +30,7 @@
 #include "progItem/FeedLiquidGroupBox.h"
 #include "progItem/FeederGroupBox.h"
 #include "progItem/AirWayGroupBox.h"
+#include "progItem/FinishWorkGroupBox.h"
 #include "ProgmaMgr.h"
 
 #include "ui_progconfig.h"
@@ -82,18 +83,16 @@ progConfig::progConfig(QWidget *parent) :
     QFlowPanel *flowpanel = new QFlowPanel;
     ui->configLayout->addWidget(flowpanel);
 
-    QSlopeTemp *slopetemp = new QSlopeTemp;
-    ui->configLayout->addWidget(slopetemp);
-
-    QValveCtrl *valveCtrl = new QValveCtrl;
-    ui->configLayout->addWidget(valveCtrl);
+    ui->configLayout->addWidget(new QSlopeTemp);
+    ui->configLayout->addWidget(new QValveCtrl);
 
     /*QCollectorCtrl *collCtrl = new QCollectorCtrl;
     ui->configLayout->addWidget(collCtrl);
     collCtrl->setVisible(false);*/
 
-    QSFunction *sfuntion = new QSFunction;
-    ui->configLayout->addWidget(sfuntion);
+
+    ui->configLayout->addWidget(new FinishWorkGroupBox);
+    ui->configLayout->addWidget(new QSFunction);
 
     ui->btn_open->setIcon(QIcon(":/programConfig/image/open.png"));
     ui->btn_open->setIconSize(QSize(30,30));

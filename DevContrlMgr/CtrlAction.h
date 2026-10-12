@@ -103,7 +103,7 @@ private:
 class DelayAction : public ActionAbstrctItem
 {
 public:
-	DelayAction(float min=0/*, uint16_t ch*/, int16_t seq = -1);
+	DelayAction(float min=0/*, uint16_t ch=0*/, int16_t seq = -1);
 	QString ToString(bool bStart = true)const override;
 
 	void Save(QDataStream *dstr);
@@ -111,7 +111,9 @@ public:
 	void Distribute()override;
     float DelayMinutes()const;
     float DelaySeconds(uint32_t msec)const;
+    uint16_t GetChannel()const;
 private:
+    uint16_t m_ch;
 	float    m_delayMin;
 };
 

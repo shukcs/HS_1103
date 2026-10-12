@@ -57,7 +57,7 @@ AirClrAction::AirClrAction(uint16_t ch, float prs, uint16_t sec, int16_t seq) : 
 
 QString AirClrAction::ToString(bool /*= true*/) const
 {
-    return QApplication::translate("AirClrAction", "吹扫空气: 通道%1以气压%2MPa吃扫气路%3秒").arg(m_ch+1)
+    return QApplication::translate("AirClrAction", "吹扫空气: 通道%1以气压%2MPa吹扫气路%3秒").arg(m_ch+1)
         .arg(m_pressure).arg(m_tm);
 }
 
@@ -109,7 +109,7 @@ AirInAction::AirInAction(uint16_t ch, float prsIn, float mlPmin, float prsKp, in
 
 QString AirInAction::ToString(bool) const
 {
-    return QApplication::translate("AirInAction", "进气开始: 通道%1以气压%2MPa, 流速%3ml/min进气; 背压阀以%4Mpa保持")
+    return QApplication::translate("AirInAction", "进气开始: 通道%1以气压%2MPa, 流速%3ml/min进气; 背压阀以%4MPa保持")
         .arg(m_ch+1).arg(m_prsIn).arg(m_mlPmin).arg(m_prsKp);
 }
 
